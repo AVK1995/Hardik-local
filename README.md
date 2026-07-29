@@ -29,7 +29,12 @@ app/landing.css         ← landing beat layout
 app/funnel-pages.css    ← checkout / book / thank-you
 app/components/         ← CTA lockup, VSL frame, FAQ, sticky, check-in wall, icons
 public/proof/           ← normalised asset copies (originals untouched)
+docs/                   ← source documents (strategy, case studies, VSL script, ICP)
 ```
+
+> `docs/` is deliberately **outside** `public/`. Anything under `public/` is served
+> at a public URL once deployed, and the strategy document is marked Confidential.
+> Do not move it back.
 
 ## Re-branding to Hardik's palette
 
