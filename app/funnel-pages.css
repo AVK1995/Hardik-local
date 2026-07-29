@@ -1,0 +1,105 @@
+/* =========================================================================
+   CHECKOUT · BOOK · THANK-YOU — token-only, same component system.
+   ========================================================================= */
+
+.fp-page{ min-height:100vh; background:var(--bg); }
+
+/* ---- Trust strip (checkout) ---- */
+.fp-truststrip{ border-bottom:1px solid var(--border); background:var(--bg-alt); }
+.fp-truststrip-inner{ display:flex; flex-wrap:wrap; justify-content:center; gap:10px 26px; padding:12px 0; }
+.fp-trustitem{ display:inline-flex; align-items:center; gap:7px; font-family:var(--fb); font-size:11.5px; font-weight:700;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+.fp-trustitem svg{ color:var(--brand); }
+
+/* ---- Step masthead ---- */
+.fp-mast{ width:100%; text-align:center; padding:56px 0 34px; }
+
+/* ---- Two-column body: details form <-> order ledger ---- */
+.fp-grid{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,420px); gap:28px; align-items:start; padding-bottom:80px; }
+@media (max-width:880px){ .fp-grid{ grid-template-columns:1fr; } }
+
+.fp-panel{ background:#fff; border:1px solid var(--border); border-radius:var(--r-lg); padding:28px; box-shadow:var(--shadow-card); }
+.fp-panel-title{ font-family:var(--fb); font-size:11px; font-weight:800; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--brand-deep); margin-bottom:20px; display:block; }
+
+.fp-field{ margin-bottom:16px; }
+.fp-field label{ display:block; font-family:var(--fb); font-size:12px; font-weight:700; letter-spacing:.04em;
+  color:var(--ink-soft); margin-bottom:7px; }
+.fp-field input{ width:100%; padding:13px 15px; border-radius:var(--r); border:1px solid var(--border-strong);
+  background:var(--bg-alt); font-family:var(--fb); font-size:15px; color:var(--ink); transition:border-color .2s, box-shadow .2s; }
+.fp-field input:focus{ outline:none; border-color:var(--brand); background:#fff; box-shadow:0 0 0 4px rgba(var(--brand-rgb),.14); }
+
+/* ---- Order ledger (R5) ---- */
+.fp-ledger{ border-top:1px solid var(--border); }
+.fp-lrow{ display:grid; grid-template-columns:30px minmax(0,1fr) auto; gap:12px; align-items:center;
+  padding:15px 0; border-bottom:1px solid var(--border); }
+.fp-lord{ font-family:var(--fh); font-size:16px; color:var(--brand); letter-spacing:.06em; }
+.fp-lwhat{ font-size:14px; color:var(--ink-soft); line-height:1.5; }
+.fp-lval{ font-family:var(--fb); font-size:11px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--success); }
+/* the total is the lit value moment (C3) */
+.fp-total{ display:flex; align-items:center; justify-content:space-between; gap:14px; margin-top:6px; padding:20px 18px;
+  border-radius:var(--r); background:linear-gradient(180deg,rgba(var(--brand-rgb),.10),rgba(var(--brand-rgb),.04));
+  border:1px solid rgba(var(--brand-rgb),.28); }
+.fp-total-l{ font-family:var(--fb); font-size:11.5px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--brand-deep); }
+.fp-total-v{ font-family:var(--fh); font-size:clamp(30px,5vw,42px); line-height:1; letter-spacing:.03em; color:var(--brand);
+  text-shadow:0 0 26px rgba(var(--brand-rgb),.4); }
+
+/* ---- Payment method tiles: colored third-party marks stay on light tiles (C12) ---- */
+.fp-methods{ display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
+.fp-method{ font-family:var(--fb); font-size:11px; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--ink-soft); background:#fff; border:1px solid var(--border); border-radius:var(--r-sm); padding:9px 13px; }
+
+/* ---- §13 Price reframe ---- */
+.fp-whyprice{ margin-top:22px; padding:22px; border-radius:var(--r-lg); background:var(--bg-alt); border:1px solid var(--border); }
+.fp-whyprice h3{ font-size:clamp(20px,3vw,26px); margin-bottom:10px; letter-spacing:.02em; }
+.fp-whyprice h3 em{ font-style:normal; color:var(--brand); }
+.fp-whyprice p{ margin:0; font-size:14px; line-height:1.7; }
+
+.fp-micro{ display:block; width:100%; text-align:center; margin-top:14px; font-size:12.5px; font-style:italic; color:var(--muted); }
+.fp-paybtn{ margin-top:22px; width:100%; text-align:center; }
+.fp-paybtn .sdp-cta{ width:100%; min-width:0; }
+
+/* ---- Book-a-call: agenda ledger + embed panel ---- */
+.fp-agenda{ width:100%; max-width:760px; margin:0 auto; border-top:1px solid var(--border); }
+.fp-arow{ display:grid; grid-template-columns:52px minmax(0,1fr); gap:16px; padding:20px 4px; border-bottom:1px solid var(--border);
+  align-items:start; transition:background .25s; }
+.fp-arow:hover{ background:rgba(var(--brand-rgb),.04); }
+.fp-aord{ font-family:var(--fh); font-size:22px; color:var(--brand); letter-spacing:.06em; padding-top:2px; }
+.fp-arow h3{ font-size:19px; margin:0 0 6px; letter-spacing:.02em; }
+.fp-arow p{ margin:0; font-size:14px; line-height:1.7; }
+
+/* Brand FRAMES the embed, it does not restyle it (C12) */
+.fp-embed{ width:100%; max-width:860px; margin:34px auto 0; background:var(--bg-alt); border:1px solid var(--border-strong);
+  border-radius:var(--r-xl); padding:12px; box-shadow:var(--shadow-card); }
+.fp-embed-inner{ position:relative; width:100%; min-height:620px; border-radius:var(--r-lg); overflow:hidden; background:#fff; }
+.fp-embed-inner iframe{ width:100%; height:100%; min-height:620px; border:0; display:block; }
+.fp-embed-ph{ position:absolute; inset:0; display:grid; place-items:center; text-align:center; padding:30px; }
+.fp-embed-ph span{ font-family:var(--fb); font-size:12px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+.fp-spinner{ width:34px; height:34px; margin:0 auto 16px; border-radius:50%;
+  border:2px solid rgba(var(--brand-rgb),.2); border-top-color:var(--brand); animation:fpSpin 1s linear infinite; }
+@keyframes fpSpin{ to{ transform:rotate(360deg); } }
+
+.fp-disarm{ display:inline-flex; align-items:center; gap:9px; margin:24px auto 0; padding:9px 18px; border-radius:999px;
+  background:rgba(var(--brand-rgb),.08); border:1px solid rgba(var(--brand-rgb),.26);
+  font-family:var(--fb); font-size:12.5px; font-weight:600; color:var(--brand-deep); }
+.fp-center{ width:100%; text-align:center; }
+
+/* ---- Thank-you: success seal + next steps (R12) ---- */
+.fp-seal{ width:96px; height:96px; margin:0 auto 24px; border-radius:50%; display:grid; place-items:center; color:#fff;
+  background:var(--grad-cta); box-shadow:0 0 0 10px rgba(var(--brand-rgb),.10), 0 16px 44px rgba(var(--brand-rgb),.4); }
+.fp-datestrip{ display:inline-flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:center;
+  margin:0 auto 34px; padding:13px 22px; border-radius:var(--r); background:var(--bg-alt); border:1px solid var(--border);
+  font-family:var(--fb); font-size:13.5px; font-weight:700; color:var(--ink); }
+.fp-datestrip svg{ color:var(--brand); }
+.fp-statband{ display:flex; flex-wrap:wrap; justify-content:center; gap:12px 30px; margin-top:56px; padding-top:26px;
+  border-top:1px solid var(--border); }
+.fp-statband span{ font-family:var(--fb); font-size:12px; font-weight:700; letter-spacing:.08em; color:var(--muted); }
+
+/* ---- Shared placeholder ---- */
+.fp-missing{ border:1px dashed rgba(var(--brand-rgb),.45); border-radius:var(--r); padding:14px 16px;
+  background:rgba(var(--brand-rgb),.06); font-family:var(--fb); font-size:12px; font-weight:700; color:var(--brand-deep);
+  margin-top:14px; text-align:left; }
+
+.fp-back{ display:inline-flex; align-items:center; gap:8px; margin-top:34px; font-family:var(--fb); font-size:12.5px;
+  font-weight:600; color:var(--muted); text-decoration:none; }
+.fp-back:hover{ color:var(--brand-deep); }
