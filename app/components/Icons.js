@@ -134,4 +134,36 @@ export function Close({ size = 18 }) {
   );
 }
 
+export function Users({ size = 14 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base} aria-hidden="true">
+      <circle cx="9" cy="8" r="3.4" />
+      <path d="M2.8 19.5a6.2 6.2 0 0 1 12.4 0" />
+      <path d="M16.2 5.2a3.4 3.4 0 0 1 0 5.6" />
+      <path d="M17.6 14.2a6.2 6.2 0 0 1 3.6 5.3" />
+    </svg>
+  );
+}
+
+export function Globe({ size = 14 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base} aria-hidden="true">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M3 12h18" />
+      <path d="M12 3c2.4 2.6 3.7 5.7 3.7 9s-1.3 6.4-3.7 9c-2.4-2.6-3.7-5.7-3.7-9S9.6 5.6 12 3z" />
+    </svg>
+  );
+}
+
 export const pointerIcons = { report: Report, target: Target, route: Route };
+
+/* Trust-row and CTA chips. A chip with icon:null renders no icon at all. */
+export const trustIcons = {
+  shield: Shield,
+  lock: Lock,
+  star: Star,
+  check: Check,
+  users: Users,
+  globe: Globe,
+  clock: Clock,
+};

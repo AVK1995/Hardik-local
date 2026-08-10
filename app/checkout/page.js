@@ -93,7 +93,7 @@ export default function Checkout() {
           {/* ── order ledger + price reframe ── */}
           <div>
             <div className="fp-panel" data-sdp-reveal style={{ '--d': '.06s' }}>
-              <span className="fp-panel-title">What you are booking</span>
+              <span className="fp-panel-title">{checkout.ledgerTitle}</span>
               <div className="fp-ledger">
                 {checkout.ledger.map((row, i) => (
                   <div className="fp-lrow" key={row.what}>
@@ -105,17 +105,23 @@ export default function Checkout() {
               </div>
               <div className="fp-total">
                 <span className="fp-total-l">{checkout.totalLabel}</span>
-                <span className="fp-total-v">{checkout.total}</span>
+                <span className="fp-total-v">
+                  {checkout.totalStrike && <s className="fp-total-strike">{checkout.totalStrike}</s>}
+                  {checkout.total}
+                </span>
               </div>
             </div>
 
-            <div className="fp-whyprice" data-sdp-reveal style={{ '--d': '.1s' }}>
-              <h3>
-                {checkout.whyPrice.headline[0]}
-                <em>{checkout.whyPrice.headline[1]}</em>
-              </h3>
-              <p>{checkout.whyPrice.body}</p>
-            </div>
+            {/* the "₹97 is a filter" reframe is not in the finalised copy */}
+            {checkout.whyPrice && (
+              <div className="fp-whyprice" data-sdp-reveal style={{ '--d': '.1s' }}>
+                <h3>
+                  {checkout.whyPrice.headline[0]}
+                  <em>{checkout.whyPrice.headline[1]}</em>
+                </h3>
+                <p>{checkout.whyPrice.body}</p>
+              </div>
+            )}
 
             <div className="fp-center">
               <a className="fp-back" href="/">

@@ -4,9 +4,11 @@ import '../funnel-pages.css';
 
 import useReveal from '../components/useReveal';
 import { Clock } from '../components/Icons';
-import { MISSING, book } from '../content';
+import { MISSING, book, CALENDLY_URL } from '../content';
 
-const CALENDAR_URL = process.env.NEXT_PUBLIC_CALENDAR_EMBED_URL || '';
+/* The docx states the client already has Calendly, so that URL is the fallback
+   when the env var is unset. See CALENDLY_URL in content.js. */
+const CALENDAR_URL = process.env.NEXT_PUBLIC_CALENDAR_EMBED_URL || CALENDLY_URL;
 
 /**
  * §1 Sequence — call-agenda ledger. Its job is reassurance and cutting no-shows,

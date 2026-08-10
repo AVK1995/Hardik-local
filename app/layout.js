@@ -26,12 +26,20 @@ export const metadata = {
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#0A0F1E',
+  themeColor: '#071A33', // Deep Navy, matches --bg-dark in the new palette
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`no-js ${bebas.variable} ${manrope.variable}`}>
+    /* suppressHydrationWarning is required, not a workaround: the head script
+       below strips `no-js` from <html> before React hydrates, so the server
+       markup and the live DOM differ by design. It suppresses the mismatch on
+       this element's attributes only, not on any child. */
+    <html
+      lang="en"
+      className={`no-js ${bebas.variable} ${manrope.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         {/* Reveals fail open: this only arms the hidden state once JS is confirmed. */}
         <script
