@@ -2,15 +2,15 @@
 
 import '../funnel-pages.css';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import useReveal from '../components/useReveal';
 import FunnelSteps from '../components/FunnelSteps';
 import SiteFooter from '../components/SiteFooter';
+import { payMarks } from '../components/PayMarks';
 import { Arrow, Check, ChevronDown, Lock, Shield } from '../components/Icons';
 import { checkout } from '../content';
 
 const PAYMENT_URL = process.env.NEXT_PUBLIC_PAYMENT_URL || '';
-const methodTiles = ['UPI', 'Cards', 'Netbanking', 'Wallets'];
 const stripIcons = [Lock, Shield, Lock];
 
 /**
@@ -30,6 +30,27 @@ export default function Checkout() {
   /* Open by default — the collapse only exists so the summary does not bury the
      form on a phone, not to hide the order. */
   const [sumOpen, setSumOpen] = useState(true);
+  const [payErr, setPayErr] = useState(false);
+  const formRef = useRef(null);
+
+  /* The mobile pay bar. If the form is not complete this takes him to the first
+     field that needs him rather than firing a payment he cannot complete —
+     and reportValidity() puts the browser's own message on that field, which
+     is clearer than anything we would invent. If it is complete, requestSubmit
+     runs the form's real onSubmit, so there is exactly one payment path. */
+  const payNow = () => {
+    const form = formRef.current;
+    if (!form) return;
+
+    if (!form.checkValidity()) {
+      const firstInvalid = form.querySelector(':invalid');
+      firstInvalid?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      /* Let the scroll settle before the browser pins its bubble to the field. */
+      window.setTimeout(() => form.reportValidity(), 400);
+      return;
+    }
+    form.requestSubmit();
+  };
 
   const half = checkout.fields.filter((f) => f.half);
   const full = checkout.fields.filter((f) => !f.half);
@@ -96,16 +117,25 @@ export default function Checkout() {
             <h1 className="fp-panel-h">{checkout.formTitle}</h1>
 
             <form
+              ref={formRef}
               onSubmit={(e) => {
                 e.preventDefault();
-                if (PAYMENT_URL) window.location.href = PAYMENT_URL;
+                if (PAYMENT_URL) {
+                  window.location.href = PAYMENT_URL;
+                  return;
+                }
+                /* No provider wired. The dev-facing [MISSING] block that used
+                   to sit under this form is gone, so failure has to surface
+                   somewhere a visitor understands — silently doing nothing on
+                   a pay button is the worst of both. */
+                setPayErr(true);
               }}
             >
               <div className="fp-fieldrow">{half.map(field)}</div>
               {full.map(field)}
 
               <div className="fp-paybtn">
-                <button className="sdp-cta" type="submit" disabled={!PAYMENT_URL}>
+                <button className="sdp-cta" type="submit">
                   <span className="sdp-cta-line">
                     <span className="sdp-cta-text">{checkout.button}</span>
                     <span className="arrow">
@@ -118,17 +148,19 @@ export default function Checkout() {
 
             <em className="fp-micro">{checkout.microline}</em>
 
-            {!PAYMENT_URL && (
-              <div className="fp-missing">
-                [MISSING — set NEXT_PUBLIC_PAYMENT_URL. The button is disabled until a payment
-                provider is wired; nothing typed above is submitted anywhere yet.]
-              </div>
+            {payErr && (
+              <p className="fp-payerr" role="alert">
+                We could not open the payment page just now. Please try again in a moment — or
+                write to us and we will send you a payment link directly.
+              </p>
             )}
 
-            <div className="fp-methods">
-              {methodTiles.map((m) => (
-                <span className="fp-method" key={m}>
-                  {m}
+            {/* Network marks rather than the old UPI/CARDS/NETBANKING/WALLETS
+                text tiles — a logo row is read at a glance, four words are not. */}
+            <div className="fp-methods" aria-label="Accepted payment methods">
+              {payMarks.map(({ key, Art }) => (
+                <span className="fp-method" key={key}>
+                  <Art />
                 </span>
               ))}
             </div>
@@ -206,17 +238,34 @@ export default function Checkout() {
               </div>
               </div>
             </div>
-
-            <div className="fp-center">
-              <a className="fp-back" href="/">
-                Back to the breakdown
-              </a>
-            </div>
           </div>
         </div>
       </div>
 
       <SiteFooter />
+
+      {/* ── Mobile-only pay bar ──
+          A phone shows the summary first and the button sits well below the
+          fold, so the page can read as "nothing to do here". This keeps the
+          action in reach: it scrolls to the first empty field if the form is
+          not ready, and submits it if it is. Desktop has the button in view
+          already and does not get one. */}
+      <div className="fp-paybar" aria-hidden={false}>
+        <div className="sdp-wrap fp-paybar-inner">
+          <span className="fp-paybar-price">
+            <s>{checkout.totalStrike}</s>
+            {checkout.total}
+          </span>
+          <button type="button" className="sdp-cta" onClick={payNow}>
+            <span className="sdp-cta-line">
+              <span className="sdp-cta-text">Pay Now</span>
+              <span className="arrow">
+                <Arrow size={12} />
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
     </main>
   );
 }

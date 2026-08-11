@@ -34,7 +34,10 @@ export const MISSING = {
   mechanismSource: 'NOT IN FINALISED DOCX — mechanism section carried over from the previous draft',
   founderStory: 'MISSING — expert bios',
   refundTerms: 'MISSING — refund terms on the ₹97 (the 90-day guarantee covers the programme, not the ₹97 call)',
-  callLength: 'MISSING — call length',
+  /* callLength — CLOSED 2026-08-11, and closed as "do not state it". The
+     Calendly event is set to an hour, but how long a call actually runs depends
+     on the man on it, so no duration is published anywhere on the site. This is
+     a decision, not a gap: do not fill it in later. */
 };
 
 /* ── The CTA lockup. Reused VERBATIM at every proof beat. ───────────────── */
@@ -151,6 +154,9 @@ export const hero = {
      icon keys resolve through markerIcons in components/Icons.js. */
   markers: [
     { label: 'Testosterone', icon: 'testosterone' },
+    /* Added 2026-08-11 on the client's call. Not a new claim: premature
+       ejaculation is already named in the hero gate and the FAQ. */
+    { label: 'Premature Ejaculation', icon: 'pe' },
     { label: 'HbA1c', icon: 'hba1c' },
     { label: 'Belly Fat', icon: 'belly' },
     { label: 'LDL Cholestrol', icon: 'ldl' },
@@ -353,6 +359,61 @@ export const founder = {
      Add a card only when you have both a URL and a capture of it. */
   credentials: [
     {
+      kind: 'Certification',
+      title: 'Certified Personal Trainer (Level 5)',
+      issuer: 'Prehab 121 Academy',
+      date: 'September 2025',
+      image: '/Certificates/cert-personal-trainer-l5.jpg',
+      /* The source filename really is "Le el 5" — a typo in the supplied file,
+         reproduced exactly because the path has to resolve. Rename the file and
+         this string together, or not at all. */
+      file: '/Certificates/Certified Personal Trainer (Le el 5).pdf',
+    },
+    {
+      kind: 'Certification',
+      title: 'Functional & Group Training Specialist (Level 6)',
+      issuer: 'Prehab 121 Academy',
+      date: 'December 2025',
+      image: '/Certificates/cert-functional-group-l6.jpg',
+      file: '/Certificates/FUNCTIONAL AND GROUP TRAINING SPECIALIST (LEVEL 6).pdf',
+    },
+    {
+      kind: 'Certification',
+      title: 'Prehab & Rehab Specialist',
+      issuer: 'Prehab 121 Academy',
+      date: 'May 2025',
+      image: '/Certificates/cert-prehab-rehab.jpg',
+      file: '/Certificates/PREHAB & REHAB SPECIALIST.pdf',
+    },
+    {
+      kind: 'Certification',
+      title: 'Posture & Functional Corrective Exercise Specialist',
+      issuer: 'Prehab 121 Academy',
+      date: 'May 2025',
+      image: '/Certificates/cert-posture-corrective.jpg',
+      file: '/Certificates/POSTURE & FUNCTIONAL CORRECTIVE EXERCISE SPECIALIST.pdf',
+    },
+    {
+      kind: 'Certification',
+      title: 'Certified Nutrition Specialist',
+      issuer: 'Mission India Fitness Institute',
+      image: '/Certificates/cert-nutrition.jpg',
+      file: '/Certificates/Certified Nutrition Specialist.pdf',
+    },
+    /* Dr. Kartik's, not Hardik's — the only credential here that is his.
+       Published on the client's explicit approval, 2026-08-11. Note the scan
+       carries his registration number, father's name, college address and
+       mobile number in full; if that is ever reconsidered, replace the image
+       with a redacted copy rather than deleting the entry. */
+    {
+      kind: 'Qualification',
+      title: 'Provisional Registration Certificate — B.A.M.S',
+      issuer: 'Board of Ayurvedic & Unani Tibbi Systems of Medicine, U.P.',
+      date: 'November 2025',
+      image: '/Certificates/cert-provisional-registration.jpg',
+      file: '/Certificates/Provisional Registration Certificate.png',
+    },
+    {
       kind: 'Press',
       title: 'The problem millions of Indian men are too ashamed to discuss — and how Hardik DhawalSingh is fixing it naturally',
       issuer: 'The Hindustan Wires',
@@ -369,7 +430,7 @@ export const founder = {
       href: 'https://thebusinessstories.com/the-problem-millions-of-indian-men-are-too-ashamed-to-discuss-and-how-hardik-dhawalsingh-is-fixing-it-naturally/',
     },
   ],
-  credentialsEyebrow: 'As Featured In',
+  credentialsEyebrow: 'Certificates',
   story: [
     'Hardik is a Level 5 Certified Personal Trainer with specialist training in functional training, prehab, rehab and corrective exercise through Prehab 121 Academy, ACE and ACSM-approved programs.',
     'Dr. Kartik holds a Bachelor of Ayurvedic Medicine & Surgery (BAMS), with a focus on preventive healthcare, lifestyle medicine, metabolic health and evidence-based supplementation.',
@@ -536,7 +597,6 @@ export const finalCta = {
     { label: 'Privacy', href: '/privacy' },
     { label: 'Terms', href: '/terms' },
     { label: 'Refund', href: '/refund' },
-    { label: 'Unsubscribe', href: '/unsubscribe' },
   ],
 };
 
@@ -679,8 +739,9 @@ export const book = {
       body: 'A straight walkthrough of the Project Alpha Wellness Protocol and whether you are a fit. If you are not, we will say so on the call.',
     },
   ],
-  /* Still MISSING — the docx never states how long the call runs, so the strip
-     renders the flag rather than a number we made up. See MISSING.callLength. */
+  /* Intentionally null and staying that way. The call length is not published
+     anywhere on the site because how long it runs depends on the man on it —
+     see the note on MISSING.callLength. Leave this null. */
   disarmDuration: null,
   disarm: '100% Private, Confidential & Judgment-Free',
   /* authored */
@@ -693,12 +754,9 @@ export const book = {
      reproduced: that the fee is refundable (MISSING.refundTerms — unsettled
      here) and a hard cap on clients per quarter (no such number exists for
      this business, and inventing scarcity is not something to guess at). */
-  marquee: [
-    'Payment Confirmed',
-    '1:1 With Hardik & Dr. Kartik',
-    '100% Private & Confidential',
-    'A Diagnosis, Not A Pitch',
-  ],
+  /* One static line, not a list of four. The strip is a single claim, and the
+     separators are part of the string so it can never wrap into a stack. */
+  marquee: '1:1 Session · 100% Private · Diagnosis, Not a Pitch',
   stickyCta: 'Pick My Slot',
   calendarEyebrow: 'Pick Slot',
   calendarH2: ['Choose A Time That ', 'Works For You.'],
@@ -803,12 +861,8 @@ export const thankYou = {
   statBand: ['120+ Success Stories Globally', '5.0 ★ Client Rating', '100% Money-Back Guarantee'],
 
   /* ── Sections added 2026-08-11 to the client's reference structure ────── */
-  marquee: [
-    'Booking Confirmed',
-    'Call Link On Its Way To Your Inbox',
-    '1:1 With Hardik & Dr. Kartik',
-    'A Diagnosis, Not A Pitch',
-  ],
+  /* One static line, matching book-a-call. */
+  marquee: 'Booking Confirmed · Call Link On Its Way · A Diagnosis, Not a Pitch',
   h1: ['Your call with ', 'Hardik & Dr. Kartik is confirmed.'],
   /* The slot card in the hero. `slotLabel` heads it; the time itself comes from
      Calendly's redirect params at runtime — see CalendlyEmbed.js for how to
@@ -865,31 +919,41 @@ export const siteFooter = {
     { label: 'Privacy', href: '/privacy' },
     { label: 'Terms', href: '/terms' },
     { label: 'Refund', href: '/refund' },
-    { label: 'Unsubscribe', href: '/unsubscribe' },
+    /* No Unsubscribe link here by design: that page confirms a removal that has
+       already happened, so reaching it from a footer would tell someone they
+       were unsubscribed when nothing had. It belongs in emails only. */
   ],
   disclaimer:
     'All content, roadmaps and coaching services on this site are for educational and informational purposes only and do not guarantee any particular result. This is not medical advice and does not create a doctor-patient relationship. Always consult a qualified healthcare professional, and never start, stop or change prescribed medication on the basis of anything you read here.',
   copyright: '© 2026 Project Alpha Wellness · A Trainer Goes Online initiative',
 };
 
-/* ── UNSUBSCRIBE (authored 2026-08-11) ──────────────────────────────────── */
-/* Landing page for the unsubscribe link in marketing emails. It cannot
-   actually unsubscribe anybody yet — that needs the email provider's API — so
-   the form is honest about handing off, rather than showing a fake success
-   state that quietly does nothing. See the note on `pending`. */
+/* ── UNSUBSCRIBE (authored 2026-08-11, rebuilt as a confirmation) ────────── */
+/* This is the page a man LANDS ON after the unsubscribe link in an email has
+   already done its work — it confirms, it does not ask. There is no form and
+   no input, because nothing here is wired to an email provider; the removal
+   happens on the provider's side before the redirect.
+
+   Deliberately NOT linked from the site footer: an unsubscribe confirmation
+   reached from a nav menu would claim someone had been removed when nothing
+   had happened. It is reachable only from the link in an email. */
 export const unsubscribe = {
   eyebrow: 'Email Preferences',
-  h1: ['You can step ', 'out of the emails.'],
-  sub: 'No hard feelings and no retention gauntlet. Enter the address the email arrived at and we will take it off the list.',
-  fieldLabel: 'Email address',
-  placeholder: 'you@example.com',
-  button: 'Unsubscribe Me',
-  /* Shown after submit while no provider is wired. */
-  pending:
-    'Send this address to us and we will remove it by hand within one working day. Automatic removal switches on as soon as the email provider is connected.',
+  h1: ['You have been ', 'unsubscribed.'],
+  sub: 'That address is off the mailing list. You will not hear from us there again, and there is no follow-up sequence waiting.',
   keepNote:
-    'One thing worth knowing: this stops the marketing emails. If you have a call booked, your confirmation, reminders and calendar invite for that call still come through — those are not marketing, and losing them would mean losing your slot.',
-  backNote: 'Changed your mind? Nothing else on your account is affected.',
+    'If you have a call booked, your confirmation, reminders and calendar invite still arrive — those are not marketing, and losing them would mean losing your slot.',
+  /* Reused from the landing page rather than newly written, so the reminder of
+     what this is stays consistent with what he was reading when he signed up. */
+  aboutTitle: 'What Project Alpha Wellness does',
+  aboutBody:
+    'Hardik and Dr. Kartik work with men 30+ on erectile dysfunction, premature ejaculation, low testosterone and the health markers that travel with them — addressing the root causes behind sexual, hormonal and metabolic health rather than managing the symptoms.',
+  aboutPoints: [
+    'A confidential assessment of your ED, testosterone, lifestyle, sleep, stress and key markers',
+    'A clear 90-day roadmap built around your condition and how your week actually runs',
+    'An honest fit check — we tell you if this is not right for you',
+  ],
+  backCta: 'Back to Project Alpha Wellness',
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -909,12 +973,17 @@ export const unsubscribe = {
         inventing an answer.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* Set every field and the warning banners disappear. */
+/* Supplied 2026-08-11. Address and jurisdiction were dropped on the client's
+   call — the contact block now carries a name and an email only, which is what
+   a reader needs to reach someone about their data.
+
+   Note for whoever reviews these with a lawyer: the governing-law clause in
+   `terms` refers to "the jurisdiction stated in the contact block", and that
+   line is no longer there. Either name the jurisdiction in that clause or
+   accept the clause is unenforceable as written. */
 export const legalEntity = {
-  name: null, // registered legal name, e.g. 'Project Alpha Wellness Pvt Ltd'
-  email: null, // the address that actually receives privacy + refund requests
-  address: null, // registered address
-  jurisdiction: null, // e.g. 'the courts of Mumbai, Maharashtra, India'
+  name: 'Hardik Dhawal',
+  email: 'hardikdhawal@gmail.com',
   updated: '11 August 2026',
 };
 

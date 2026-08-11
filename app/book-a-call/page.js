@@ -2,15 +2,15 @@
 
 import '../funnel-pages.css';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import useReveal from '../components/useReveal';
 import FunnelSteps from '../components/FunnelSteps';
 import CalendlyEmbed from '../components/CalendlyEmbed';
 import SiteFooter from '../components/SiteFooter';
+import Faq from '../components/Faq';
 import { Arrow, Check, Clock } from '../components/Icons';
-import { MISSING, book } from '../content';
+import { book } from '../content';
 
-const MARQUEE_REPEAT = 4;
 const SLOT_ID = 'pick-slot';
 
 /**
@@ -25,16 +25,60 @@ const SLOT_ID = 'pick-slot';
 export default function BookACall() {
   useReveal();
   const [stuck, setStuck] = useState(true);
+  const barRef = useRef(null);
 
-  /* The sticky bar is pointless while the scheduler is on screen — it would
-     scroll you to what you are already looking at. */
+  /* The bar hides for two reasons, tracked separately:
+       - the scheduler is on screen, so scrolling to it would do nothing;
+       - the footer is on screen, where a fixed bar sits on top of the legal
+         links and the disclaimer and hides them.
+     Either one suppresses it. */
   useEffect(() => {
+    if (typeof IntersectionObserver === 'undefined') return;
     const slot = document.getElementById(SLOT_ID);
-    if (!slot || typeof IntersectionObserver === 'undefined') return;
-    const io = new IntersectionObserver(([e]) => setStuck(!e.isIntersecting), { threshold: 0.12 });
-    io.observe(slot);
-    return () => io.disconnect();
+    const footer = document.querySelector('.sf');
+
+    const state = { atSlot: false, atFooter: false };
+    const sync = () => setStuck(!state.atSlot && !state.atFooter);
+
+    const slotIo = new IntersectionObserver(
+      ([e]) => {
+        state.atSlot = e.isIntersecting;
+        sync();
+      },
+      { threshold: 0.12 }
+    );
+    const footIo = new IntersectionObserver(
+      ([e]) => {
+        state.atFooter = e.isIntersecting;
+        sync();
+      },
+      { threshold: 0 }
+    );
+
+    if (slot) slotIo.observe(slot);
+    if (footer) footIo.observe(footer);
+    return () => {
+      slotIo.disconnect();
+      footIo.disconnect();
+    };
   }, []);
+
+  /* While the bar is up it reserves its own height, so the last thing on the
+     page is never sitting underneath it. */
+  useEffect(() => {
+    const bar = barRef.current;
+    if (!bar) return;
+    const apply = () => {
+      document.body.style.paddingBottom = stuck ? `${bar.offsetHeight}px` : '';
+    };
+    apply();
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(apply) : null;
+    ro?.observe(bar);
+    return () => {
+      ro?.disconnect();
+      document.body.style.paddingBottom = '';
+    };
+  }, [stuck]);
 
   const toSlot = (e) => {
     e.preventDefault();
@@ -54,27 +98,26 @@ export default function BookACall() {
 
   return (
     <main className="sdp-root fp-page">
-      {/* ── Marquee ── */}
+      {/* ── Announce strip ──
+          Static, matching the landing page: the scrolling marquee was stopped
+          there and left running here, which made the two pages feel like they
+          came from different sites. */}
       <div className="sdp-announce">
-        <div className="sdp-announce-track">
-          {[0, 1].map((half) =>
-            Array.from({ length: MARQUEE_REPEAT }, (_, rep) =>
-              book.marquee.map((line, i) => (
-                <span key={`${half}-${rep}-${i}`}>
-                  {line} <span className="dot">·</span>
-                </span>
-              ))
-            )
-          )}
-        </div>
+        <span className="sdp-announce-line">{book.marquee}</span>
       </div>
 
       <div className="sdp-wrap">
         <FunnelSteps current={1} />
 
-        {/* ── Hero ── */}
+        {/* ── Hero ──
+            The eyebrow here is a receipt, not a label: it is the first thing a
+            man sees after paying, so it gets a live tick badge instead of the
+            standard rule-dash eyebrow. */}
         <div className="fp-mast">
-          <span className="sdp-eyebrow center" data-sdp-reveal>
+          <span className="bk-paid" data-sdp-reveal>
+            <span className="bk-paid-mark" aria-hidden="true">
+              <Check size={15} />
+            </span>
             {book.eyebrow}
           </span>
           <h1 className="sdp-h2" data-sdp-reveal>
@@ -117,7 +160,9 @@ export default function BookACall() {
               {book.disarmDuration ? `${book.disarmDuration} · ` : ''}
               {book.disarm}
             </span>
-            {!book.disarmDuration && <div className="fp-missing">[{MISSING.callLength}]</div>}
+            {/* The [MISSING call length] flag was removed 2026-08-11. The
+                duration is still unstated in the docx, so the pill simply omits
+                it rather than announcing the gap. See MISSING.callLength. */}
           </div>
         </div>
       </section>
@@ -139,10 +184,9 @@ export default function BookACall() {
           <div className="bk-grid">
             {book.included.map((it, i) => (
               <div className="bk-card" key={it.title} data-sdp-reveal style={{ '--d': `${i * 0.05}s` }}>
-                <span className="bk-card-tag">
-                  <Check size={11} />
-                  Included
-                </span>
+                {/* Numbered 3D plate, the same one the landing timeline uses,
+                    so the two pages read as one site. */}
+                <span className="bk-card-num sdp-num3d">{String(i + 1).padStart(2, '0')}</span>
                 <h3>{it.title}</h3>
                 <p>{it.body}</p>
               </div>
@@ -182,13 +226,9 @@ export default function BookACall() {
             <em>{book.faqH2[1]}</em>
           </h2>
 
-          <div className="sdp-narrow pa-mt-24">
-            {book.faq.map((item, i) => (
-              <div className="bk-q" key={item.q} data-sdp-reveal style={{ '--d': `${i * 0.04}s` }}>
-                <h3>{item.q}</h3>
-                <p>{item.a}</p>
-              </div>
-            ))}
+          {/* Same accordion component as the landing page, not a flat list. */}
+          <div className="pa-mt-24">
+            <Faq items={book.faq} idPrefix="bk-faq" />
           </div>
         </div>
       </section>
@@ -210,7 +250,7 @@ export default function BookACall() {
       <SiteFooter />
 
       {/* ── Sticky: the page's only CTA, and it scrolls rather than navigates ── */}
-      <div className={`sdp-stuck bk-stuck${stuck ? ' on' : ''}`} aria-hidden={!stuck}>
+      <div className={`sdp-stuck bk-stuck${stuck ? ' on' : ''}`} ref={barRef} aria-hidden={!stuck}>
         <div className="sdp-wrap sdp-stuck-inner">
           <div className="sdp-stuck-copy">
             <span className="sdp-stuck-title">

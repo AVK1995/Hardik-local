@@ -221,6 +221,19 @@ export function Triglyceride({ size = 14 }) {
   );
 }
 
+/* Premature ejaculation — a stopwatch, the one marker on this row that is
+   about timing rather than a blood value. */
+export function Stopwatch({ size = 14 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base} aria-hidden="true">
+      <circle cx="12" cy="13.6" r="7.6" />
+      <path d="M12 9.8v3.8l2.6 1.6" />
+      <path d="M9.6 2.6h4.8" />
+      <path d="M18.6 6.4l1.4-1.4" />
+    </svg>
+  );
+}
+
 /* Blood pressure — the dial of a sphygmomanometer. */
 export function Gauge({ size = 14 }) {
   return (
@@ -299,6 +312,7 @@ export function ChevronDown({ size = 14 }) {
 /* Hero health-marker chips: keyed from `icon` on each entry in hero.markers. */
 export const markerIcons = {
   testosterone: Mars,
+  pe: Stopwatch,
   hba1c: Droplet,
   belly: Tape,
   ldl: Artery,

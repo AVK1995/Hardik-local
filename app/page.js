@@ -2,11 +2,14 @@
 
 import './landing.css';
 
+import { Fragment, useRef, useState } from 'react';
 import useReveal from './components/useReveal';
 import CtaLockup from './components/CtaLockup';
 import VslFrame from './components/VslFrame';
 import CheckinWall from './components/CheckinWall';
 import VideoTestimonials from './components/VideoTestimonials';
+import Timeline from './components/Timeline';
+import Credentials from './components/Credentials';
 import Faq from './components/Faq';
 import StickyCta from './components/StickyCta';
 import {
@@ -14,7 +17,6 @@ import {
   Check,
   Shield,
   Star,
-  User,
   markerIcons,
   pointerIcons,
   programmeIcons,
@@ -31,7 +33,6 @@ import {
   cases,
   checkinWall,
   founder,
-  mechanism,
   programme,
   guarantee,
   faq,
@@ -64,22 +65,22 @@ function H2({ parts }) {
   );
 }
 
-function Missing({ note }) {
-  return (
-    <div className="pa-missing" data-sdp-reveal>
-      <span className="pa-missing-tag">Placeholder</span>
-      <p>
-        <strong>[{note}]</strong>
-        <br />
-        Supply the copy and it drops straight in via <code>app/content.js</code>. Nothing has been
-        written here on our side.
-      </p>
-    </div>
-  );
-}
+/* The <Missing> placeholder block was removed 2026-08-11 — every slot it
+   guarded is now filled. The MISSING map stays in content.js as a record of
+   what the docx never supplied; it just no longer renders to visitors. */
 
 export default function Landing() {
   useReveal();
+
+  /* The VSL's play state lives here, not in VslFrame, because two controls
+     start it: the disc on the poster and the "Watch the short video below"
+     pill above it. */
+  const [vslPlaying, setVslPlaying] = useState(false);
+  const vslRef = useRef(null);
+  const startVsl = () => {
+    setVslPlaying(true);
+    vslRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
 
   return (
     <main className="sdp-root">
@@ -125,8 +126,11 @@ export default function Landing() {
       <section className="sdp-hero" id="hero">
         <div className="sdp-wrap pa-hero-inner">
           {/* gate = bordered pill + user icon (was a glowing dot), not the filled callout */}
+          {/* Back to the pulsing glow dot, 2026-08-11. The theme pass had swapped
+              it for a user glyph; the dot is the live mark this pill was built
+              around and reads as "open now" rather than "a person". */}
           <span className="sdp-eyebrow-pill" data-sdp-reveal>
-            <User size={18} />
+            <span className="glowdot" />
             {hero.gate}
           </span>
 
@@ -172,26 +176,39 @@ export default function Landing() {
             </p>
           )}
           <div className="pa-pillrow" data-sdp-reveal style={{ '--d': '.15s' }}>
-            {hero.markers.map((marker) => {
+            {hero.markers.map((marker, i) => {
               const Ico = markerIcons[marker.icon];
               return (
-                <span className="sdp-marker-chip" key={marker.label}>
-                  {Ico ? <Ico size={15} /> : <span className="sdp-marker-dot" />}
-                  {marker.label}
-                </span>
+                <Fragment key={marker.label}>
+                  <span className="sdp-marker-chip">
+                    {Ico ? <Ico size={15} /> : <span className="sdp-marker-dot" />}
+                    {marker.label}
+                  </span>
+                  {/* Forces the desktop row break at 4 + 3. A zero-height
+                      flex-basis:100% item is the only way to break a wrapping
+                      flex row at a chosen point; it collapses on mobile so
+                      the pills wrap naturally there. */}
+                  {i === 3 && <span className="pa-pillbreak" aria-hidden="true" />}
+                </Fragment>
               );
             })}
           </div>
 
-          {/* Reference sets this label as a highlighted pill, not loose text. */}
+          {/* The label is the video's second play button: pressing it starts
+              the clip below and brings it into view, so the instruction and the
+              thing it points at are one control. */}
           <div className="pa-watch" data-sdp-reveal style={{ '--d': '.2s' }}>
-            <span className="pa-watch-pill">
+            <button type="button" className="pa-watch-pill" onClick={startVsl}>
               {cta.aboveVideo}
-              <ArrowDown size={13} />
-            </span>
+              <span className="pa-watch-arrow">
+                <ArrowDown size={13} />
+              </span>
+            </button>
           </div>
 
-          <VslFrame />
+          <div ref={vslRef}>
+            <VslFrame playing={vslPlaying} onPlay={() => setVslPlaying(true)} />
+          </div>
 
           {/* post-video order is exact: CTA → pointers → urgency (inside lockup)
               → reassurance (inside lockup) → credibility table → outcome pills */}
@@ -274,7 +291,10 @@ export default function Landing() {
           docx defines this as a single beat. */}
       <section className="sdp-section sdp-light-alt pa-proof">
         <div className="sdp-wrap">
-          {/* no eyebrow on this section by design */}
+          {/* No eyebrow TEXT on this section by design, but the rule mark above
+              the heading is part of the section rhythm — without it this was
+              the one beat on the page whose heading started cold. */}
+          <span className="pa-rule" data-sdp-reveal aria-hidden="true" />
           <H2 parts={cases.h2} />
           <p className="pa-lede" data-sdp-reveal>
             {cases.lede}
@@ -365,103 +385,32 @@ export default function Landing() {
                 {founder.role}
               </div>
 
-              {/* BEAT 5a — credential + press row, from the finalised copy */}
-              {founder.certifications.length > 0 && (
-                <div className="pa-credrow" data-sdp-reveal>
-                  {founder.certifications.map((c) => (
-                    <span className="pa-credpill" key={c.label}>
-                      <Check size={12} />
-                      {c.label}
-                      <a href={c.href} target="_blank" rel="noopener noreferrer">
-                        {c.linkLabel}
-                      </a>
-                    </span>
-                  ))}
-                </div>
-              )}
+              {/* BEAT 5a — the "Certification (Hardik) / (Kartik) — Featured"
+                  pill row was removed 2026-08-11. It pointed at the same two
+                  articles the Certificates wall below already shows in full,
+                  so it was the same proof stated twice, weaker the first time.
+                  founder.certifications stays in content.js as the record. */}
 
               {/* BEAT 5b — the one reliably-TEXT beat. Prose, never a component. */}
               <div className="pa-story pa-mt-24">
-                {founder.story ? (
-                  founder.story.map((para, i) => <p key={i}>{para}</p>)
-                ) : (
-                  <Missing note={MISSING.founderStory} />
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* BEAT 5c — press wall. Static grid, not a carousel: there are two,
-              and every card is a live article you can click through to. */}
-          {founder.credentials.length > 0 && (
-            <div className="pa-creds">
-              <span className="pa-creds-eyebrow" data-sdp-reveal>
-                {founder.credentialsEyebrow}
-              </span>
-              <div className="pa-creds-grid">
-                {founder.credentials.map((c, i) => (
-                  <a
-                    className="pa-cred"
-                    key={c.href}
-                    href={c.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    data-sdp-reveal
-                    style={{ '--d': `${i * 0.06}s` }}
-                  >
-                    <span className="pa-cred-art">
-                      <img src={c.image} alt={`${c.issuer} — ${c.title}`} loading="lazy" />
-                    </span>
-                    <span className="pa-cred-body">
-                      <span className="pa-cred-kind">
-                        {c.kind}
-                        {c.date && <em>{c.date}</em>}
-                      </span>
-                      <span className="pa-cred-title">{c.title}</span>
-                      <span className="pa-cred-issuer">{c.issuer}</span>
-                    </span>
-                  </a>
+                {founder.story.map((para, i) => (
+                  <p key={i}>{para}</p>
                 ))}
               </div>
             </div>
-          )}
+          </div>
+
+          {/* BEAT 5c — credentials carousel: certificates and press in one
+              rail, each card opening the full document in a modal. */}
+          <Credentials />
         </div>
       </section>
 
-      {/* ─────────── BEAT 6 · MECHANISM (§1 numbered pillars, light-alt) ─────────── */}
-      <section className="sdp-section sdp-light-alt">
-        <div className="sdp-wrap">
-          <span className="sdp-eyebrow center" data-sdp-reveal>
-            {mechanism.eyebrow}
-          </span>
-          <H2 parts={mechanism.h2} />
-          <p className="sdp-sub" data-sdp-reveal>
-            {mechanism.sub}
-          </p>
-
-          <div className="pa-pillars">
-            {mechanism.pillars.map((p, i) => (
-              <div className="sdp-card pa-pillar" key={p.title} data-sdp-reveal style={{ '--d': `${i * 0.06}s` }}>
-                <span className="sdp-pillar-num">{String(i + 1).padStart(2, '0')}</span>
-                <h3>{p.title}</h3>
-                <p>{p.body}</p>
-              </div>
-            ))}
-          </div>
-
-          <blockquote className="pa-pullquote" data-sdp-reveal>
-            <p>{mechanism.reframe}</p>
-          </blockquote>
-
-          <p className="pa-closer" data-sdp-reveal>
-            {mechanism.closer}
-          </p>
-
-          <div className="pa-mt-lockup">
-            <CtaLockup />
-          </div>
-        </div>
-      </section>
+      {/* ─────────── BEAT 6 · MECHANISM — REMOVED 2026-08-11 ───────────
+          Cut on the client's call. It was the one section on the page with no
+          source in the finalised docx (MISSING.mechanismSource flagged it as
+          carried over from an earlier draft), so nothing approved was lost.
+          `mechanism` stays in content.js should it ever be wanted back. */}
 
       {/* ─────────── BEAT 7 · PROGRAMME (§3 itemized ledger, light) ─────────── */}
       <section className="sdp-section sdp-light">
@@ -479,23 +428,7 @@ export default function Landing() {
               in globals.css. Deliberately NO week numbering: the docx never
               staged these, and inventing "Week 1 / Week 2" would promise an
               order of delivery nobody has agreed to. */}
-          <div className="pa-tl">
-            {programme.items.map((item, i) => {
-              const Ico = programmeIcons[item.icon] || programmeIcons.report;
-              return (
-                <div className="pa-tl-row" key={item.title} data-sdp-reveal style={{ '--d': `${i * 0.06}s` }}>
-                  <span className="pa-tl-node" aria-hidden="true">
-                    <Ico size={19} />
-                  </span>
-                  <div className="pa-tl-body">
-                    <span className="pa-tl-ord">{String(i + 1).padStart(2, '0')}</span>
-                    <h3>{item.title}</h3>
-                    <p>{item.body}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <Timeline />
 
           <p className="pa-footnote" data-sdp-reveal>
             {programme.footnote}

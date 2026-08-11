@@ -15,10 +15,15 @@ export default function FunnelSteps({ current = 0 }) {
         const state = i < current ? 'done' : i === current ? 'now' : 'todo';
         return (
           <li className="fp-step" data-state={state} key={label}>
-            <span className="fp-step-dot">
-              {state === 'done' ? <Check size={11} /> : i + 1}
+            {/* Connector sits between markers, not under the labels, so it
+                still lines up once the labels drop below on mobile. */}
+            {i > 0 && <span className="fp-step-bar" aria-hidden="true" />}
+            <span className="fp-step-mark">
+              <span className="fp-step-dot">
+                {state === 'done' ? <Check size={11} /> : i + 1}
+              </span>
+              <span className="fp-step-l">{label}</span>
             </span>
-            <span className="fp-step-l">{label}</span>
           </li>
         );
       })}

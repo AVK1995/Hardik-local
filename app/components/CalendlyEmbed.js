@@ -30,6 +30,17 @@ const CALENDAR_URL = process.env.NEXT_PUBLIC_CALENDAR_EMBED_URL || CALENDLY_URL;
  */
 export default function CalendlyEmbed({ id = 'pick-slot' }) {
   const [booked, setBooked] = useState(false);
+  /* Calendly wants embed_domain to match the host it is embedded on, and the
+     host is only knowable in the browser. Reading window during render made the
+     server emit `embed_domain=` and the client `embed_domain=localhost`, which
+     is a hydration mismatch. Resolving it after mount means the first render is
+     identical on both sides — the placeholder — and the iframe appears once the
+     host is known. */
+  const [host, setHost] = useState(null);
+
+  useEffect(() => {
+    setHost(window.location.hostname);
+  }, []);
 
   useEffect(() => {
     if (!CALENDAR_URL) return;
@@ -51,11 +62,9 @@ export default function CalendlyEmbed({ id = 'pick-slot' }) {
   return (
     <div className="fp-embed" id={id} data-sdp-reveal>
       <div className="fp-embed-inner">
-        {CALENDAR_URL ? (
+        {CALENDAR_URL && host ? (
           <iframe
-            src={`${CALENDAR_URL}${CALENDAR_URL.includes('?') ? '&' : '?'}embed_domain=${
-              typeof window === 'undefined' ? '' : window.location.hostname
-            }&embed_type=Inline&hide_gdpr_banner=1`}
+            src={`${CALENDAR_URL}${CALENDAR_URL.includes('?') ? '&' : '?'}embed_domain=${host}&embed_type=Inline&hide_gdpr_banner=1`}
             title="Pick your call slot"
             loading="lazy"
           />
@@ -63,7 +72,11 @@ export default function CalendlyEmbed({ id = 'pick-slot' }) {
           <div className="fp-embed-ph">
             <div>
               <div className="fp-spinner" />
-              <span>Calendar pending · set NEXT_PUBLIC_CALENDAR_EMBED_URL</span>
+              <span>
+                {CALENDAR_URL
+                  ? 'Loading available slots…'
+                  : 'Calendar pending · set NEXT_PUBLIC_CALENDAR_EMBED_URL'}
+              </span>
             </div>
           </div>
         )}

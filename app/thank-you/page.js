@@ -9,7 +9,6 @@ import SiteFooter from '../components/SiteFooter';
 import { Check, Calendar } from '../components/Icons';
 import { thankYou } from '../content';
 
-const MARQUEE_REPEAT = 4;
 
 /**
  * §9 Confirmation — step 3. Structure follows the reference the client sent:
@@ -51,18 +50,10 @@ export default function ThankYou() {
 
   return (
     <main className="sdp-root fp-page">
+      {/* Static, like the landing page and book-a-call. The scrolling track is
+          retired across the funnel — three pages, one behaviour. */}
       <div className="sdp-announce">
-        <div className="sdp-announce-track">
-          {[0, 1].map((half) =>
-            Array.from({ length: MARQUEE_REPEAT }, (_, rep) =>
-              thankYou.marquee.map((line, i) => (
-                <span key={`${half}-${rep}-${i}`}>
-                  {line} <span className="dot">·</span>
-                </span>
-              ))
-            )
-          )}
-        </div>
+        <span className="sdp-announce-line">{thankYou.marquee}</span>
       </div>
 
       <div className="sdp-wrap">
@@ -122,7 +113,7 @@ export default function ThankYou() {
           <div className="fp-agenda">
             {thankYou.cover.map((row, i) => (
               <div className="fp-arow" key={row.title} data-sdp-reveal style={{ '--d': `${i * 0.05}s` }}>
-                <span className="fp-aord">{String(i + 1).padStart(2, '0')}</span>
+                <span className="fp-aord sdp-num3d">{String(i + 1).padStart(2, '0')}</span>
                 <div>
                   <h3>{row.title}</h3>
                   <p>{row.body}</p>
@@ -150,7 +141,7 @@ export default function ThankYou() {
           <div className="fp-agenda">
             {thankYou.prep.map((row, i) => (
               <div className="fp-arow" key={row.title} data-sdp-reveal style={{ '--d': `${i * 0.05}s` }}>
-                <span className="fp-aord">{String(i + 1).padStart(2, '0')}</span>
+                <span className="fp-aord sdp-num3d">{String(i + 1).padStart(2, '0')}</span>
                 <div>
                   <h3>{row.title}</h3>
                   <p>{row.body}</p>

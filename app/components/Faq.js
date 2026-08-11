@@ -8,14 +8,19 @@ import { faq } from '../content';
  * §5 Objection-set — ruled FAQ ledger (R4). Q.0X ordinals, open is a physical
  * event (accent border + white surface + shadow) and the icon rotates 45 degrees
  * to an x. The top objection carries "Most asked" and is open by default (C8).
+ *
+ * `items` is a prop so book-a-call renders its own questions through this exact
+ * component. It used to have a flat list of its own, which is why that page's
+ * FAQ looked like it belonged to a different site. Same shape either way:
+ * { q, a, mostAsked? }.
  */
-export default function Faq() {
-  const firstOpen = faq.items.findIndex((i) => i.mostAsked);
+export default function Faq({ items = faq.items, idPrefix = 'faq' }) {
+  const firstOpen = items.findIndex((i) => i.mostAsked);
   const [open, setOpen] = useState(firstOpen === -1 ? 0 : firstOpen);
 
   return (
     <div className="sdp-narrow">
-      {faq.items.map((item, i) => {
+      {items.map((item, i) => {
         const isOpen = open === i;
         return (
           /* Open state is a data attribute, NEVER a className. useReveal adds
@@ -28,7 +33,7 @@ export default function Faq() {
               type="button"
               className="sdp-q-head"
               aria-expanded={isOpen}
-              aria-controls={`faq-body-${i}`}
+              aria-controls={`${idPrefix}-body-${i}`}
               onClick={() => setOpen(isOpen ? -1 : i)}
             >
               <span>
@@ -40,7 +45,7 @@ export default function Faq() {
                 <Plus size={13} />
               </span>
             </button>
-            <div className="sdp-q-body" id={`faq-body-${i}`} role="region">
+            <div className="sdp-q-body" id={`${idPrefix}-body-${i}`} role="region">
               <div className="sdp-q-body-inner">{item.a}</div>
             </div>
           </div>

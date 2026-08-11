@@ -2,31 +2,35 @@
 
 import '../funnel-pages.css';
 
-import { useState } from 'react';
 import useReveal from '../components/useReveal';
 import SiteFooter from '../components/SiteFooter';
-import { Arrow, Shield } from '../components/Icons';
+import { Check } from '../components/Icons';
 import { unsubscribe } from '../content';
 
 /**
- * Landing page for the unsubscribe link in marketing emails.
+ * The page a man lands on AFTER the unsubscribe link in an email has done its
+ * work. It confirms; it does not ask. No form, no input, no button that claims
+ * to do something — the removal happens on the email provider's side before
+ * the redirect, and a second "are you sure" here would only make him wonder
+ * whether the first one worked.
  *
- * It cannot actually remove anyone yet — that needs the email provider's API,
- * and there is no backend here. So submitting shows an honest hand-off message
- * rather than a green "you're unsubscribed" tick that quietly does nothing.
- * A false confirmation on an unsubscribe page is worse than no page at all:
- * the man stops expecting the emails to stop, and they keep arriving.
+ * Not linked from the site footer, deliberately: reached from a nav menu this
+ * page would tell someone they had been unsubscribed when nothing had happened.
  *
- * Wire the provider, then replace the pending state with a real result.
+ * Below the confirmation sits a short reminder of what this business does,
+ * carried over from the landing copy. A man who unsubscribes today is not
+ * necessarily a man who is not interested — he just does not want the emails.
  */
 export default function Unsubscribe() {
   useReveal();
-  const [sent, setSent] = useState(false);
 
   return (
     <main className="sdp-root fp-page">
       <div className="sdp-wrap">
-        <div className="fp-mast lg-mast">
+        <div className="fp-mast">
+          <div className="fp-seal us-seal" data-sdp-reveal>
+            <Check size={44} />
+          </div>
           <span className="sdp-eyebrow center" data-sdp-reveal>
             {unsubscribe.eyebrow}
           </span>
@@ -37,56 +41,39 @@ export default function Unsubscribe() {
           <p className="sdp-sub" data-sdp-reveal>
             {unsubscribe.sub}
           </p>
-        </div>
-
-        <div className="us-card" data-sdp-reveal>
-          {sent ? (
-            <div className="us-done" role="status">
-              <span className="us-done-mark">
-                <Shield size={20} />
-              </span>
-              <p>{unsubscribe.pending}</p>
-            </div>
-          ) : (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                setSent(true);
-              }}
-            >
-              <div className="fp-field">
-                <label htmlFor="unsub-email">{unsubscribe.fieldLabel}</label>
-                <input
-                  id="unsub-email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  placeholder={unsubscribe.placeholder}
-                  required
-                />
-              </div>
-              <div className="fp-paybtn">
-                <button className="sdp-cta" type="submit">
-                  <span className="sdp-cta-line">
-                    <span className="sdp-cta-text">{unsubscribe.button}</span>
-                    <span className="arrow">
-                      <Arrow size={13} />
-                    </span>
-                  </span>
-                </button>
-              </div>
-            </form>
-          )}
-
-          <p className="us-keep">{unsubscribe.keepNote}</p>
-        </div>
-
-        <div className="fp-center" style={{ paddingBottom: 70 }}>
-          <a className="fp-back" href="/">
-            {unsubscribe.backNote}
-          </a>
+          <p className="us-keep" data-sdp-reveal>
+            {unsubscribe.keepNote}
+          </p>
         </div>
       </div>
+
+      <section className="sdp-section sdp-light-alt">
+        <div className="sdp-wrap">
+          <h2 className="fp-sectionh" data-sdp-reveal>
+            {unsubscribe.aboutTitle}
+          </h2>
+          <p className="sdp-sub" data-sdp-reveal>
+            {unsubscribe.aboutBody}
+          </p>
+
+          <ul className="us-points" data-sdp-reveal>
+            {unsubscribe.aboutPoints.map((p) => (
+              <li key={p}>
+                <span className="fp-sumtick">
+                  <Check size={12} />
+                </span>
+                {p}
+              </li>
+            ))}
+          </ul>
+
+          <div className="fp-center">
+            <a className="fp-back" href="/">
+              {unsubscribe.backCta}
+            </a>
+          </div>
+        </div>
+      </section>
 
       <SiteFooter />
     </main>

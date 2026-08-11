@@ -60,11 +60,21 @@
   background:linear-gradient(135deg,rgba(var(--brand-rgb),.14),rgba(var(--brand-rgb),.06));
   border:1px solid rgba(var(--brand-rgb),.28); color:var(--brand-deep); }
 
-.pa-stats{ width:100%; display:grid; grid-template-columns:repeat(4,1fr); margin:34px auto 0; max-width:860px;
-  border:1px solid var(--border); border-radius:16px; overflow:hidden; background:#fff; box-shadow:var(--shadow-card); }
-.pa-stat{ padding:20px 12px; text-align:center; border-right:1px solid var(--border); }
-.pa-stat:last-child{ border-right:0; }
-.pa-stat-v{ font-family:var(--fh); font-size:clamp(24px,3.6vw,36px); color:var(--brand); letter-spacing:.04em; line-height:1; }
+/* Four separate cards, not one slab with dividers (2026-08-11). Welded
+   together, an oversized "100% Natural" pushed its own cell taller and dragged
+   the whole row with it; as individual cards each stat sits in its own box and
+   an uneven one costs nothing. */
+.pa-stats{ width:100%; display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin:34px auto 0; max-width:860px; }
+.pa-stat{ padding:20px 14px; text-align:center; background:#fff;
+  border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow-card);
+  transition:transform .25s cubic-bezier(.2,.8,.3,1), border-color .25s ease, box-shadow .25s ease; }
+.pa-stat:hover{ transform:translateY(-3px); border-color:rgba(var(--brand-rgb),.32);
+  box-shadow:var(--shadow-card-hover); }
+.pa-stat-v{ font-family:var(--fh); font-size:24px; color:var(--brand); letter-spacing:.04em; line-height:1.15; }
+@media (prefers-reduced-motion:reduce){
+  .pa-stat{ transition:none; }
+  .pa-stat:hover{ transform:none; }
+}
 .pa-stat-l{ font-family:var(--fb); font-size:10.5px; font-weight:700; letter-spacing:.11em; text-transform:uppercase;
   color:var(--muted); margin-top:8px; line-height:1.45; }
 
@@ -72,13 +82,9 @@
    columns at phone width squeezed "SUCCESS STORIES GLOBALLY" onto three lines
    and made the row taller than the stats were worth. */
 @media (max-width:720px){
-  .pa-stats{ grid-template-columns:repeat(2,1fr); margin-top:26px; }
-  .pa-stat{ padding:16px 10px; border-right:1px solid var(--border); border-bottom:1px solid var(--border); }
-  /* Right-hand column and bottom row lose their outer rules, so the internal
-     dividers form a clean cross rather than boxing each cell. */
-  .pa-stat:nth-child(2n){ border-right:0; }
-  .pa-stat:nth-last-child(-n+2){ border-bottom:0; }
-  .pa-stat-v{ font-size:26px; }
+  .pa-stats{ grid-template-columns:repeat(2,1fr); gap:10px; margin-top:26px; }
+  .pa-stat{ padding:15px 10px; border-radius:12px; }
+  .pa-stat-v{ font-size:18px; }
   .pa-stat-l{ margin-top:6px; line-height:1.4; }
 }
 
@@ -86,11 +92,41 @@
    player, not as loose tracked-out text. The gap below is deliberately tight —
    the pill and the video read as one unit. */
 .pa-watch{ width:100%; margin:30px auto 0; display:flex; align-items:center; justify-content:center; }
-.pa-watch-pill{ display:inline-flex; align-items:center; gap:8px; padding:9px 20px; border-radius:999px;
+/* A real button now — it starts the video below. Styled as the pill it was, so
+   nothing moves, but it has to behave like a control: pointer, focus ring,
+   and a press state. */
+.pa-watch-pill{ display:inline-flex; align-items:center; gap:9px; padding:9px 20px; border-radius:999px;
   background:rgba(var(--brand-rgb),.12); border:1px solid rgba(var(--brand-rgb),.22);
   font-family:var(--fb); font-size:12px; font-weight:800; letter-spacing:.16em; text-transform:uppercase;
-  color:var(--brand-deep); line-height:1; }
-.pa-watch-pill svg{ flex:0 0 auto; }
+  color:var(--brand-deep); line-height:1; cursor:pointer;
+  transition:background-color .25s ease, border-color .25s ease, transform .25s cubic-bezier(.2,.8,.3,1),
+    box-shadow .25s ease; }
+.pa-watch-pill:hover{ background:rgba(var(--brand-rgb),.2); border-color:rgba(var(--brand-rgb),.45);
+  transform:translateY(-2px); box-shadow:0 10px 22px -10px rgba(var(--brand-rgb),.75); }
+.pa-watch-pill:active{ transform:translateY(0); }
+.pa-watch-pill:focus-visible{ outline:2px solid var(--brand); outline-offset:3px; }
+
+/* The arrow keeps nodding at the video. It is the one piece of motion on the
+   page whose whole job is to point somewhere, so it never fully stops. */
+.pa-watch-arrow{ display:grid; place-items:center; width:20px; height:20px; border-radius:50%; flex:0 0 20px;
+  background:rgba(var(--brand-rgb),.18); color:var(--brand-deep);
+  animation:paWatchNudge 1.7s ease-in-out infinite;
+  transition:background-color .25s ease, transform .25s ease; }
+.pa-watch-pill:hover .pa-watch-arrow{ background:var(--brand); color:#fff; animation-duration:.9s; }
+@keyframes paWatchNudge{
+  0%,100%{ transform:translateY(-2px); }
+  50%    { transform:translateY(3px); }
+}
+@media (prefers-reduced-motion:reduce){
+  .pa-watch-arrow{ animation:none; }
+  .pa-watch-pill{ transition:none; }
+  .pa-watch-pill:hover{ transform:none; }
+}
+
+/* Desktop row break for the marker pills: 4 on the first row, 3 on the second.
+   Collapses to nothing on mobile so they wrap by width there. */
+.pa-pillbreak{ flex-basis:100%; height:0; margin:0; }
+@media (max-width:720px){ .pa-pillbreak{ display:none; } }
 
 /* ── BEAT 2 · For-You-If (single centred column, per the Kunal lock) ───── */
 .pa-whowrap{ width:100%; max-width:760px; margin-left:auto; margin-right:auto; }
@@ -113,6 +149,11 @@
   .pa-marquee{ overflow-x:auto; -webkit-mask-image:none; mask-image:none; }
   .pa-marquee-track{ animation:none; }
 }
+
+/* The standalone rule mark, for sections that carry no eyebrow text. Same
+   24x2 bar the eyebrow draws via ::before, so the two are interchangeable. */
+.pa-rule{ display:block; width:24px; height:2px; margin:0 auto 18px; background:var(--brand); border-radius:2px; }
+.sdp-dark .pa-rule,.sdp-dark-alt .pa-rule{ background:var(--brand-bright); }
 
 /* ── BEAT 4 · Case cards (exhibit frame; media slot pending) ──────────── */
 .pa-lede{ width:100%; text-align:center; font-style:italic; color:var(--muted); font-size:14.5px; margin-bottom:8px; }
@@ -172,21 +213,96 @@
 .pa-story{ max-width:62ch; }
 .pa-story p{ font-size:15.5px; line-height:1.8; color:var(--ink-dark-soft); }
 
+/* Mobile: the whole experts block centres together. The prose was already
+   centred while the name and role above it stayed left, which read as two
+   different blocks stacked rather than one. */
+@media (max-width:720px){
+  .pa-founder-name,
+  .pa-founder-role{ text-align:center; }
+  .pa-story{ margin-left:auto; margin-right:auto; }
+}
+
 /* ── BEAT 5c · Credentials wall (2026-08-11) ──────────────────────────────
    Sits on the dark founder band, so every colour here is the dark-band token,
    not the light one. Static grid by design — the reference carousel hid four
    of six cards behind arrows, which is a strange thing to do to your proof. */
 .pa-creds{ margin-top:56px; padding-top:40px; border-top:1px solid var(--border-dark-strong); }
-.pa-creds-eyebrow{ display:block; text-align:center; margin-bottom:26px; font-family:var(--fb); font-size:11px;
-  font-weight:800; letter-spacing:.22em; text-transform:uppercase; color:var(--gold); }
-/* Two cards, so 2-up with a cap — a 3-col track would stretch each screenshot
-   until the headline in it stopped being readable. */
-.pa-creds-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:22px; max-width:940px; margin:0 auto; }
-@media (max-width:720px){ .pa-creds-grid{ grid-template-columns:1fr; } }
+/* Themed like every other eyebrow on a dark band — brand-bright, not the gold
+   it was borrowing, and carrying the same rule mark so it sits in the system. */
+.pa-creds-eyebrow{ display:inline-flex; align-items:center; gap:10px; margin:0 auto 26px;
+  font-family:var(--fb); font-size:11px; font-weight:800; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--brand-bright); }
+.pa-creds-eyebrow::before{ content:""; width:24px; height:2px; background:var(--brand-bright); flex:0 0 24px; }
+.pa-creds{ text-align:center; }
+.pa-creds-grid{ text-align:left; }
+/* ── Carousel rail ────────────────────────────────────────────────────────
+   A real scroller with snap points, not a JS-only widget: trackpad, touch and
+   the arrow buttons all drive the same element, and it degrades to a plain
+   swipeable strip if the script never runs. */
+.pa-creds-rail-wrap{ position:relative; }
+.pa-creds-rail{ display:flex; gap:22px; overflow-x:auto; scroll-snap-type:x mandatory;
+  padding:4px 2px 10px; scrollbar-width:none; -ms-overflow-style:none; }
+.pa-creds-rail::-webkit-scrollbar{ display:none; }
+.pa-creds-rail > .pa-cred{ scroll-snap-align:start; flex:0 0 clamp(240px,26vw,300px); }
 
-.pa-cred{ display:flex; flex-direction:column; overflow:hidden; text-decoration:none;
+.pa-creds-nav{ position:absolute; top:calc(50% - 34px); z-index:3; width:44px; height:44px; border-radius:50%;
+  display:grid; place-items:center; cursor:pointer; color:var(--bg-dark);
+  background:var(--ink-dark); border:1px solid rgba(255,255,255,.5);
+  box-shadow:0 10px 26px -10px rgba(0,0,0,.9);
+  transition:transform .2s ease, opacity .2s ease, background-color .2s ease; }
+.pa-creds-nav.prev{ left:-14px; transform:scaleX(-1); }
+.pa-creds-nav.next{ right:-14px; }
+.pa-creds-nav:hover:not(:disabled){ background:var(--brand-bright); color:#fff; }
+.pa-creds-nav.next:hover:not(:disabled){ transform:translateX(3px); }
+.pa-creds-nav.prev:hover:not(:disabled){ transform:scaleX(-1) translateX(3px); }
+.pa-creds-nav:disabled{ opacity:0; pointer-events:none; }
+@media (max-width:900px){
+  .pa-creds-nav{ display:none; }         /* touch scrolls it; arrows are clutter */
+  .pa-creds-rail{ gap:16px; }
+  .pa-creds-rail > .pa-cred{ flex-basis:78vw; max-width:300px; }
+}
+
+/* ── Lightbox ─────────────────────────────────────────────────────────── */
+.pa-cred-lb{ position:fixed; inset:0; z-index:1200; display:grid; place-items:center; padding:24px; }
+.pa-cred-lb-bg{ position:absolute; inset:0; background:rgba(var(--ink-rgb),.88); backdrop-filter:blur(8px); }
+/* Flex column, so the meta block claims its height FIRST and the image takes
+   whatever is left. A max-height on the image alone was not enough: a landscape
+   certificate still filled the panel and pushed the "open the original" link
+   out past the panel's own overflow. min-height:0 is what lets the image
+   actually shrink inside a flex parent. */
+.pa-cred-lb-panel{ position:relative; z-index:1; width:min(980px,100%); max-height:90vh;
+  display:flex; flex-direction:column; overflow:hidden;
+  background:var(--bg-dark-alt); border:1px solid var(--border-dark-strong); border-radius:var(--r-lg);
+  box-shadow:0 40px 90px -30px rgba(0,0,0,.9); }
+.pa-cred-lb-img{ display:block; width:100%; min-height:0; flex:1 1 auto; object-fit:contain;
+  background:#fff; border-radius:var(--r-lg) var(--r-lg) 0 0; }
+.pa-cred-lb-meta{ flex:0 0 auto; }
+.pa-cred-lb-meta{ padding:22px 26px 26px; }
+.pa-cred-lb-meta h3{ margin:9px 0 5px; font-size:clamp(18px,2.4vw,23px); color:var(--ink-dark); }
+.pa-cred-lb-meta p{ margin:0; font-size:14px; color:var(--muted-dark); }
+.pa-cred-lb-link{ display:inline-flex; align-items:center; gap:9px; margin-top:16px; padding:10px 18px;
+  border-radius:999px; background:rgba(var(--brand-rgb),.18); border:1px solid rgba(var(--brand-rgb),.45);
+  font-family:var(--fb); font-size:12.5px; font-weight:700; color:var(--brand-bright); text-decoration:none;
+  transition:background-color .2s ease, transform .2s ease; }
+.pa-cred-lb-link:hover{ background:rgba(var(--brand-rgb),.3); transform:translateX(3px); }
+/* The shared .pa-lb-close is white-on-translucent, which vanishes against a
+   white certificate. Solid dark plate here so it is always findable. */
+.pa-cred-lb .pa-lb-close{ position:absolute; top:12px; right:12px; z-index:2;
+  background:rgba(var(--ink-rgb),.86); border-color:rgba(255,255,255,.35); color:#fff;
+  box-shadow:0 6px 18px -6px rgba(0,0,0,.8); }
+.pa-cred-lb .pa-lb-close:hover{ background:var(--brand); border-color:var(--brand); }
+@media (max-width:720px){
+  .pa-cred-lb{ padding:14px; }
+  .pa-cred-lb-meta{ padding:18px 18px 22px; }
+}
+
+/* A button now, not a link — it opens the document in a modal. Padding and
+   text-align are reset because a <button> brings its own. */
+.pa-cred{ display:flex; flex-direction:column; overflow:hidden; text-decoration:none; cursor:pointer;
+  padding:0; text-align:left; font:inherit; color:inherit; appearance:none;
   background:var(--bg-dark-alt); border:1px solid var(--border-dark-strong); border-radius:16px;
   transition:transform .25s cubic-bezier(.2,.7,.3,1), border-color .25s ease, box-shadow .25s ease; }
+.pa-cred:focus-visible{ outline:2px solid var(--brand-bright); outline-offset:3px; }
 .pa-cred:hover{ transform:translateY(-4px); border-color:rgba(var(--brand-rgb),.55);
   box-shadow:0 18px 40px -20px rgba(0,0,0,.8), 0 0 0 1px rgba(var(--brand-rgb),.22); }
 
@@ -200,7 +316,7 @@
 
 .pa-cred-body{ display:flex; flex-direction:column; gap:7px; padding:18px 20px 22px; }
 .pa-cred-kind{ display:flex; align-items:center; gap:10px; font-family:var(--fb); font-size:10px; font-weight:800;
-  letter-spacing:.18em; text-transform:uppercase; color:var(--gold); }
+  letter-spacing:.18em; text-transform:uppercase; color:var(--brand-bright); }
 .pa-cred-kind em{ font-style:normal; font-weight:600; letter-spacing:.06em; color:var(--muted-dark); }
 .pa-cred-kind em::before{ content:"· "; }
 .pa-cred-title{ font-size:15.5px; line-height:1.45; font-weight:600; color:var(--ink-dark); }
@@ -259,20 +375,57 @@ a.pa-cred .pa-cred-issuer::after{ content:" ↗"; color:var(--brand-bright); }
 .pa-tl-node{ position:relative; z-index:1; width:48px; height:48px; border-radius:14px;
   display:grid; place-items:center; color:var(--brand-deep); background:#fff;
   border:1px solid rgba(var(--brand-rgb),.3);
-  box-shadow:0 6px 18px -8px rgba(var(--brand-rgb),.55), inset 0 1px 0 rgba(255,255,255,.9); }
+  box-shadow:0 6px 18px -8px rgba(var(--brand-rgb),.55), inset 0 1px 0 rgba(255,255,255,.9);
+  transition:background .4s ease, color .4s ease, border-color .4s ease,
+    box-shadow .4s ease, transform .4s cubic-bezier(.2,.8,.3,1); }
+
+/* ── Scroll-lit state (2026-08-11) ────────────────────────────────────────
+   Timeline.js sets --fill on the bar and data-lit on each row as its node
+   reaches the playhead. The rail therefore fills as you read down it and the
+   node you have arrived at is the one that is lit — the beat builds instead of
+   sitting there finished. */
+.pa-tl-fill{ position:absolute; left:23px; top:30px; width:2px; height:var(--fill,0%);
+  border-radius:2px; background:linear-gradient(180deg,var(--brand-bright),var(--brand));
+  box-shadow:0 0 12px rgba(var(--brand-rgb),.6);
+  transition:height .18s linear; pointer-events:none; }
+
+.pa-tl-row[data-lit] .pa-tl-node{
+  background:var(--grad-brand); color:#fff; border-color:transparent; transform:scale(1.06);
+  box-shadow:0 0 0 5px rgba(var(--brand-rgb),.14), 0 12px 26px -10px rgba(var(--brand-rgb),.85);
+}
+.pa-tl-row[data-lit] .sdp-num3d{
+  color:#fff; background:var(--grad-brand); border-color:transparent;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35), inset 0 -3px 0 rgba(0,0,0,.14),
+    0 3px 0 rgba(var(--brand-rgb),.45), 0 10px 20px -10px rgba(var(--brand-rgb),.8);
+}
+.pa-tl-row[data-lit] h3{ color:var(--brand-deep); transition:color .4s ease; }
+
+@media (prefers-reduced-motion:reduce){
+  .pa-tl-node,
+  .pa-tl-fill,
+  .pa-tl-row[data-lit] h3{ transition:none; }
+  .pa-tl-row[data-lit] .pa-tl-node{ transform:none; }
+}
 .pa-tl-body{ padding-top:2px; }
-.pa-tl-ord{ display:inline-block; font-family:var(--fh); font-size:15px; letter-spacing:.14em;
-  color:var(--brand); margin-bottom:4px; }
+/* Placement only — the plate itself comes from .sdp-num3d, so nothing here may
+   set display, font-size or colour or it will out-specify the badge. */
+.pa-tl-ord{ margin-bottom:9px; }
 .pa-tl-row h3{ font-size:clamp(17px,2.1vw,21px); margin:0 0 7px; letter-spacing:.02em; }
 .pa-tl-row p{ margin:0; font-size:14.5px; line-height:1.7; }
 
-/* Mobile: node above the copy, everything centred, rail removed — a vertical
-   rail with centred text either side of it reads as a mistake. */
+/* Mobile: the timeline KEEPS its rail and its left edge (2026-08-11). Stacking
+   the node above centred copy was tried and reverted — it stopped reading as a
+   sequence, which is the entire point of the beat. Just tightened. */
 @media (max-width:720px){
-  .pa-tl::before{ display:none; }
-  .pa-tl-row{ grid-template-columns:1fr; justify-items:center; gap:12px; padding:16px 0 24px; }
-  .pa-tl-row + .pa-tl-row{ border-top:1px solid var(--border); padding-top:24px; }
-  .pa-tl-body{ text-align:center; }
+  .pa-tl::before,
+  .pa-tl-fill{ left:19px; }
+  .pa-tl-fill{ top:26px; }
+  .pa-tl-row{ grid-template-columns:40px minmax(0,1fr); gap:14px; padding:12px 0 22px; }
+  .pa-tl-node{ width:40px; height:40px; border-radius:12px; }
+  .pa-tl-node svg{ width:17px; height:17px; }
+  .pa-tl-body{ text-align:left; }
+  .pa-tl-ord{ margin-bottom:7px; }
+  .sdp-num3d{ min-width:38px; height:34px; font-size:15px; padding:0 9px; border-radius:11px; }
 }
 .pa-footnote{ width:100%; text-align:center; max-width:680px; margin:26px auto 0; font-size:13px; font-style:italic; color:var(--muted); }
 

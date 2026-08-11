@@ -259,7 +259,16 @@ h2.sdp-h2{ text-align:center; font-size:clamp(25px,3.8vw,44px); letter-spacing:-
 .sdp-cta-text{ min-width:0; }
 .sdp-cta-ln{ display:inline; }
 .sdp-cta-ln + .sdp-cta-ln::before{ content:" "; white-space:pre; }
-.sdp-cta .arrow{ width:26px; height:26px; border-radius:50%; background:rgba(255,255,255,.22); display:grid; place-items:center; flex:0 0 26px; }
+/* The disc travels on hover — disc and glyph together, so it reads as the
+   button leaning toward the next step rather than an icon twitching inside it. */
+.sdp-cta .arrow{ width:26px; height:26px; border-radius:50%; background:rgba(255,255,255,.22); display:grid; place-items:center; flex:0 0 26px;
+  transition:transform .26s cubic-bezier(.2,.8,.3,1), background-color .26s ease; }
+.sdp-cta:hover .arrow,
+.sdp-cta:focus-visible .arrow{ transform:translateX(5px); background:rgba(255,255,255,.34); }
+@media (prefers-reduced-motion:reduce){
+  .sdp-cta .arrow{ transition:none; }
+  .sdp-cta:hover .arrow{ transform:none; }
+}
 .sdp-cta .cta-sub{ font-family:var(--fb); font-size:11px; font-weight:500; letter-spacing:.05em; color:rgba(255,255,255,.78); text-transform:uppercase; }
 
 /* ---- Below-CTA stack ---- */
@@ -274,7 +283,12 @@ h2.sdp-h2{ text-align:center; font-size:clamp(25px,3.8vw,44px); letter-spacing:-
   color:#fff; font-family:var(--fh); font-size:18px; letter-spacing:.08em; font-variant-numeric:tabular-nums;
   animation:sdpUrgencyPulse 2s ease-in-out infinite; }
 @keyframes sdpUrgencyPulse{ 0%,100%{ filter:brightness(1);} 50%{ filter:brightness(1.14);} }
-.sdp-cta-note{ display:block; margin:14px auto 0; max-width:760px; font-style:italic; font-size:13px; color:var(--muted); }
+/* "100% Private, Confidential & Judgment-Free". Was muted italic, which is how
+   you set a footnote — and for this audience it is the single line most likely
+   to decide whether a man clicks. Bold, brand colour, upright (2026-08-11). */
+.sdp-cta-note{ display:block; margin:14px auto 0; max-width:760px; font-style:normal;
+  font-family:var(--fb); font-size:13.5px; font-weight:800; letter-spacing:.02em; color:var(--brand); }
+.sdp-dark .sdp-cta-note,.sdp-dark-alt .sdp-cta-note{ color:var(--brand-bright); }
 
 /* ---- Announcement bar ---- */
 /* Marquee retired on the hero, 2026-08-11. It now holds ONE static line,
@@ -296,6 +310,54 @@ h2.sdp-h2{ text-align:center; font-size:clamp(25px,3.8vw,44px); letter-spacing:-
 @keyframes sdpAnnScroll{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
 @media (prefers-reduced-motion:reduce){
   .sdp-announce-track{ animation:none; }
+}
+
+/* ── Numbered step badge (2026-08-11) ─────────────────────────────────────
+   The 01/02/03 markers, everywhere they appear. Raised rather than flat: a
+   top highlight, an inner shade along the bottom, and a solid 3px "lip" under
+   the plate are what read as depth — a drop shadow alone just reads as blur.
+   It lifts when its row or card is hovered, so the whole block feels live
+   rather than only the number itself. */
+.sdp-num3d{
+  display:inline-grid; place-items:center; min-width:44px; height:40px; padding:0 11px;
+  border-radius:13px; font-family:var(--fh); font-size:17px; letter-spacing:.09em; line-height:1;
+  color:var(--brand);
+  background:linear-gradient(180deg,#FFFFFF 0%,#EAF1FC 100%);
+  border:1px solid rgba(var(--brand-rgb),.24);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.95),
+    inset 0 -3px 0 rgba(var(--brand-rgb),.09),
+    0 3px 0 rgba(var(--brand-rgb),.20),
+    0 9px 18px -9px rgba(var(--brand-rgb),.55);
+  transition:transform .24s cubic-bezier(.2,.8,.3,1), box-shadow .24s ease;
+}
+/* Hover targets: the timeline row, the agenda row, and the badge itself. */
+.pa-tl-row:hover .sdp-num3d,
+.fp-arow:hover .sdp-num3d,
+.sdp-num3d:hover{
+  transform:translateY(-3px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.95),
+    inset 0 -3px 0 rgba(var(--brand-rgb),.09),
+    0 6px 0 rgba(var(--brand-rgb),.22),
+    0 16px 26px -10px rgba(var(--brand-rgb),.6);
+}
+/* On the dark bands the plate inverts, or it glares. */
+.sdp-dark .sdp-num3d,.sdp-dark-alt .sdp-num3d{
+  color:var(--brand-bright);
+  background:linear-gradient(180deg,var(--bg-dark-elev) 0%,var(--bg-dark-alt) 100%);
+  border-color:rgba(var(--brand-rgb),.4);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.12),
+    inset 0 -3px 0 rgba(0,0,0,.28),
+    0 3px 0 rgba(0,0,0,.4),
+    0 9px 18px -9px rgba(0,0,0,.7);
+}
+@media (prefers-reduced-motion:reduce){
+  .sdp-num3d{ transition:none; }
+  .pa-tl-row:hover .sdp-num3d,
+  .fp-arow:hover .sdp-num3d,
+  .sdp-num3d:hover{ transform:none; }
 }
 
 /* ---- CARD SYSTEM ---- */
@@ -423,7 +485,9 @@ h2.sdp-h2{ text-align:center; font-size:clamp(25px,3.8vw,44px); letter-spacing:-
 
 /* ---- CTA-lockup text readable on the dark bands ---- */
 .sdp-dark .sdp-risk-badge,.sdp-dark-alt .sdp-risk-badge{ color:var(--ink-dark-soft); }
-.sdp-dark .sdp-cta-note,.sdp-dark-alt .sdp-cta-note{ color:var(--muted-dark); }
+/* The muted-dark rule that used to sit here is gone: the reassurance line is
+   now deliberately loud on every band, and this later rule was quietly
+   undoing that on the dark ones. Its colour lives with the base rule above. */
 .sdp-dark .sdp-risk-icon-blue,.sdp-dark-alt .sdp-risk-icon-blue{ color:var(--brand-bright); }
 .sdp-dark .sdp-urgency-label,.sdp-dark-alt .sdp-urgency-label{ color:var(--muted-dark); }
 
@@ -443,11 +507,22 @@ h2.sdp-h2{ text-align:center; font-size:clamp(25px,3.8vw,44px); letter-spacing:-
    Part 2 and in landing.css, several of which are more specific.
    ═══════════════════════════════════════════════════════════════════════════ */
 @media (max-width:720px){
-  /* Headings */
-  .sdp-root .sdp-h1-l1,
+  /* Headings. The hero H1 keeps the tighter 1.14 — it is the only heading big
+     enough to need it. Section headings take the client's 1.2 / 0.4px, which
+     stops the condensed caps from locking together at 30px. */
+  /* The H1 is three authored lines and must render as exactly three — each
+     .pa-h1-line has to fit on one row. The longest is "Get Your Sexual
+     Confidence Back" at 31 characters; at a fixed 30px that wraps and the
+     headline becomes five or six lines. Fluid, with 30px as the ceiling so
+     larger phones still get the full size. */
+  .sdp-root .sdp-h1-l1{ font-size:clamp(17px,5.55vw,30px) !important; line-height:1.16 !important; }
   .sdp-root h1.sdp-h2,
   .sdp-root h2.sdp-h2,
-  .sdp-root .pa-founder-name{ font-size:30px !important; line-height:1.14 !important; }
+  .sdp-root .pa-founder-name{
+    font-size:30px !important;
+    line-height:1.2 !important;
+    letter-spacing:0.4px !important;
+  }
 
   /* Sub-headings */
   .sdp-root .fp-panel-h,
@@ -459,9 +534,19 @@ h2.sdp-h2{ text-align:center; font-size:clamp(25px,3.8vw,44px); letter-spacing:-
      count at two from 320px up, and stops growing once 18px is reached. */
   .sdp-root .sdp-h1-l2{ font-size:clamp(15px,4.7vw,18px) !important; line-height:1.34 !important; }
 
+  /* The hero gate pill is its own case: 86 characters of tracked-out caps that
+     must land in TWO lines on every phone. Fixed 10.5px made three below
+     ~430px, so it is fluid with 10.5px as the ceiling, and the tracking is cut
+     — at .14em the spacing alone costs ~12 characters of width. */
+  .sdp-root .sdp-eyebrow-pill{
+    font-size:clamp(7.2px,2.2vw,10.5px) !important;
+    letter-spacing:.03em !important;
+    padding:8px 13px 8px 11px;
+    gap:8px;
+  }
+
   /* Eyebrows and every tracked-out micro-label */
   .sdp-root .sdp-eyebrow,
-  .sdp-root .sdp-eyebrow-pill,
   .sdp-root .pa-creds-eyebrow,
   .sdp-root .fp-panel-title,
   .sdp-root .fp-step-l,
@@ -478,7 +563,7 @@ h2.sdp-h2{ text-align:center; font-size:clamp(25px,3.8vw,44px); letter-spacing:-
   .sdp-root .pa-tl-row p,
   .sdp-root .fp-arow p,
   .sdp-root .bk-card p,
-  .sdp-root .bk-q p,
+
   .sdp-root .sdp-q-body-inner,
   .sdp-root .pa-story p,
   .sdp-root .bk-prose p,
@@ -492,21 +577,33 @@ h2.sdp-h2{ text-align:center; font-size:clamp(25px,3.8vw,44px); letter-spacing:-
   .sdp-root .bk-card h3,
   .sdp-root .fp-arow h3,
   .sdp-root .pa-tl-row h3,
-  .sdp-root .bk-q h3{ font-size:17px !important; }
 
-  /* Centre everything on mobile, per the client's instruction. Left-aligned
-     runs are re-centred at source where they are grids. */
-  .sdp-root .sdp-wrap,
+
+  /* Centring on mobile, scoped — 2026-08-11.
+     The first pass centred everything, which broke every block whose meaning
+     depends on a left edge: numbered timeline rows, tick lists, agenda steps,
+     form fields. A bullet is a starting mark, and centring it puts the mark in
+     a different place on every line, so the eye loses the column.
+     Centred: the hero, section masts and headings, the standalone prose blocks
+     (about the coaches), and the CTA lockups. Everything with a marker down
+     its left edge stays left. */
   .sdp-root .fp-mast,
   .sdp-root .sdp-lockup,
-  .sdp-root .bk-card,
-  .sdp-root .bk-q,
-  .sdp-root .sdp-q-head,
-  .sdp-root .sdp-q-body-inner,
   .sdp-root .pa-story,
   .sdp-root .bk-prose,
-  .sdp-root .sdp-eyebrow-pill{ text-align:center; }
+  .sdp-root .sdp-eyebrow-pill,
+  .sdp-root .pa-hero-inner{ text-align:center; }
   .sdp-root .sdp-who-list li{ text-align:left; }
+
+  /* Section headings and their eyebrows/subs centre wherever they appear,
+     without dragging the section's body copy with them. */
+  .sdp-root h1.sdp-h2,
+  .sdp-root h2.sdp-h2,
+  .sdp-root .sdp-sub,
+  .sdp-root .sdp-eyebrow,
+  .sdp-root .fp-sectionh,
+  .sdp-root .pa-lede,
+  .sdp-root .pa-creds-eyebrow{ text-align:center; }
 }
 
 @media (max-width:720px){
@@ -521,10 +618,21 @@ h2.sdp-h2{ text-align:center; font-size:clamp(25px,3.8vw,44px); letter-spacing:-
      lines — "…Personalised Diagnosis" / "& ED Reversal Roadmap". At the
      inherited 15px the first run overflows and orphans "Diagnosis" onto a line
      of its own, which is the three-line mess this replaces. */
-  .sdp-cta{ position:relative; width:100%; min-width:0; padding:15px 44px 13px;
-    font-size:13px !important; letter-spacing:.045em; }
+  /* Retuned 2026-08-11 after the theme pass swapped this button off the
+     condensed face onto Schibsted Grotesk, which is far wider per character —
+     the old 13px/.045em spilled the first run onto its own line and made three.
+     38px is the least padding that still clears the 24px disc at right:14px,
+     and dropping the tracking buys back ~18px across a 44-character line. That
+     is what holds the break at "…Personalised Diagnosis / & ED Reversal
+     Roadmap" instead of shrinking the type to 11px to force it. */
+  .sdp-cta{ position:relative; width:100%; min-width:0; padding:15px 38px 13px;
+    font-size:11.8px !important; letter-spacing:.01em; }
   .sdp-cta .arrow{ position:absolute; right:14px; top:50%; transform:translateY(-50%);
     width:24px; height:24px; flex-basis:24px; }
+  /* Hover travel has to compose with the centring translate, or the disc jumps
+     to the vertical middle of the button the moment you touch it. */
+  .sdp-cta:hover .arrow,
+  .sdp-cta:focus-visible .arrow{ transform:translate(5px,-50%); }
 
   /* Trust chips: two on the first row, the third centred beneath. This is the
      one place the 14px body size is not applied — at 14px a single chip is
@@ -548,8 +656,15 @@ h2.sdp-h2{ text-align:center; font-size:clamp(25px,3.8vw,44px); letter-spacing:-
   .sdp-stuck-title{ display:none; }
   .sdp-stuck-chips{ justify-content:center; gap:4px 14px; }
   .sdp-stuck-chip{ font-size:11px; }
-  .sdp-stuck .sdp-cta{ order:1; width:100%; flex:0 0 auto; padding:13px 50px 13px 18px; font-size:13px; }
-  .sdp-stuck .sdp-cta .arrow{ right:13px; }
+  /* Symmetric, matching the inline button — the old 18px/50px split centred the
+     label inside its padding box rather than inside the button, so it sat
+     visibly left of centre. */
+  /* letter-spacing is restated because the desktop `.sdp-stuck .sdp-cta` rule
+     sets .05em at higher specificity than the `.sdp-cta` above — that extra
+     20px of tracking across 44 characters was on its own enough to push the
+     first run onto a third line. */
+  .sdp-stuck .sdp-cta{ order:1; width:100%; flex:0 0 auto; padding:13px 38px; letter-spacing:.01em; }
+  .sdp-stuck .sdp-cta .arrow{ right:14px; }
 
   .sdp-guarantee-card{ padding:34px 22px; }
 }

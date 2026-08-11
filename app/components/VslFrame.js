@@ -10,9 +10,20 @@ import { vsl } from '../content';
 const URL_OVERRIDE = process.env.NEXT_PUBLIC_VSL_URL || '';
 const POSTER = process.env.NEXT_PUBLIC_VSL_POSTER || vsl.poster;
 
+/* Playback params, and why each one is here:
+     autoplay=1    the iframe is only ever created by a tap, so the browser
+                   counts that gesture and lets it start WITH SOUND. Adding
+                   muted=1 would guarantee autoplay but silence a sales video,
+                   which is the opposite of what it is for.
+     muted=0       explicit, so no future edit "helpfully" adds a mute.
+     playsinline=1 iOS Safari otherwise seizes the video into its own fullscreen
+                   player the moment it starts. This is the single param that
+                   makes iPhone behave like every other device.
+     dnt=1         no Vimeo tracking cookies. */
 const EMBED = URL_OVERRIDE
   ? URL_OVERRIDE
-  : `https://player.vimeo.com/video/${vsl.vimeoId}?autoplay=1&title=0&byline=0&portrait=0&dnt=1`;
+  : `https://player.vimeo.com/video/${vsl.vimeoId}` +
+    `?autoplay=1&muted=0&playsinline=1&title=0&byline=0&portrait=0&dnt=1`;
 
 /**
  * §8 Focal media — the hero VSL (R2/R7).
@@ -25,8 +36,14 @@ const EMBED = URL_OVERRIDE
  * The frame takes its aspect ratio from the clip's own dimensions via --ar, so
  * a portrait VSL would frame portrait with no CSS change.
  */
-export default function VslFrame() {
-  const [playing, setPlaying] = useState(false);
+export default function VslFrame({ playing: playingProp, onPlay }) {
+  const [playingSelf, setPlayingSelf] = useState(false);
+  /* Controlled when the page passes `playing` — the "Watch the short video
+     below" pill starts it from outside the frame — and self-managed otherwise,
+     so the component still works standalone. */
+  const controlled = playingProp !== undefined;
+  const playing = controlled ? playingProp : playingSelf;
+  const start = () => (controlled ? onPlay?.() : setPlayingSelf(true));
 
   return (
     /* data-playing, not a className — rewriting className here wipes the `vis`
@@ -51,12 +68,7 @@ export default function VslFrame() {
       ) : (
         <>
           <img className="sdp-vsl-poster" src={POSTER} alt="" />
-          <button
-            type="button"
-            className="sdp-vsl-play"
-            onClick={() => setPlaying(true)}
-            aria-label="Play the video"
-          >
+          <button type="button" className="sdp-vsl-play" onClick={start} aria-label="Play the video">
             <span className="sdp-vsl-disc">
               <Play size={30} />
             </span>
