@@ -8,7 +8,7 @@ import VslFrame from './components/VslFrame';
 import CheckinWall from './components/CheckinWall';
 import Faq from './components/Faq';
 import StickyCta from './components/StickyCta';
-import { ArrowDown, Arrow, Check, Shield, Star, pointerIcons } from './components/Icons';
+import { ArrowDown, Check, Play, Shield, Star, pointerIcons, trustIcons } from './components/Icons';
 
 import {
   MISSING,
@@ -16,7 +16,6 @@ import {
   trustRow,
   hero,
   forYouIf,
-  transformations,
   cases,
   checkinWall,
   founder,
@@ -27,6 +26,10 @@ import {
   finalCta,
   cta,
 } from './content';
+
+/* How many times the announce copy repeats per half of the marquee track.
+   Each half must overflow the widest viewport or the loop shows a blank gap. */
+const ANNOUNCE_REPEAT = 8;
 
 /** H2 formula: [plain setup clause] + [ONE accent tail on the payoff/mechanism]. */
 function H2({ parts }) {
@@ -59,13 +62,19 @@ export default function Landing() {
     <main className="sdp-root">
       {/* ─────────── BEAT 0a · Announcement strip (§11 · R10) ─────────── */}
       <div className="sdp-announce">
+        {/* The track scrolls by translateX(-50%), so the two halves must be
+            identical AND each half must be wider than the viewport, or a blank
+            gap appears. One short line was nowhere near wide enough, so each
+            half repeats the copy ANNOUNCE_REPEAT times. */}
         <div className="sdp-announce-track">
-          {[0, 1].map((dup) =>
-            announce.map((line, i) => (
-              <span key={`${dup}-${i}`}>
-                {line} <span className="dot">·</span>
-              </span>
-            ))
+          {[0, 1].map((half) =>
+            Array.from({ length: ANNOUNCE_REPEAT }, (_, rep) =>
+              announce.map((line, i) => (
+                <span key={`${half}-${rep}-${i}`}>
+                  {line} <span className="dot">·</span>
+                </span>
+              ))
+            )
           )}
         </div>
       </div>
@@ -73,12 +82,15 @@ export default function Landing() {
       {/* ─────────── BEAT 0b · Trust row (§12, light) ─────────── */}
       <div className="pa-trustrow">
         <div className="sdp-wrap pa-trustrow-inner">
-          {trustRow.map((chip) => (
-            <span className="pa-trustchip" key={chip}>
-              <Check size={13} />
-              {chip}
-            </span>
-          ))}
+          {trustRow.map((chip) => {
+            const Ico = chip.icon ? trustIcons[chip.icon] : null;
+            return (
+              <span className="pa-trustchip" key={chip.label}>
+                {Ico && <Ico size={14} />}
+                {chip.label}
+              </span>
+            );
+          })}
         </div>
       </div>
 
@@ -92,20 +104,31 @@ export default function Landing() {
           </span>
 
           <h1 className="sdp-h1" data-sdp-reveal style={{ '--d': '.05s' }}>
-            <span className="sdp-h1-l1">{hero.h1line1}</span>
-            <span className="sdp-h1-l2">{hero.h1line2}</span>
+            <span className="sdp-h1-l1">
+              {hero.h1.map((line) => (
+                <span className="pa-h1-line" key={line}>
+                  {line}
+                </span>
+              ))}
+            </span>
+            <span className="sdp-h1-l2">{hero.h1tail}</span>
           </h1>
 
           <p className="sdp-sub" data-sdp-reveal style={{ '--d': '.1s' }}>
             {hero.sub}
           </p>
 
-          {/* pre-video pills = programme FEATURES, never transformation figures */}
+          {/* the health-marker row the finalised copy leads the hero with */}
+          {hero.markersLede && (
+            <p className="pa-markers-lede" data-sdp-reveal style={{ '--d': '.13s' }}>
+              {hero.markersLede}
+            </p>
+          )}
           <div className="pa-pillrow" data-sdp-reveal style={{ '--d': '.15s' }}>
-            {hero.featurePills.map((pill) => (
-              <span className="sdp-marker-chip" key={pill}>
+            {hero.markers.map((marker) => (
+              <span className="sdp-marker-chip" key={marker}>
                 <span className="sdp-marker-dot" />
-                {pill}
+                {marker}
               </span>
             ))}
           </div>
@@ -123,19 +146,22 @@ export default function Landing() {
             <CtaLockup />
           </div>
 
-          <div className="pa-pointers" data-sdp-reveal>
-            {hero.pointers.map((p) => {
-              const Ico = pointerIcons[p.icon];
-              return (
-                <span className="pa-pointer" key={p.text}>
-                  <span className="pa-pico">
-                    <Ico size={15} />
+          {/* no pointer copy in the finalised docx; renders nothing when empty */}
+          {hero.pointers.length > 0 && (
+            <div className="pa-pointers" data-sdp-reveal>
+              {hero.pointers.map((p) => {
+                const Ico = pointerIcons[p.icon];
+                return (
+                  <span className="pa-pointer" key={p.text}>
+                    <span className="pa-pico">
+                      <Ico size={15} />
+                    </span>
+                    {p.text}
                   </span>
-                  {p.text}
-                </span>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
 
           <div className="pa-stats" data-sdp-reveal>
             {hero.stats.map((s) => (
@@ -146,14 +172,17 @@ export default function Landing() {
             ))}
           </div>
 
-          <div className="pa-pillrow" data-sdp-reveal>
-            {hero.outcomePills.map((pill) => (
-              <span className="sdp-marker-chip" key={pill}>
-                <span className="sdp-marker-dot" />
-                {pill}
-              </span>
-            ))}
-          </div>
+          {/* the markers row above replaces this in the finalised copy */}
+          {hero.outcomePills.length > 0 && (
+            <div className="pa-pillrow" data-sdp-reveal>
+              {hero.outcomePills.map((pill) => (
+                <span className="sdp-marker-chip" key={pill}>
+                  <span className="sdp-marker-dot" />
+                  {pill}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -185,64 +214,94 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ─────────── BEAT 3 · TRANSFORMATIONS (§6 marquee, light) ─────────── */}
-      <section className="sdp-section sdp-light">
+      {/* ─────────── BEAT 3+4 · PROOF (ported from the Shruti funnel's .section.proof) ───────────
+          One section, exactly as on resetbyshrutisolanki.in: eyebrow, H2, lede,
+          a 2-up grid of video testimonials, then an auto-scrolling marquee of
+          case cards. The old separate before/after marquee is gone; the finalised
+          docx defines this as a single beat. */}
+      <section className="sdp-section sdp-light-alt pa-proof">
         <div className="sdp-wrap">
-          <span className="sdp-eyebrow center" data-sdp-reveal>
-            {transformations.eyebrow}
-          </span>
-          <H2 parts={transformations.h2} />
-        </div>
-        <div className="pa-marquee pa-mt-24" data-sdp-reveal>
-          <div className="pa-marquee-track">
-            {[0, 1].map((dup) =>
-              transformations.items.map((item) => (
-                <figure className="pa-ba" key={`${dup}-${item.src}`}>
-                  <img src={item.src} alt={item.caption} loading="lazy" />
-                  <figcaption className="pa-ba-cap">{item.caption}</figcaption>
-                </figure>
-              ))
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* ─────────── BEAT 4 · PROOF, case cards (§6 exhibit frame + §4 lit number, light-alt) ─────────── */}
-      <section className="sdp-section sdp-light-alt">
-        <div className="sdp-wrap">
-          <span className="sdp-eyebrow center" data-sdp-reveal>
-            The case files
-          </span>
+          {/* no eyebrow on this section by design */}
           <H2 parts={cases.h2} />
           <p className="pa-lede" data-sdp-reveal>
             {cases.lede}
           </p>
 
-          <div className="pa-cases pa-mt-24">
-            {cases.items.map((c, i) => (
-              <article className="sdp-card pa-case" key={c.name} data-sdp-reveal style={{ '--d': `${i * 0.05}s` }}>
-                <div className="pa-case-mat">
-                  <div className="pa-case-metric">
-                    <span className="pa-metric-n pa-metric-from">{c.metric.from}</span>
-                    <span className="pa-metric-arrow">
-                      <Arrow size={20} />
+          {/* Video testimonials, 2-up. Structure matches Shruti's .tcards-vid.
+              Until clips land, cases.videoSlots empty boxes hold the layout. */}
+          <div className="pa-tcards pa-tcards-vid pa-mt-24">
+            {cases.videoTestimonials.length > 0
+              ? cases.videoTestimonials.map((v, i) => (
+                  <button
+                    className="pa-tcard pa-tcard-vid"
+                    key={v.name}
+                    data-sdp-reveal
+                    style={{ '--d': `${i * 0.05}s` }}
+                    type="button"
+                  >
+                    <span className="pa-tphoto">
+                      <video src={v.src} poster={v.poster} preload="none" muted loop playsInline />
+                      <span className="pa-tglass" />
+                      <span className="pa-tplay">
+                        <Play size={22} />
+                      </span>
+                      <span className="pa-tag">Video</span>
                     </span>
-                    <span className="pa-metric-n pa-metric-to">{c.metric.to}</span>
+                    <span className="pa-tcard-body">
+                      <span className="nm">{v.name}</span>
+                    </span>
+                  </button>
+                ))
+              : Array.from({ length: cases.videoSlots }, (_, i) => (
+                  <div
+                    className="pa-tcard pa-tcard-vid pa-tcard-ph"
+                    key={`vid-slot-${i}`}
+                    data-sdp-reveal
+                    style={{ '--d': `${i * 0.05}s` }}
+                  >
+                    <span className="pa-tphoto">
+                      <span className="pa-tglass" />
+                      <span className="pa-tplay">
+                        <Play size={22} />
+                      </span>
+                      <span className="pa-tag">Video</span>
+                    </span>
+                    <span className="pa-tcard-body">
+                      <span className="nm">Video testimonial {i + 1}</span>
+                    </span>
                   </div>
-                  <span className="pa-metric-l">{c.metric.label}</span>
-                  {/* Media slot intentionally empty — see MISSING note below. */}
-                  <div className="pa-media-pending">Photo / clip pending</div>
-                </div>
-                <div className="pa-case-meta">
-                  <span>
-                    {c.name} · {c.meta}
-                  </span>
-                  <span className="pa-verified">
-                    <Check size={12} /> Verified case
-                  </span>
-                </div>
-                <p className="pa-case-quote">{c.quote}</p>
-              </article>
+                ))}
+          </div>
+          {cases.videoTestimonials.length === 0 && <Missing note={MISSING.videoTestimonials} />}
+        </div>
+
+        {/* Case-card marquee. Two identical sets, track animates to -50%, so the
+            loop is seamless. Second set is aria-hidden, as on the source. */}
+        <div className="pa-case-row" data-dir="ltr" aria-label="Client transformations">
+          <div className="pa-case-track" style={{ '--marq-dur': '60s' }}>
+            {[0, 1].map((set) => (
+              <div className="pa-case-set" key={set} aria-hidden={set === 1 ? 'true' : undefined}>
+                {cases.items.map((c) => (
+                  <article className="pa-tcard pa-case-card" key={`${set}-${c.name}`}>
+                    <div className="pa-tcard-body">
+                      <h4>{c.name}</h4>
+                      <div className="meta">{c.meta}</div>
+                      <div className="stars" aria-label="5 out of 5">
+                        {c.rating}
+                      </div>
+                      <p>{c.quote}</p>
+                      <div className="metrics">
+                        {c.metrics.map((m) => (
+                          <p className="metric" key={m.label}>
+                            <span className="v">{m.from ? `${m.from} → ${m.to}` : m.value}</span>
+                            <span className="k">{m.label}</span>
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
             ))}
           </div>
         </div>
@@ -272,10 +331,16 @@ export default function Landing() {
             {founder.eyebrow}
           </span>
           <H2 parts={founder.h2} />
+          {founder.sub && (
+            <p className="sdp-sub" data-sdp-reveal>
+              {founder.sub}
+            </p>
+          )}
 
           <div className="pa-founder pa-mt-24">
             <div className="pa-founder-photo" data-sdp-reveal>
               <img src={founder.photo} alt={`${founder.name}, ${founder.role}`} />
+              <Missing note={MISSING.expertsPhoto} />
             </div>
 
             <div>
@@ -286,18 +351,19 @@ export default function Landing() {
                 {founder.role}
               </div>
 
-              {/* BEAT 5a — credential pill row */}
-              {founder.credentials.length > 0 ? (
+              {/* BEAT 5a — credential + press row, from the finalised copy */}
+              {founder.certifications.length > 0 && (
                 <div className="pa-credrow" data-sdp-reveal>
-                  {founder.credentials.map((c) => (
-                    <span className="pa-credpill" key={c}>
+                  {founder.certifications.map((c) => (
+                    <span className="pa-credpill" key={c.label}>
                       <Check size={12} />
-                      {c}
+                      {c.label}
+                      <a href={c.href} target="_blank" rel="noopener noreferrer">
+                        {c.linkLabel}
+                      </a>
                     </span>
                   ))}
                 </div>
-              ) : (
-                <Missing note={MISSING.founderCredentials} />
               )}
 
               {/* BEAT 5b — the one reliably-TEXT beat. Prose, never a component. */}
@@ -389,13 +455,25 @@ export default function Landing() {
               <Shield size={38} />
             </div>
             <span className="sdp-eyebrow center">{guarantee.eyebrow}</span>
-            {guarantee.h2 ? (
-              <>
-                <H2 parts={guarantee.h2} />
-                <p>{guarantee.body}</p>
-              </>
-            ) : (
-              <Missing note={MISSING.guarantee} />
+            <H2 parts={guarantee.h2} />
+            <p>{guarantee.body}</p>
+            {guarantee.terms.length > 0 && (
+              <div className="pa-guarantee-terms">
+                <h3 className="pa-terms-title">{guarantee.termsTitle}</h3>
+                <ul className="sdp-who-list">
+                  {guarantee.terms.map((t) => (
+                    <li key={t.lead}>
+                      <span className="ck">
+                        <Check size={13} />
+                      </span>
+                      <span>
+                        <strong className="pa-who-lead">{t.lead}</strong>
+                        {t.body}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
           </div>
         </div>

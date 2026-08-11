@@ -1,10 +1,8 @@
 'use client';
 
 import Countdown from './Countdown';
-import { Arrow, Check, Clock, Star } from './Icons';
+import { Arrow, trustIcons } from './Icons';
 import { cta } from '../content';
-
-const chipIcons = [Check, Star, Clock];
 
 /**
  * THE CTA LOCKUP — written once, reused VERBATIM at every proof beat (7x on the
@@ -30,14 +28,16 @@ export default function CtaLockup({ className = '', delay = 0 }) {
 
       {/* Layer 1 — trust chips */}
       <div className="sdp-risk-strip">
-        {cta.chips.map((chip, i) => {
-          const Ico = chipIcons[i % chipIcons.length];
+        {cta.chips.map((chip) => {
+          const Ico = chip.icon ? trustIcons[chip.icon] : null;
           return (
-            <span className="sdp-risk-badge" key={chip}>
-              <span className="sdp-risk-icon-blue">
-                <Ico size={13} />
-              </span>
-              {chip}
+            <span className="sdp-risk-badge" key={chip.label}>
+              {Ico && (
+                <span className="sdp-risk-icon-blue">
+                  <Ico size={16} />
+                </span>
+              )}
+              {chip.label}
             </span>
           );
         })}

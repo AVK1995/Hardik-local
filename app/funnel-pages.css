@@ -103,3 +103,7 @@
 .fp-back{ display:inline-flex; align-items:center; gap:8px; margin-top:34px; font-family:var(--fb); font-size:12.5px;
   font-weight:600; color:var(--muted); text-decoration:none; }
 .fp-back:hover{ color:var(--brand-deep); }
+
+/* ── Finalised-copy additions (2026-08-10) ── */
+/* Checkout price shows the struck anchor before the live price */
+.fp-total-strike{ margin-right:10px; opacity:.42; font-size:.62em; text-decoration:line-through; }

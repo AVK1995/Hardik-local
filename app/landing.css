@@ -121,8 +121,15 @@
 .sdp-light .pa-missing-tag,.sdp-light-alt .pa-missing-tag{ color:var(--brand-deep); }
 
 /* ── BEAT 6 · Mechanism pillars (centred, per the Kunal lock) ─────────── */
-.pa-pillars{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:18px; }
-.pa-pillar{ text-align:center; }
+/* Fixed 2 by 2. auto-fit was collapsing the four pillars into a single wide
+   row on desktop; an explicit 2-column track holds the square regardless of
+   how much width is available. Capped so the cards do not stretch thin. */
+.pa-pillars{ display:grid; grid-template-columns:repeat(2,1fr); gap:18px;
+  max-width:900px; margin-left:auto; margin-right:auto; }
+.pa-pillar{ text-align:center; display:flex; flex-direction:column; }
+@media (max-width:720px){
+  .pa-pillars{ grid-template-columns:1fr; max-width:460px; }
+}
 .pa-pillar .sdp-pillar-num{ margin:0 auto 16px; }
 .pa-pillar h3{ font-size:clamp(19px,2.4vw,24px); letter-spacing:.02em; margin-bottom:10px; }
 .pa-pillar p{ font-size:14px; line-height:1.7; margin:0; }
@@ -179,3 +186,238 @@
 /* Spacing helpers */
 .pa-mt-lockup{ margin-top:44px; }
 .pa-mt-24{ margin-top:24px; }
+
+/* ── Finalised-copy additions (2026-08-10, from "Hardik Project File.docx") ── */
+
+/* Hero H1 is three stacked lines plus a qualifier tail */
+.pa-h1-line{ display:block; }
+
+/* Lede above the health-marker chip row */
+.pa-markers-lede{ max-width:62ch; margin:18px auto 0; text-align:center;
+  font-size:15px; line-height:1.6; color:var(--ink-soft); }
+
+/* Case cards carry three stats each, not one */
+.pa-case-stat{ display:block; }
+.pa-case-stat + .pa-case-stat{ margin-top:10px; }
+.pa-case-stat .pa-metric-l{ margin-top:5px; }
+
+/* Guarantee now carries the "What We Ask In Return" terms */
+.pa-guarantee-terms{ margin-top:30px; padding-top:26px;
+  border-top:1px solid rgba(255,255,255,.14); text-align:left; }
+.pa-terms-title{ font-family:var(--fh); font-size:clamp(17px,2.4vw,21px); letter-spacing:.01em;
+  margin:0 0 16px; text-align:center; }
+.pa-guarantee-terms .sdp-who-list{ margin:0 auto; max-width:66ch; }
+
+/* Press link inside a credential pill */
+.pa-credpill a{ color:var(--brand-bright); text-decoration:underline;
+  text-underline-offset:2px; }
+.pa-credpill a:hover{ opacity:.82; }
+
+/* ── Hero opening block, sits lower in the first screen (2026-08-10) ───────
+   NO flex, NO wrapper, NO layout change. Padding only.
+   Flex here turns .sdp-eyebrow-pill (inline-flex) into a stretched flex item,
+   which blows the pill out to full width. Never do that to this block. */
+.pa-hero-inner{ padding-top:clamp(34px,9vh,110px); }
+
+/* The H1 lines were not centring. The eyebrow and the sub below it were, so
+   text-align was reaching the block; something inside the H1 was winning.
+   Forced explicitly on the h1 and every line in it. Centring only: no widths,
+   no display changes, no flex. */
+.pa-hero-inner .sdp-h1,
+.pa-hero-inner .sdp-h1-l1,
+.pa-hero-inner .sdp-h1-l2,
+.pa-hero-inner .pa-h1-line{
+  text-align:center;
+  margin-left:auto;
+  margin-right:auto;
+}
+/* each headline line spans the full H1 so text-align has the whole width to
+   centre against, rather than shrinking to its own content box */
+.pa-hero-inner .pa-h1-line{ display:block; width:100%; }
+
+@media (max-width:760px){
+  .pa-hero-inner{ padding-top:26px; }
+}
+
+/* ── Chip icons: size + optical centring against their own label (2026-08-10) ──
+   The svg was an inline element, so it sat on the text baseline and picked up
+   descender space, which reads as the icon sitting slightly low. Making the
+   icon wrapper a centred flex box and the svg a block removes the baseline
+   entirely, so the icon centres against its label's actual cap height. */
+.sdp-risk-badge{ align-items:center; }
+.sdp-risk-icon-blue,
+.sdp-risk-icon-green,
+.sdp-risk-icon-gold{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  line-height:0;
+  flex:0 0 auto;
+}
+.sdp-risk-badge svg{ display:block; }
+
+/* same construct on the trust row above the hero */
+.pa-trustchip{ align-items:center; }
+.pa-trustchip svg{ display:block; flex:0 0 auto; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BEAT 3+4 · PROOF SECTION
+   Ported from resetbyshrutisolanki.in (.section.proof), 2026-08-10.
+   Structure and metrics are 1:1 with the source. Every colour, radius and font
+   is remapped onto this project's tokens, so it re-skins with --brand rather
+   than carrying Shruti's palette across.
+   Source token → here:  --brand-light → --brand-bright · --star → --gold
+                         --fm → --fb   · --radius-m → 14px · --bg-grid → --bg-alt
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Video testimonial grid (2-up) ─────────────────────────────────────── */
+.pa-proof .pa-tcards{ display:grid; grid-template-columns:repeat(2,1fr); gap:24px; max-width:860px; margin:0 auto; }
+.pa-proof .pa-tcards-vid{ margin-bottom:24px; }
+
+/* ── The card shell, shared by video cards and case cards ──────────────── */
+.pa-proof .pa-tcard{ position:relative; display:flex; flex-direction:column; overflow:hidden; padding:0;
+  min-width:0; text-align:left; background:var(--bg-alt); border:1px solid var(--border); border-radius:14px;
+  will-change:transform;
+  transition:transform .28s cubic-bezier(.2,.7,.3,1), box-shadow .28s ease, border-color .28s ease; }
+.pa-proof .pa-tcard::before{ content:""; position:absolute; inset:0; z-index:1; opacity:0; border-radius:inherit;
+  pointer-events:none;
+  background:linear-gradient(135deg,rgba(var(--brand-rgb),.18),transparent 45%,rgba(var(--brand-rgb),.12));
+  transition:opacity .35s; }
+.pa-proof .pa-tcard:hover,
+.pa-proof .pa-tcard:focus-visible{ transform:translateY(-4px); border-color:rgba(var(--brand-rgb),.28);
+  box-shadow:0 14px 32px rgba(var(--brand-rgb),.2), 0 0 0 4px rgba(var(--brand-rgb),.1); }
+.pa-proof .pa-tcard:hover::before,
+.pa-proof .pa-tcard:focus-visible::before{ opacity:1; }
+.pa-proof .pa-tcard-vid{ width:100%; cursor:pointer; font:inherit; color:inherit; appearance:none; }
+.pa-proof .pa-tcard-vid .pa-tcard-body{ text-align:center; align-items:center; }
+.pa-proof .pa-tphoto,
+.pa-proof .pa-tcard-body{ position:relative; z-index:2; }
+
+/* ── Video poster frame (9:14 portrait, as on the source) ──────────────── */
+.pa-proof .pa-tphoto{ display:block; position:relative; width:100%; height:0; padding-top:155.56%; flex:0 0 auto;
+  overflow:hidden; background:linear-gradient(135deg,var(--bg-alt),var(--bg)); }
+.pa-proof .pa-tphoto video{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain;
+  transition:transform .6s cubic-bezier(.2,.7,.3,1), filter .35s ease; }
+.pa-proof .pa-tcard:hover .pa-tphoto video{ transform:scale(1.06); filter:brightness(1.04); }
+.pa-proof .pa-tglass{ position:absolute; inset:0; z-index:1;
+  background:linear-gradient(180deg,transparent 42%,rgba(var(--ink-rgb),.46)); }
+.pa-proof .pa-tplay{ position:absolute; top:50%; left:50%; z-index:2; width:54px; height:54px; margin:-27px 0 0 -27px;
+  display:grid; place-content:center; border-radius:50%; border:1px solid rgba(255,255,255,.4); color:#fff;
+  background:rgba(var(--brand-rgb),.92); box-shadow:0 8px 22px rgba(var(--brand-rgb),.4);
+  transition:transform .35s cubic-bezier(.2,.7,.3,1), box-shadow .35s ease; }
+.pa-proof .pa-tplay svg{ width:22px; height:22px; margin-left:2px; fill:currentColor; stroke:none; }
+.pa-proof .pa-tcard:hover .pa-tplay{ transform:scale(1.08); box-shadow:0 6px 18px rgba(var(--brand-rgb),.45); }
+.pa-proof .pa-tag{ position:absolute; bottom:10px; right:10px; z-index:3; padding:4px 12px; border-radius:3px;
+  font-family:var(--fb); font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:#fff;
+  background:var(--brand); transition:transform .35s cubic-bezier(.2,.7,.3,1), box-shadow .35s ease; }
+.pa-proof .pa-tcard:hover .pa-tag{ transform:scale(1.08); box-shadow:0 6px 18px rgba(var(--brand-rgb),.45); }
+
+/* ── Card body: name, meta, stars, story, metrics ──────────────────────── */
+.pa-proof .pa-tcard-body{ display:flex; flex-direction:column; flex:1 1 0%; padding:22px 22px 24px; }
+.pa-proof .pa-tcard-body h4,
+.pa-proof .pa-tcard-body .nm{ display:block; margin:0 0 2px; font-family:var(--fh); font-size:17px; font-weight:700;
+  line-height:1.12; letter-spacing:-.02em; color:var(--ink); transition:color .3s; }
+.pa-proof .pa-tcard:hover .pa-tcard-body h4,
+.pa-proof .pa-tcard:hover .pa-tcard-body .nm{ color:var(--brand-bright); }
+.pa-proof .pa-tcard-body .meta{ display:block; margin-bottom:10px; font-size:13px; font-weight:700; line-height:1.45;
+  letter-spacing:.04em; text-transform:uppercase; color:var(--brand); }
+.pa-proof .pa-tcard-body .stars{ margin-bottom:12px; font-size:14px; line-height:1; letter-spacing:1px; color:var(--gold); }
+.pa-proof .pa-tcard-body p{ margin:0; font-size:14px; line-height:1.6; color:var(--ink-soft); }
+.pa-proof .metrics{ display:flex; flex-direction:column; gap:7px; margin-top:16px; padding-top:14px;
+  border-top:1px solid var(--border); }
+.pa-proof .metric{ display:flex; align-items:baseline; gap:9px; margin:0; }
+.pa-proof .metric .v{ font-family:var(--fh); font-size:17px; font-weight:700; line-height:1.15; letter-spacing:-.02em;
+  color:var(--ink); white-space:nowrap; }
+.pa-proof .metric .k{ font-size:10px; font-weight:700; line-height:1.5; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--muted); }
+
+/* ── The auto-scrolling case row ───────────────────────────────────────── */
+.pa-case-row{ position:relative; overflow:hidden; margin-top:6px; padding:12px 0 6px;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent); }
+.pa-case-track{ display:flex; width:max-content; will-change:transform;
+  animation:paCaseMarq var(--marq-dur,60s) linear infinite; }
+.pa-case-row[data-dir="rtl"] .pa-case-track{ animation-name:paCaseMarqRtl; }
+@media (hover:hover){ .pa-case-row:hover .pa-case-track{ animation-play-state:paused; } }
+.pa-case-row:focus-within .pa-case-track{ animation-play-state:paused; }
+.pa-case-set{ display:flex; flex-shrink:0; align-items:stretch; gap:20px; padding-right:20px; }
+.pa-case-set .pa-case-card{ flex:0 0 340px; width:340px; align-self:stretch; margin:0; }
+@keyframes paCaseMarq{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+@keyframes paCaseMarqRtl{ from{ transform:translateX(-50%); } to{ transform:translateX(0); } }
+
+@media (max-width:640px){
+  .pa-proof .pa-tcards{ grid-template-columns:1fr; gap:18px; }
+  .pa-proof .pa-tcards-vid{ max-width:320px; margin-bottom:18px; }
+  .pa-proof .pa-tcard-body{ padding:16px 16px 18px; }
+  .pa-proof .pa-tcard-body h4,
+  .pa-proof .pa-tcard-body .nm{ font-size:16px; }
+  .pa-proof .pa-tcard-body .meta{ font-size:12.5px; }
+  .pa-proof .pa-tcard-body p{ font-size:13.5px; line-height:1.55; }
+  .pa-proof .metric .v{ font-size:16px; }
+  .pa-case-set{ gap:14px; padding-right:14px; }
+  .pa-case-set .pa-case-card{ flex-basis:296px; width:296px; }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .pa-case-track{ animation:none !important; }
+  .pa-case-row{ overflow-x:auto; -webkit-mask-image:none; mask-image:none; }
+  .pa-proof .pa-tcard,
+  .pa-proof .pa-tphoto video,
+  .pa-proof .pa-tplay,
+  .pa-proof .pa-tag{ transition:none; }
+  .pa-proof .pa-tcard:hover{ transform:none; }
+}
+
+/* ── Video testimonial placeholders (until the 4 clips land) ───────────── */
+/* Same shell and proportions as a real card, so the layout does not shift
+   when the clips are dropped in. Not clickable, no hover lift. */
+.pa-proof .pa-tcard-ph{ cursor:default; }
+.pa-proof .pa-tcard-ph:hover{ transform:none; border-color:var(--border); box-shadow:none; }
+.pa-proof .pa-tcard-ph:hover::before{ opacity:0; }
+.pa-proof .pa-tcard-ph .pa-tphoto{
+  background:
+    repeating-linear-gradient(135deg,
+      rgba(var(--brand-rgb),.05) 0 10px,
+      rgba(var(--brand-rgb),.02) 10px 20px);
+  box-shadow:inset 0 0 0 1px rgba(var(--brand-rgb),.14);
+}
+.pa-proof .pa-tcard-ph .pa-tglass{ background:none; }
+.pa-proof .pa-tcard-ph .pa-tplay{
+  background:rgba(var(--brand-rgb),.18);
+  border-color:rgba(var(--brand-rgb),.3);
+  color:var(--brand);
+  box-shadow:none;
+}
+.pa-proof .pa-tcard-ph:hover .pa-tplay{ transform:none; box-shadow:none; }
+.pa-proof .pa-tcard-ph .pa-tag{ background:var(--muted); }
+.pa-proof .pa-tcard-ph:hover .pa-tag{ transform:none; box-shadow:none; }
+.pa-proof .pa-tcard-ph .nm{ color:var(--muted); }
+.pa-proof .pa-tcard-ph:hover .nm{ color:var(--muted); }
+
+/* ── BEAT 4b · Chat wall, two opposed marquee rows (2026-08-10) ────────────
+   Replaces the column masonry. Row one runs left to right, row two right to
+   left. Each row duplicates its OWN set once so the -50% loop is seamless;
+   the two rows never share an image (enforced in CheckinWall.js). */
+.pa-chatwall{ display:flex; flex-direction:column; gap:16px; margin-top:8px; }
+.pa-chatrow{ position:relative; overflow:hidden; padding:2px 0;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent); }
+.pa-chattrack{ display:flex; width:max-content; will-change:transform;
+  animation:paChatMarq var(--marq-dur,60s) linear infinite; }
+.pa-chatrow[data-dir="rtl"] .pa-chattrack{ animation-name:paChatMarqRtl; }
+@media (hover:hover){ .pa-chatrow:hover .pa-chattrack{ animation-play-state:paused; } }
+.pa-chatrow:focus-within .pa-chattrack{ animation-play-state:paused; }
+.pa-chatset{ display:flex; flex-shrink:0; align-items:flex-start; gap:16px; padding-right:16px; }
+.pa-chatset .pa-shot{ flex:0 0 260px; width:260px; margin:0; }
+@keyframes paChatMarq{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+@keyframes paChatMarqRtl{ from{ transform:translateX(-50%); } to{ transform:translateX(0); } }
+
+@media (max-width:640px){
+  .pa-chatwall{ gap:12px; }
+  .pa-chatset{ gap:12px; padding-right:12px; }
+  .pa-chatset .pa-shot{ flex-basis:216px; width:216px; }
+}
+@media (prefers-reduced-motion:reduce){
+  .pa-chattrack{ animation:none !important; }
+  .pa-chatrow{ overflow-x:auto; -webkit-mask-image:none; mask-image:none; }
+}
