@@ -180,10 +180,9 @@
 @media (max-width:1000px){ .pa-wall{ column-count:3; } }
 @media (max-width:720px){ .pa-wall{ column-count:2; column-gap:12px; } }
 @media (max-width:420px){ .pa-wall{ column-count:1; } }
+/* Inert: no zoom cursor, no hover lift, nothing to click. */
 .pa-shot{ break-inside:avoid; margin:0 0 16px; padding:0; border:1px solid var(--border); border-radius:14px; overflow:hidden;
-  background:#fff; box-shadow:var(--shadow-card); position:relative; display:block; width:100%; cursor:zoom-in;
-  transition:border-color .2s, transform .2s, box-shadow .2s; }
-.pa-shot:hover{ border-color:var(--brand); transform:translateY(-2px); box-shadow:var(--shadow-card-hover); }
+  background:#fff; box-shadow:var(--shadow-card); position:relative; display:block; width:100%; }
 .pa-shot img{ width:100%; height:auto; }
 .pa-shot-tag{ position:absolute; top:10px; left:10px; font-family:var(--fb); font-size:9.5px; font-weight:800; letter-spacing:.14em;
   text-transform:uppercase; color:#fff; background:var(--grad-brand); padding:5px 10px; border-radius:999px;
@@ -235,84 +234,45 @@
 .pa-creds-eyebrow::before{ content:""; width:24px; height:2px; background:var(--brand-bright); flex:0 0 24px; }
 .pa-creds{ text-align:center; }
 .pa-creds-grid{ text-align:left; }
-/* ── Carousel rail ────────────────────────────────────────────────────────
-   A real scroller with snap points, not a JS-only widget: trackpad, touch and
-   the arrow buttons all drive the same element, and it degrades to a plain
-   swipeable strip if the script never runs. */
-.pa-creds-rail-wrap{ position:relative; }
-.pa-creds-rail{ display:flex; gap:22px; overflow-x:auto; scroll-snap-type:x mandatory;
-  padding:4px 2px 10px; scrollbar-width:none; -ms-overflow-style:none; }
-.pa-creds-rail::-webkit-scrollbar{ display:none; }
-.pa-creds-rail > .pa-cred{ scroll-snap-align:start; flex:0 0 clamp(240px,26vw,300px); }
+/* ── Credentials marquee (2026-08-11) ────────────────────────────────────
+   Was a scroll-snap rail with arrows and a modal. Now a passive, linear,
+   infinite loop and nothing else — no arrows, no click, no hover pause. The
+   track holds the set twice and animates to -50%, so the second copy lands
+   exactly where the first began and the wrap is invisible. Same mechanism the
+   check-in wall and case rows use.
 
-.pa-creds-nav{ position:absolute; top:calc(50% - 34px); z-index:3; width:44px; height:44px; border-radius:50%;
-  display:grid; place-items:center; cursor:pointer; color:var(--bg-dark);
-  background:var(--ink-dark); border:1px solid rgba(255,255,255,.5);
-  box-shadow:0 10px 26px -10px rgba(0,0,0,.9);
-  transition:transform .2s ease, opacity .2s ease, background-color .2s ease; }
-.pa-creds-nav.prev{ left:-14px; transform:scaleX(-1); }
-.pa-creds-nav.next{ right:-14px; }
-.pa-creds-nav:hover:not(:disabled){ background:var(--brand-bright); color:#fff; }
-.pa-creds-nav.next:hover:not(:disabled){ transform:translateX(3px); }
-.pa-creds-nav.prev:hover:not(:disabled){ transform:scaleX(-1) translateX(3px); }
-.pa-creds-nav:disabled{ opacity:0; pointer-events:none; }
+   The mask fades both ends, so cards enter and leave rather than being
+   guillotined at the container edge. */
+.pa-creds-rail{ position:relative; width:100%; overflow:hidden;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent); }
+.pa-creds-track{ display:flex; width:max-content; animation:paCredsMarq 46s linear infinite; }
+.pa-creds-set{ display:flex; gap:22px; padding:4px 11px 10px; }
+.pa-creds-set > .pa-cred{ flex:0 0 clamp(240px,26vw,300px); }
+@keyframes paCredsMarq{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
 @media (max-width:900px){
-  .pa-creds-nav{ display:none; }         /* touch scrolls it; arrows are clutter */
-  .pa-creds-rail{ gap:16px; }
-  .pa-creds-rail > .pa-cred{ flex-basis:78vw; max-width:300px; }
+  .pa-creds-set{ gap:16px; padding-left:8px; padding-right:8px; }
+  .pa-creds-set > .pa-cred{ flex-basis:min(78vw,300px); }
+}
+/* Reduced motion: the loop stops and the row becomes a plain scrollable strip,
+   so the cards are still reachable rather than frozen mid-slide. */
+@media (prefers-reduced-motion:reduce){
+  .pa-creds-track{ animation:none; }
+  .pa-creds-rail{ overflow-x:auto; -webkit-mask-image:none; mask-image:none; }
+  .pa-creds-set:last-child{ display:none; }
 }
 
-/* ── Lightbox ─────────────────────────────────────────────────────────── */
-.pa-cred-lb{ position:fixed; inset:0; z-index:1200; display:grid; place-items:center; padding:24px; }
-.pa-cred-lb-bg{ position:absolute; inset:0; background:rgba(var(--ink-rgb),.88); backdrop-filter:blur(8px); }
-/* Flex column, so the meta block claims its height FIRST and the image takes
-   whatever is left. A max-height on the image alone was not enough: a landscape
-   certificate still filled the panel and pushed the "open the original" link
-   out past the panel's own overflow. min-height:0 is what lets the image
-   actually shrink inside a flex parent. */
-.pa-cred-lb-panel{ position:relative; z-index:1; width:min(980px,100%); max-height:90vh;
-  display:flex; flex-direction:column; overflow:hidden;
-  background:var(--bg-dark-alt); border:1px solid var(--border-dark-strong); border-radius:var(--r-lg);
-  box-shadow:0 40px 90px -30px rgba(0,0,0,.9); }
-.pa-cred-lb-img{ display:block; width:100%; min-height:0; flex:1 1 auto; object-fit:contain;
-  background:#fff; border-radius:var(--r-lg) var(--r-lg) 0 0; }
-.pa-cred-lb-meta{ flex:0 0 auto; }
-.pa-cred-lb-meta{ padding:22px 26px 26px; }
-.pa-cred-lb-meta h3{ margin:9px 0 5px; font-size:clamp(18px,2.4vw,23px); color:var(--ink-dark); }
-.pa-cred-lb-meta p{ margin:0; font-size:14px; color:var(--muted-dark); }
-.pa-cred-lb-link{ display:inline-flex; align-items:center; gap:9px; margin-top:16px; padding:10px 18px;
-  border-radius:999px; background:rgba(var(--brand-rgb),.18); border:1px solid rgba(var(--brand-rgb),.45);
-  font-family:var(--fb); font-size:12.5px; font-weight:700; color:var(--brand-bright); text-decoration:none;
-  transition:background-color .2s ease, transform .2s ease; }
-.pa-cred-lb-link:hover{ background:rgba(var(--brand-rgb),.3); transform:translateX(3px); }
-/* The shared .pa-lb-close is white-on-translucent, which vanishes against a
-   white certificate. Solid dark plate here so it is always findable. */
-.pa-cred-lb .pa-lb-close{ position:absolute; top:12px; right:12px; z-index:2;
-  background:rgba(var(--ink-rgb),.86); border-color:rgba(255,255,255,.35); color:#fff;
-  box-shadow:0 6px 18px -6px rgba(0,0,0,.8); }
-.pa-cred-lb .pa-lb-close:hover{ background:var(--brand); border-color:var(--brand); }
-@media (max-width:720px){
-  .pa-cred-lb{ padding:14px; }
-  .pa-cred-lb-meta{ padding:18px 18px 22px; }
-}
+/* Inert card. No cursor, no hover, no transition: there is nothing to click,
+   and a card that lifts under the pointer promises otherwise. */
+.pa-cred{ display:flex; flex-direction:column; overflow:hidden; text-decoration:none;
+  padding:0; text-align:left; font:inherit; color:inherit;
+  background:var(--bg-dark-alt); border:1px solid var(--border-dark-strong); border-radius:16px; }
 
-/* A button now, not a link — it opens the document in a modal. Padding and
-   text-align are reset because a <button> brings its own. */
-.pa-cred{ display:flex; flex-direction:column; overflow:hidden; text-decoration:none; cursor:pointer;
-  padding:0; text-align:left; font:inherit; color:inherit; appearance:none;
-  background:var(--bg-dark-alt); border:1px solid var(--border-dark-strong); border-radius:16px;
-  transition:transform .25s cubic-bezier(.2,.7,.3,1), border-color .25s ease, box-shadow .25s ease; }
-.pa-cred:focus-visible{ outline:2px solid var(--brand-bright); outline-offset:3px; }
-.pa-cred:hover{ transform:translateY(-4px); border-color:rgba(var(--brand-rgb),.55);
-  box-shadow:0 18px 40px -20px rgba(0,0,0,.8), 0 0 0 1px rgba(var(--brand-rgb),.22); }
-
-/* Art slot: a screenshot of the live article, anchored top-left so the outlet
-   masthead and headline stay in frame at every card width. */
+/* Art slot: the certificate page or article screenshot, anchored top-left so
+   the masthead and heading stay in frame at every card width. */
 .pa-cred-art{ position:relative; display:block; width:100%; aspect-ratio:16/10; overflow:hidden;
   background:var(--bg-dark-elev); border-bottom:1px solid var(--border-dark-strong); }
-.pa-cred-art img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:top left;
-  transition:transform .5s cubic-bezier(.2,.7,.3,1); }
-.pa-cred:hover .pa-cred-art img{ transform:scale(1.03); }
+.pa-cred-art img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:top left; }
 
 .pa-cred-body{ display:flex; flex-direction:column; gap:7px; padding:18px 20px 22px; }
 .pa-cred-kind{ display:flex; align-items:center; gap:10px; font-family:var(--fb); font-size:10px; font-weight:800;
@@ -322,7 +282,7 @@
 .pa-cred-title{ font-size:15.5px; line-height:1.45; font-weight:600; color:var(--ink-dark); }
 .pa-cred-issuer{ font-family:var(--fb); font-size:12.5px; color:var(--muted-dark); }
 /* Press cards are links; make that legible without an underline. */
-a.pa-cred .pa-cred-issuer::after{ content:" ↗"; color:var(--brand-bright); }
+/* No ↗ affordance on the issuer any more — the cards do not link anywhere. */
 
 @media (prefers-reduced-motion:reduce){
   .pa-cred,
@@ -580,11 +540,15 @@ a.pa-cred .pa-cred-issuer::after{ content:" ↗"; color:var(--brand-bright); }
   pointer-events:none;
   background:linear-gradient(135deg,rgba(var(--brand-rgb),.18),transparent 45%,rgba(var(--brand-rgb),.12));
   transition:opacity .35s; }
-.pa-proof .pa-tcard:hover,
-.pa-proof .pa-tcard:focus-visible{ transform:translateY(-4px); border-color:rgba(var(--brand-rgb),.28);
+/* Hover lift is for the VIDEO cards only — those are buttons that play a clip,
+   so the affordance is honest. The case cards in the marquee below are inert
+   <article>s: they were lifting and glowing under the pointer while doing
+   nothing at all, which is the one thing a hover state must not do. */
+.pa-proof .pa-tcard-vid:hover,
+.pa-proof .pa-tcard-vid:focus-visible{ transform:translateY(-4px); border-color:rgba(var(--brand-rgb),.28);
   box-shadow:0 14px 32px rgba(var(--brand-rgb),.2), 0 0 0 4px rgba(var(--brand-rgb),.1); }
-.pa-proof .pa-tcard:hover::before,
-.pa-proof .pa-tcard:focus-visible::before{ opacity:1; }
+.pa-proof .pa-tcard-vid:hover::before,
+.pa-proof .pa-tcard-vid:focus-visible::before{ opacity:1; }
 .pa-proof .pa-tcard-vid{ width:100%; cursor:pointer; font:inherit; color:inherit; appearance:none; }
 .pa-proof .pa-tcard-vid .pa-tcard-body{ text-align:center; align-items:center; }
 .pa-proof .pa-tphoto,
@@ -625,20 +589,20 @@ a.pa-cred .pa-cred-issuer::after{ content:" ↗"; color:var(--brand-bright); }
   background:rgba(var(--brand-rgb),.92); box-shadow:0 8px 22px rgba(var(--brand-rgb),.4);
   transition:transform .35s cubic-bezier(.2,.7,.3,1), box-shadow .35s ease; }
 .pa-proof .pa-tplay svg{ width:22px; height:22px; margin-left:2px; fill:currentColor; stroke:none; }
-.pa-proof .pa-tcard:hover .pa-tplay{ transform:scale(1.08); box-shadow:0 6px 18px rgba(var(--brand-rgb),.45); }
+.pa-proof .pa-tcard-vid:hover .pa-tplay{ transform:scale(1.08); box-shadow:0 6px 18px rgba(var(--brand-rgb),.45); }
 .pa-proof .pa-tag{ position:absolute; bottom:10px; right:10px; z-index:3; pointer-events:none;
   padding:4px 12px; border-radius:3px;
   font-family:var(--fb); font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:#fff;
   background:var(--brand); transition:transform .35s cubic-bezier(.2,.7,.3,1), box-shadow .35s ease; }
-.pa-proof .pa-tcard:hover .pa-tag{ transform:scale(1.08); box-shadow:0 6px 18px rgba(var(--brand-rgb),.45); }
+.pa-proof .pa-tcard-vid:hover .pa-tag{ transform:scale(1.08); box-shadow:0 6px 18px rgba(var(--brand-rgb),.45); }
 
 /* ── Card body: name, meta, stars, story, metrics ──────────────────────── */
 .pa-proof .pa-tcard-body{ display:flex; flex-direction:column; flex:1 1 0%; padding:22px 22px 24px; }
 .pa-proof .pa-tcard-body h4,
 .pa-proof .pa-tcard-body .nm{ display:block; margin:0 0 2px; font-family:var(--fh); font-size:17px; font-weight:700;
   line-height:1.12; letter-spacing:-.02em; color:var(--ink); transition:color .3s; }
-.pa-proof .pa-tcard:hover .pa-tcard-body h4,
-.pa-proof .pa-tcard:hover .pa-tcard-body .nm{ color:var(--brand-bright); }
+.pa-proof .pa-tcard-vid:hover .pa-tcard-body h4,
+.pa-proof .pa-tcard-vid:hover .pa-tcard-body .nm{ color:var(--brand-bright); }
 .pa-proof .pa-tcard-body .meta{ display:block; margin-bottom:10px; font-size:13px; font-weight:700; line-height:1.45;
   letter-spacing:.04em; text-transform:uppercase; color:var(--brand); }
 .pa-proof .pa-tcard-body .stars{ margin-bottom:12px; font-size:14px; line-height:1; letter-spacing:1px; color:var(--gold); }
@@ -658,8 +622,9 @@ a.pa-cred .pa-cred-issuer::after{ content:" ↗"; color:var(--brand-bright); }
 .pa-case-track{ display:flex; width:max-content; will-change:transform;
   animation:paCaseMarq var(--marq-dur,60s) linear infinite; }
 .pa-case-row[data-dir="rtl"] .pa-case-track{ animation-name:paCaseMarqRtl; }
-@media (hover:hover){ .pa-case-row:hover .pa-case-track{ animation-play-state:paused; } }
-.pa-case-row:focus-within .pa-case-track{ animation-play-state:paused; }
+/* Runs continuously. No hover pause and no focus pause — the cards are inert
+   <article>s with nothing to stop for, and a row that halts under the pointer
+   suggests it is waiting for you to do something. */
 .pa-case-set{ display:flex; flex-shrink:0; align-items:stretch; gap:20px; padding-right:20px; }
 .pa-case-set .pa-case-card{ flex:0 0 340px; width:340px; align-self:stretch; margin:0; }
 @keyframes paCaseMarq{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
@@ -692,7 +657,7 @@ a.pa-cred .pa-cred-issuer::after{ content:" ↗"; color:var(--brand-bright); }
   .pa-proof .pa-tphoto img,
   .pa-proof .pa-tplay,
   .pa-proof .pa-tag{ transition:none; }
-  .pa-proof .pa-tcard:hover{ transform:none; }
+  .pa-proof .pa-tcard-vid:hover{ transform:none; }
 }
 
 /* ── Video testimonial placeholders ────────────────────────────────────── */
@@ -734,7 +699,7 @@ a.pa-cred .pa-cred-issuer::after{ content:" ↗"; color:var(--brand-bright); }
 .pa-chattrack{ display:flex; width:max-content; will-change:transform;
   animation:paChatMarq var(--marq-dur,60s) linear infinite; }
 .pa-chatrow[data-dir="rtl"] .pa-chattrack{ animation-name:paChatMarqRtl; }
-@media (hover:hover){ .pa-chatrow:hover .pa-chattrack{ animation-play-state:paused; } }
+/* No hover pause — these rows run continuously and are not interactive. */
 .pa-chatrow:focus-within .pa-chattrack{ animation-play-state:paused; }
 .pa-chatset{ display:flex; flex-shrink:0; align-items:flex-start; gap:16px; padding-right:16px; }
 .pa-chatset .pa-shot{ flex:0 0 260px; width:260px; margin:0; }

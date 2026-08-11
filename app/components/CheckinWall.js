@@ -1,12 +1,13 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { Close } from './Icons';
 import { checkinWall } from '../content';
 
 /**
  * §6 Proof — the chat wall, as two opposed marquee rows.
  * Row one runs left to right, row two right to left, per the docx.
+ *
+ * Inert as of 2026-08-11: the screenshots used to open in a lightbox and lift
+ * on hover. Both are gone — these rows scroll past and that is all they do, so
+ * there is no state, no effect and nothing to click. That also makes this a
+ * server component again.
  *
  * NO IMAGE APPEARS IN BOTH ROWS. content.js holds rowOne and rowTwo as separate
  * lists and every screenshot is used exactly once across the two. The set
@@ -27,23 +28,17 @@ if (process.env.NODE_ENV !== 'production') {
   }
 }
 
-function Row({ items, dir, duration, onZoom }) {
+function Row({ items, dir, duration }) {
   return (
     <div className="pa-chatrow" data-dir={dir} style={{ '--marq-dur': duration }}>
       <div className="pa-chattrack">
         {[0, 1].map((set) => (
           <div className="pa-chatset" key={set} aria-hidden={set === 1 ? 'true' : undefined}>
             {items.map((item) => (
-              <button
-                type="button"
-                className="pa-shot"
-                key={`${set}-${item.src}`}
-                onClick={() => onZoom(item)}
-                tabIndex={set === 1 ? -1 : 0}
-              >
+              <div className="pa-shot" key={`${set}-${item.src}`}>
                 <img src={item.src} alt={item.alt} loading="lazy" />
                 {item.tag && <span className="pa-shot-tag">{item.tag}</span>}
-              </button>
+              </div>
             ))}
           </div>
         ))}
@@ -53,41 +48,10 @@ function Row({ items, dir, duration, onZoom }) {
 }
 
 export default function CheckinWall() {
-  const [zoom, setZoom] = useState(null);
-
-  useEffect(() => {
-    if (!zoom) return;
-    const onKey = (e) => e.key === 'Escape' && setZoom(null);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    window.addEventListener('keydown', onKey);
-    return () => {
-      document.body.style.overflow = prev;
-      window.removeEventListener('keydown', onKey);
-    };
-  }, [zoom]);
-
   return (
-    <>
-      <div className="pa-chatwall">
-        <Row items={checkinWall.rowOne} dir="ltr" duration="58s" onZoom={setZoom} />
-        <Row items={checkinWall.rowTwo} dir="rtl" duration="66s" onZoom={setZoom} />
-      </div>
-
-      {zoom && (
-        <div
-          className="pa-lb"
-          role="dialog"
-          aria-modal="true"
-          aria-label={zoom.alt}
-          onClick={() => setZoom(null)}
-        >
-          <span className="pa-lb-close" aria-hidden="true">
-            <Close />
-          </span>
-          <img src={zoom.src} alt={zoom.alt} />
-        </div>
-      )}
-    </>
+    <div className="pa-chatwall">
+      <Row items={checkinWall.rowOne} dir="ltr" duration="58s" />
+      <Row items={checkinWall.rowTwo} dir="rtl" duration="66s" />
+    </div>
   );
 }

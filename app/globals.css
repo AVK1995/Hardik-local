@@ -147,7 +147,10 @@ h2.sdp-h2{ text-align:center; font-size:clamp(25px,3.8vw,44px); letter-spacing:-
 .sdp-dark .sdp-sub,.sdp-dark-alt .sdp-sub{ color:var(--ink-dark-soft); }
 
 .sdp-h1{ max-width:1000px; margin:0 auto 18px; line-height:1.04; }
-.sdp-h1-l1{ display:block; font-family:var(--fh); font-size:clamp(30px,4.7vw,58px); color:var(--ink); line-height:1.06; letter-spacing:-.028em; text-wrap:balance; }
+/* Ceiling cut 58px → 42px on the client's call, 2026-08-11. Only the cap moves:
+   the 4.7vw ramp and the 30px floor stay, so the headline still scales down
+   through the tablet range, and the ≤720px override further down is untouched. */
+.sdp-h1-l1{ display:block; font-family:var(--fh); font-size:clamp(30px,4.7vw,42px); color:var(--ink); line-height:1.06; letter-spacing:-.028em; text-wrap:balance; }
 .sdp-h1-l2{ display:block; font-family:var(--fb); font-weight:600; font-size:clamp(15px,1.8vw,20px); color:var(--brand-deep); line-height:1.5; margin-top:14px; text-wrap:balance; }
 
 /* Reveal — fail-open: visible if JS never adds .vis */
@@ -204,9 +207,11 @@ h2.sdp-h2{ text-align:center; font-size:clamp(25px,3.8vw,44px); letter-spacing:-
 [data-sdp-reveal].vis .pa-avatar,
 .pa-avatars .pa-avatar{ animation:sdpLego .55s cubic-bezier(.22,.9,.28,1) both; }
 .pa-avatars .pa-avatar:nth-child(1){ animation-delay:.14s; }
-.pa-avatars .pa-avatar:nth-child(2){ animation-delay:.22s; }
-.pa-avatars .pa-avatar:nth-child(3){ animation-delay:.30s; }
-.pa-avatars .pa-avatar:nth-child(4){ animation-delay:.38s; }
+.pa-avatars .pa-avatar:nth-child(2){ animation-delay:.20s; }
+.pa-avatars .pa-avatar:nth-child(3){ animation-delay:.26s; }
+.pa-avatars .pa-avatar:nth-child(4){ animation-delay:.32s; }
+.pa-avatars .pa-avatar:nth-child(5){ animation-delay:.38s; }
+.pa-avatars .pa-avatar:nth-child(6){ animation-delay:.44s; }
 
 /* Non-negotiable: none of this runs for anyone who asked for less motion. */
 @media (prefers-reduced-motion:reduce){
