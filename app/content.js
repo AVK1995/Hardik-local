@@ -320,20 +320,24 @@ export const checkinWall = {
   eyebrow: '',
   h2: ['Thousands Of Messages. ', 'Hundreds Of Wins.'],
   lede: "Here's a small glimpse into our clients' journeys.",
+  /* 2026-08-11: swapped to the BLURRED set (source: public/Blurred-Chat-Testimonials).
+     Every contact name, phone number and pinned filename is obscured at source.
+     The unblurred originals were deleted from public/ — anything under public/ is
+     fetchable at a guessable URL, so keeping them would have undone the blurring. */
   rowOne: [
-    { src: '/proof/chat-abhishek.jpeg', alt: 'Client message' },
-    { src: '/proof/chat-bhargav.jpeg', alt: 'Client message' },
-    { src: '/proof/chat-devanand.jpeg', alt: 'Client message' },
-    { src: '/proof/chat-mayur.jpeg', alt: 'Client message' },
-    { src: '/proof/chat-morning-erections.jpeg', alt: 'Client message' },
+    { src: '/proof/chat-abhishek.jpg', alt: 'Client message' },
+    { src: '/proof/chat-bhargav.jpg', alt: 'Client message' },
+    { src: '/proof/chat-devanand.jpg', alt: 'Client message' },
+    { src: '/proof/chat-mayur.jpg', alt: 'Client message' },
+    { src: '/proof/chat-venkat-pradeep.jpg', alt: 'Client message' },
   ],
   rowTwo: [
-    { src: '/proof/chat-improved-erection.jpeg', alt: 'Client message' },
-    { src: '/proof/chat-libido-energy.jpeg', alt: 'Client message' },
-    { src: '/proof/chat-venkat-before.jpeg', alt: 'Client message', tag: 'Before' },
-    { src: '/proof/chat-venkat-after.jpeg', alt: 'Client message', tag: 'After' },
-    { src: '/proof/chat-whatsapp-jun25.jpeg', alt: 'Client message' },
-    { src: '/proof/chat-extra-01.png', alt: 'Client message' },
+    { src: '/proof/chat-krishna.jpg', alt: 'Client message' },
+    { src: '/proof/chat-roshin.jpg', alt: 'Client message' },
+    { src: '/proof/chat-vishal-before.jpg', alt: 'Client message', tag: 'Before' },
+    { src: '/proof/chat-vishal-after.jpg', alt: 'Client message', tag: 'After' },
+    { src: '/proof/chat-sanat.jpg', alt: 'Client message' },
+    { src: '/proof/chat-shruti.jpg', alt: 'Client message' },
   ],
 };
 
@@ -344,7 +348,7 @@ export const founder = {
   sub: 'A multidisciplinary approach to men’s sexual, hormonal and metabolic health.',
   name: 'Hardik & Dr. Kartik',
   role: 'Project Alpha Wellness',
-  photo: '/proof/hardik.png', // ← MISSING.expertsPhoto (docx wants a combined shot)
+  photo: '/Hardik-img/Hardik_Kartik.png', // ← MISSING.expertsPhoto (docx wants a combined shot)
   /* The press wall under the founder beat (2026-08-11, trimmed 2026-08-11).
 
      ONLY REAL, VERIFIABLE COVERAGE GOES HERE. The first pass mirrored the
