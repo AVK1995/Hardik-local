@@ -6,14 +6,16 @@ import useReveal from './components/useReveal';
 import CtaLockup from './components/CtaLockup';
 import VslFrame from './components/VslFrame';
 import CheckinWall from './components/CheckinWall';
+import VideoTestimonials from './components/VideoTestimonials';
 import Faq from './components/Faq';
 import StickyCta from './components/StickyCta';
-import { ArrowDown, Check, Play, Shield, Star, pointerIcons, trustIcons } from './components/Icons';
+import { ArrowDown, Check, Shield, Star, pointerIcons, programmeIcons, trustIcons } from './components/Icons';
 
 import {
   MISSING,
   announce,
   trustRow,
+  trustAvatars,
   hero,
   forYouIf,
   cases,
@@ -27,9 +29,6 @@ import {
   cta,
 } from './content';
 
-/* How many times the announce copy repeats per half of the marquee track.
-   Each half must overflow the widest viewport or the loop shows a blank gap. */
-const ANNOUNCE_REPEAT = 8;
 
 /** H2 formula: [plain setup clause] + [ONE accent tail on the payoff/mechanism]. */
 function H2({ parts }) {
@@ -62,31 +61,35 @@ export default function Landing() {
     <main className="sdp-root">
       {/* ─────────── BEAT 0a · Announcement strip (§11 · R10) ─────────── */}
       <div className="sdp-announce">
-        {/* The track scrolls by translateX(-50%), so the two halves must be
-            identical AND each half must be wider than the viewport, or a blank
-            gap appears. One short line was nowhere near wide enough, so each
-            half repeats the copy ANNOUNCE_REPEAT times. */}
-        <div className="sdp-announce-track">
-          {[0, 1].map((half) =>
-            Array.from({ length: ANNOUNCE_REPEAT }, (_, rep) =>
-              announce.map((line, i) => (
-                <span key={`${half}-${rep}-${i}`}>
-                  {line} <span className="dot">·</span>
-                </span>
-              ))
-            )
-          )}
-        </div>
+        {/* Static single line since 2026-08-11 — no scroll, no repetition, and
+            it must not wrap. .sdp-announce-line scales its own type down on
+            narrow screens to hold one line all the way to 320px. */}
+        <span className="sdp-announce-line">{announce[0]}</span>
       </div>
 
       {/* ─────────── BEAT 0b · Trust row (§12, light) ─────────── */}
       <div className="pa-trustrow">
         <div className="sdp-wrap pa-trustrow-inner">
+          {/* Overlapping avatar cluster leads the row, as in the reference. */}
+          {trustAvatars.length > 0 && (
+            <span className="pa-avatars">
+              {trustAvatars.map((a) => (
+                <img className="pa-avatar" key={a.src} src={a.src} alt={a.name} loading="eager" />
+              ))}
+            </span>
+          )}
           {trustRow.map((chip) => {
             const Ico = chip.icon ? trustIcons[chip.icon] : null;
             return (
               <span className="pa-trustchip" key={chip.label}>
                 {Ico && <Ico size={14} />}
+                {chip.stars > 0 && (
+                  <span className="pa-stars" aria-label={`${chip.stars} out of 5`}>
+                    {Array.from({ length: chip.stars }, (_, i) => (
+                      <Star key={i} size={13} />
+                    ))}
+                  </span>
+                )}
                 {chip.label}
               </span>
             );
@@ -115,13 +118,29 @@ export default function Landing() {
           </h1>
 
           <p className="sdp-sub" data-sdp-reveal style={{ '--d': '.1s' }}>
-            {hero.sub}
+            {hero.sub.map((run, i) =>
+              run.em ? (
+                <em className="pa-em" key={i}>
+                  {run.text}
+                </em>
+              ) : (
+                <span key={i}>{run.text}</span>
+              )
+            )}
           </p>
 
           {/* the health-marker row the finalised copy leads the hero with */}
-          {hero.markersLede && (
+          {hero.markersLede.length > 0 && (
             <p className="pa-markers-lede" data-sdp-reveal style={{ '--d': '.13s' }}>
-              {hero.markersLede}
+              {hero.markersLede.map((run, i) =>
+                run.mark ? (
+                  <mark className="pa-hl" key={i}>
+                    {run.text}
+                  </mark>
+                ) : (
+                  <span key={i}>{run.text}</span>
+                )
+              )}
             </p>
           )}
           <div className="pa-pillrow" data-sdp-reveal style={{ '--d': '.15s' }}>
@@ -133,9 +152,12 @@ export default function Landing() {
             ))}
           </div>
 
+          {/* Reference sets this label as a highlighted pill, not loose text. */}
           <div className="pa-watch" data-sdp-reveal style={{ '--d': '.2s' }}>
-            {cta.aboveVideo}
-            <ArrowDown size={13} />
+            <span className="pa-watch-pill">
+              {cta.aboveVideo}
+              <ArrowDown size={13} />
+            </span>
           </div>
 
           <VslFrame />
@@ -227,52 +249,10 @@ export default function Landing() {
             {cases.lede}
           </p>
 
-          {/* Video testimonials, 2-up. Structure matches Shruti's .tcards-vid.
-              Until clips land, cases.videoSlots empty boxes hold the layout. */}
-          <div className="pa-tcards pa-tcards-vid pa-mt-24">
-            {cases.videoTestimonials.length > 0
-              ? cases.videoTestimonials.map((v, i) => (
-                  <button
-                    className="pa-tcard pa-tcard-vid"
-                    key={v.name}
-                    data-sdp-reveal
-                    style={{ '--d': `${i * 0.05}s` }}
-                    type="button"
-                  >
-                    <span className="pa-tphoto">
-                      <video src={v.src} poster={v.poster} preload="none" muted loop playsInline />
-                      <span className="pa-tglass" />
-                      <span className="pa-tplay">
-                        <Play size={22} />
-                      </span>
-                      <span className="pa-tag">Video</span>
-                    </span>
-                    <span className="pa-tcard-body">
-                      <span className="nm">{v.name}</span>
-                    </span>
-                  </button>
-                ))
-              : Array.from({ length: cases.videoSlots }, (_, i) => (
-                  <div
-                    className="pa-tcard pa-tcard-vid pa-tcard-ph"
-                    key={`vid-slot-${i}`}
-                    data-sdp-reveal
-                    style={{ '--d': `${i * 0.05}s` }}
-                  >
-                    <span className="pa-tphoto">
-                      <span className="pa-tglass" />
-                      <span className="pa-tplay">
-                        <Play size={22} />
-                      </span>
-                      <span className="pa-tag">Video</span>
-                    </span>
-                    <span className="pa-tcard-body">
-                      <span className="nm">Video testimonial {i + 1}</span>
-                    </span>
-                  </div>
-                ))}
-          </div>
-          {cases.videoTestimonials.length === 0 && <Missing note={MISSING.videoTestimonials} />}
+          {/* Video testimonials, 3-up. Three clips supplied, so the fourth slot
+              Shruti's funnel carries is gone. Poster/iframe swap and the
+              per-clip aspect ratio live in the component. */}
+          <VideoTestimonials items={cases.videoTestimonials} slots={cases.videoSlots} />
         </div>
 
         {/* Case-card marquee. Two identical sets, track animates to -50%, so the
@@ -338,9 +318,12 @@ export default function Landing() {
           )}
 
           <div className="pa-founder pa-mt-24">
+            {/* The "combined shot of Hardik & Dr. Kartik" placeholder was
+                removed on the client's call, 2026-08-11. MISSING.expertsPhoto
+                still records the gap in content.js; it just no longer shows on
+                the page. Swap `founder.photo` when the combined shot lands. */}
             <div className="pa-founder-photo" data-sdp-reveal>
               <img src={founder.photo} alt={`${founder.name}, ${founder.role}`} />
-              <Missing note={MISSING.expertsPhoto} />
             </div>
 
             <div>
@@ -376,6 +359,41 @@ export default function Landing() {
               </div>
             </div>
           </div>
+
+          {/* BEAT 5c — press wall. Static grid, not a carousel: there are two,
+              and every card is a live article you can click through to. */}
+          {founder.credentials.length > 0 && (
+            <div className="pa-creds">
+              <span className="pa-creds-eyebrow" data-sdp-reveal>
+                {founder.credentialsEyebrow}
+              </span>
+              <div className="pa-creds-grid">
+                {founder.credentials.map((c, i) => (
+                  <a
+                    className="pa-cred"
+                    key={c.href}
+                    href={c.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-sdp-reveal
+                    style={{ '--d': `${i * 0.06}s` }}
+                  >
+                    <span className="pa-cred-art">
+                      <img src={c.image} alt={`${c.issuer} — ${c.title}`} loading="lazy" />
+                    </span>
+                    <span className="pa-cred-body">
+                      <span className="pa-cred-kind">
+                        {c.kind}
+                        {c.date && <em>{c.date}</em>}
+                      </span>
+                      <span className="pa-cred-title">{c.title}</span>
+                      <span className="pa-cred-issuer">{c.issuer}</span>
+                    </span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
@@ -425,16 +443,27 @@ export default function Landing() {
             {programme.sub}
           </p>
 
-          <div className="pa-ledger">
-            {programme.items.map((item, i) => (
-              <div className="pa-lrow" key={item.title} data-sdp-reveal style={{ '--d': `${i * 0.04}s` }}>
-                <span className="pa-lord">{String(i + 1).padStart(2, '0')}</span>
-                <div>
-                  <h3>{item.title}</h3>
-                  <p>{item.body}</p>
+          {/* Timeline, not a plain ledger (2026-08-11). The rail is drawn on
+              .pa-tl, and each node snaps in on reveal — see the lego keyframes
+              in globals.css. Deliberately NO week numbering: the docx never
+              staged these, and inventing "Week 1 / Week 2" would promise an
+              order of delivery nobody has agreed to. */}
+          <div className="pa-tl">
+            {programme.items.map((item, i) => {
+              const Ico = programmeIcons[item.icon] || programmeIcons.report;
+              return (
+                <div className="pa-tl-row" key={item.title} data-sdp-reveal style={{ '--d': `${i * 0.06}s` }}>
+                  <span className="pa-tl-node" aria-hidden="true">
+                    <Ico size={19} />
+                  </span>
+                  <div className="pa-tl-body">
+                    <span className="pa-tl-ord">{String(i + 1).padStart(2, '0')}</span>
+                    <h3>{item.title}</h3>
+                    <p>{item.body}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <p className="pa-footnote" data-sdp-reveal>
@@ -492,11 +521,16 @@ export default function Landing() {
             <Faq />
           </div>
 
-          <div className="pa-plaque" data-sdp-reveal>
-            {faq.plaque.map((line) => (
-              <span key={line}>{line}</span>
-            ))}
-          </div>
+          {/* Guarded: faq.plaque is empty (no plaque copy in the docx), and an
+              unguarded .pa-plaque still renders its own border, padding and
+              background — an empty white slab under the FAQ. */}
+          {faq.plaque.length > 0 && (
+            <div className="pa-plaque" data-sdp-reveal>
+              {faq.plaque.map((line) => (
+                <span key={line}>{line}</span>
+              ))}
+            </div>
+          )}
 
           <div className="pa-mt-lockup">
             <CtaLockup />
@@ -516,16 +550,20 @@ export default function Landing() {
           </div>
 
           <div className="pa-colophon">
+            {/* Brand and links are separate spans so mobile can stack them on
+                two centred lines without the star drifting between them. */}
             <div className="pa-colophon-line">
-              <span>{finalCta.colophon}</span>
+              <span className="pa-colophon-brand">{finalCta.colophon}</span>
               <span className="pa-colophon-star">
                 <Star size={11} />
               </span>
-              {finalCta.links.map((l) => (
-                <a key={l.label} href={l.href}>
-                  {l.label}
-                </a>
-              ))}
+              <span className="pa-colophon-links">
+                {finalCta.links.map((l) => (
+                  <a key={l.label} href={l.href}>
+                    {l.label}
+                  </a>
+                ))}
+              </span>
             </div>
           </div>
         </div>

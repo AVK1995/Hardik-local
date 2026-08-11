@@ -24,7 +24,11 @@ export default function VslFrame() {
   };
 
   return (
-    <div className={`sdp-vsl${playing ? ' playing' : ''}`} data-sdp-reveal style={{ '--d': '.1s' }}>
+    /* data-playing, not a className — same trap as Faq.js and
+       VideoTestimonials.js: rewriting className wipes useReveal's `vis` and the
+       player would fade out the instant you pressed play. Latent until now only
+       because NEXT_PUBLIC_VSL_URL is unset, so play() returns early. */
+    <div className="sdp-vsl" data-playing={playing ? '' : undefined} data-sdp-reveal style={{ '--d': '.1s' }}>
       {playing ? (
         <video ref={videoRef} className="sdp-vsl-video" src={VSL_URL} poster={POSTER} controls playsInline />
       ) : (

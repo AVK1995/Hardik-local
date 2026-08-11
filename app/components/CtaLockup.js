@@ -1,6 +1,7 @@
 'use client';
 
 import Countdown from './Countdown';
+import CtaLabel from './CtaLabel';
 import { Arrow, trustIcons } from './Icons';
 import { cta } from '../content';
 
@@ -18,12 +19,12 @@ export default function CtaLockup({ className = '', delay = 0 }) {
     <div className={`sdp-lockup ${className}`} data-sdp-reveal style={{ '--d': `${delay}s` }}>
       <a className="sdp-cta" href="/checkout">
         <span className="sdp-cta-line">
-          {cta.button}
+          <CtaLabel />
           <span className="arrow">
             <Arrow size={13} />
           </span>
         </span>
-        <span className="cta-sub">{cta.buttonSub}</span>
+        {cta.buttonSub && <span className="cta-sub">{cta.buttonSub}</span>}
       </a>
 
       {/* Layer 1 — trust chips */}

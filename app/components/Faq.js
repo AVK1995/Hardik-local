@@ -18,7 +18,12 @@ export default function Faq() {
       {faq.items.map((item, i) => {
         const isOpen = open === i;
         return (
-          <div className={`sdp-q${isOpen ? ' open' : ''}`} key={item.q} data-sdp-reveal style={{ '--d': `${i * 0.04}s` }}>
+          /* Open state is a data attribute, NEVER a className. useReveal adds
+             `vis` with classList.add, so re-rendering a changed className string
+             wipes it — and the observer has already unobserved the node, so the
+             answer faded to opacity:0 and stayed gone the moment you toggled it.
+             Keeping the className literal means React never touches it. */
+          <div className="sdp-q" data-open={isOpen ? '' : undefined} key={item.q} data-sdp-reveal style={{ '--d': `${i * 0.04}s` }}>
             <button
               type="button"
               className="sdp-q-head"
