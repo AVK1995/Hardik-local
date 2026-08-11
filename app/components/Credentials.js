@@ -16,11 +16,21 @@ import { founder } from '../content';
  * card size; the modal shows it at full width, plus a link to the original PDF
  * for anyone who wants to check it properly.
  */
+/* Autoplay cadence. Long enough to read a card's caption before it moves. */
+const AUTOPLAY_MS = 3200;
+/* How long a user's own interaction suppresses autoplay. Resuming immediately
+   after someone presses an arrow feels like the page is arguing with them. */
+const RESUME_MS = 9000;
+
 export default function Credentials() {
   const railRef = useRef(null);
   const closeRef = useRef(null);
+  const wrapRef = useRef(null);
+  const holdRef = useRef(0); // timestamp until which autoplay stays paused
+  const hoverRef = useRef(false); // pointer over the rail — pauses indefinitely
   const [open, setOpen] = useState(null); // index of the open card, or null
   const [edges, setEdges] = useState({ start: true, end: false });
+  const [onScreen, setOnScreen] = useState(false);
 
   const items = founder.credentials;
 
@@ -47,13 +57,52 @@ export default function Credentials() {
     };
   }, [syncEdges]);
 
-  const page = (dir) => {
+  const page = (dir, userDriven = true) => {
     const el = railRef.current;
     if (!el) return;
+    if (userDriven) holdRef.current = Date.now() + RESUME_MS;
+
     const card = el.querySelector('.pa-cred');
     /* One card plus its gap, so a press stops on a card edge every time. */
     const step = card ? card.getBoundingClientRect().width + 22 : el.clientWidth * 0.8;
+
+    /* Autoplay wraps back to the start at the end; the arrows do not, because a
+       Next button that silently jumps to the beginning reads as broken. */
+    const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 2;
+    if (!userDriven && dir > 0 && atEnd) {
+      el.scrollTo({ left: 0, behavior: 'smooth' });
+      return;
+    }
     el.scrollBy({ left: dir * step, behavior: 'smooth' });
+  };
+
+  /* Only run the carousel while it is actually on screen — an interval
+     scrolling a section nobody is looking at is pure battery. */
+  useEffect(() => {
+    const wrap = wrapRef.current;
+    if (!wrap || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(([e]) => setOnScreen(e.isIntersecting), { threshold: 0.25 });
+    io.observe(wrap);
+    return () => io.disconnect();
+  }, []);
+
+  /* Autoplay. Suppressed while the modal is open, while the pointer is over the
+     rail, when the section is off screen, and for a beat after any manual
+     interaction. Never runs for anyone who has asked for reduced motion. */
+  useEffect(() => {
+    if (open !== null || !onScreen) return;
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+
+    const id = window.setInterval(() => {
+      if (hoverRef.current || Date.now() < holdRef.current) return;
+      page(1, false);
+    }, AUTOPLAY_MS);
+    return () => window.clearInterval(id);
+  }, [open, onScreen]);
+
+  /* Hover, focus and touch all just extend the same hold. */
+  const hold = () => {
+    holdRef.current = Date.now() + RESUME_MS;
   };
 
   /* Modal: lock the page behind it, close on Escape, and move focus to the
@@ -82,7 +131,20 @@ export default function Credentials() {
         {founder.credentialsEyebrow}
       </span>
 
-      <div className="pa-creds-rail-wrap" data-sdp-reveal>
+      <div
+        className="pa-creds-rail-wrap"
+        ref={wrapRef}
+        data-sdp-reveal
+        onMouseEnter={() => {
+          hoverRef.current = true;
+        }}
+        onMouseLeave={() => {
+          hoverRef.current = false;
+          hold();
+        }}
+        onFocusCapture={hold}
+        onTouchStart={hold}
+      >
         <button
           type="button"
           className="pa-creds-nav prev"
