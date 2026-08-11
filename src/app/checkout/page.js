@@ -107,9 +107,16 @@ export default function Checkout() {
   useReveal();
   const router = useRouter();
 
-  /* Open by default — the collapse only exists so the summary does not bury the
-     form on a phone, not to hide the order. */
-  const [sumOpen, setSumOpen] = useState(true);
+  /* Collapsed by default (client's call, 2026-08-11). On a phone the summary
+     sits ABOVE the form (see .fp-summary-col order), so leaving it open pushed
+     the fields and the pay button below the fold. The handle still shows the
+     item name and the ₹97 total while collapsed, so nothing is hidden — the
+     order is one tap away and the form is what he lands on.
+
+     Mobile-only by construction: every collapse rule lives inside
+     @media (max-width:880px) and .fp-sum-toggle is display:none above it, so
+     data-collapsed is inert on desktop and the side rail stays open there. */
+  const [sumOpen, setSumOpen] = useState(false);
   const [fields, setFields] = useState(EMPTY);
   const [dialCode, setDialCode] = useState('+91');
   const [errors, setErrors] = useState({});
