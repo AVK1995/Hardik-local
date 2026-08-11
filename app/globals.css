@@ -207,9 +207,11 @@ h2.sdp-h2{ text-align:center; font-size:clamp(25px,3.8vw,44px); letter-spacing:-
 [data-sdp-reveal].vis .pa-avatar,
 .pa-avatars .pa-avatar{ animation:sdpLego .55s cubic-bezier(.22,.9,.28,1) both; }
 .pa-avatars .pa-avatar:nth-child(1){ animation-delay:.14s; }
-.pa-avatars .pa-avatar:nth-child(2){ animation-delay:.22s; }
-.pa-avatars .pa-avatar:nth-child(3){ animation-delay:.30s; }
-.pa-avatars .pa-avatar:nth-child(4){ animation-delay:.38s; }
+.pa-avatars .pa-avatar:nth-child(2){ animation-delay:.20s; }
+.pa-avatars .pa-avatar:nth-child(3){ animation-delay:.26s; }
+.pa-avatars .pa-avatar:nth-child(4){ animation-delay:.32s; }
+.pa-avatars .pa-avatar:nth-child(5){ animation-delay:.38s; }
+.pa-avatars .pa-avatar:nth-child(6){ animation-delay:.44s; }
 
 /* Non-negotiable: none of this runs for anyone who asked for less motion. */
 @media (prefers-reduced-motion:reduce){

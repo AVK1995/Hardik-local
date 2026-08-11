@@ -109,6 +109,14 @@ export const trustAvatars = [
   { src: '/proof/avatar-mahendra.jpg', name: 'Mahendra' },
   { src: '/proof/avatar-mayur.jpg', name: 'Mayur' },
   { src: '/proof/avatar-prateek.jpg', name: 'Prateek' },
+  /* Added 2026-08-11 from the Before/After cards, cropped off the AFTER panel
+     — never the before shot. NOTE: 113 and 115 are women. They are real
+     transformation clients, but this row sits directly above an ED headline, so
+     it reads as "these are our ED clients". Swap them for male clients if that
+     matters; the crops are just files and the paths are the only wiring. */
+  { src: '/proof/avatar-ba-116.jpg', name: 'Client — lost 12kg in 16 weeks' },
+  { src: '/proof/avatar-ba-113.jpg', name: 'Client — lost 15kg in 24 weeks' },
+  { src: '/proof/avatar-ba-115.jpg', name: 'Client — lost 10kg in 16 weeks' },
 ];
 
 /* ── BEAT 1 · Hero ──────────────────────────────────────────────────────── */
@@ -357,7 +365,50 @@ export const founder = {
      `image` is a screenshot of the live article, cropped to keep the outlet
      masthead and headline in frame, and each card links out to the piece.
      Add a card only when you have both a URL and a capture of it. */
+  /* ORDER IS THE CLIENT'S, 2026-08-11. The marquee renders this array in
+     sequence, so reordering here reorders the rail. Two entries were removed on
+     the same call:
+
+       - Provisional Registration Certificate (Dr. Kartik's B.A.M.S). Pulled
+         because the scan carries his registration number, father's name,
+         college address and mobile number, and the client decided that is not
+         for a public page. The file is still in /public/Certificates; do not
+         re-add it without a redacted image.
+       - The Hindustan Wires piece. Same article as The Business Stories one,
+         syndicated — two cards of identical copy read as padding, so only the
+         Business Stories card is kept. */
   credentials: [
+    {
+      kind: 'Certification',
+      title: 'Certified Nutrition Specialist',
+      issuer: 'Mission India Fitness Institute',
+      image: '/Certificates/cert-nutrition.jpg',
+      file: '/Certificates/Certified Nutrition Specialist.pdf',
+    },
+    {
+      kind: 'Certification',
+      title: 'Functional & Group Training Specialist (Level 6)',
+      issuer: 'Prehab 121 Academy',
+      date: 'December 2025',
+      image: '/Certificates/cert-functional-group-l6.jpg',
+      file: '/Certificates/FUNCTIONAL AND GROUP TRAINING SPECIALIST (LEVEL 6).pdf',
+    },
+    {
+      kind: 'Certification',
+      title: 'Posture & Functional Corrective Exercise Specialist',
+      issuer: 'Prehab 121 Academy',
+      date: 'May 2025',
+      image: '/Certificates/cert-posture-corrective.jpg',
+      file: '/Certificates/POSTURE & FUNCTIONAL CORRECTIVE EXERCISE SPECIALIST.pdf',
+    },
+    {
+      kind: 'Press',
+      title: 'The problem millions of Indian men are too ashamed to discuss — and how Hardik DhawalSingh is fixing it naturally',
+      issuer: 'The Business Stories',
+      date: '28 April 2026',
+      image: '/proof/press-business-stories.jpg',
+      href: 'https://thebusinessstories.com/the-problem-millions-of-indian-men-are-too-ashamed-to-discuss-and-how-hardik-dhawalsingh-is-fixing-it-naturally/',
+    },
     {
       kind: 'Certification',
       title: 'Certified Personal Trainer (Level 5)',
@@ -371,63 +422,11 @@ export const founder = {
     },
     {
       kind: 'Certification',
-      title: 'Functional & Group Training Specialist (Level 6)',
-      issuer: 'Prehab 121 Academy',
-      date: 'December 2025',
-      image: '/Certificates/cert-functional-group-l6.jpg',
-      file: '/Certificates/FUNCTIONAL AND GROUP TRAINING SPECIALIST (LEVEL 6).pdf',
-    },
-    {
-      kind: 'Certification',
       title: 'Prehab & Rehab Specialist',
       issuer: 'Prehab 121 Academy',
       date: 'May 2025',
       image: '/Certificates/cert-prehab-rehab.jpg',
       file: '/Certificates/PREHAB & REHAB SPECIALIST.pdf',
-    },
-    {
-      kind: 'Certification',
-      title: 'Posture & Functional Corrective Exercise Specialist',
-      issuer: 'Prehab 121 Academy',
-      date: 'May 2025',
-      image: '/Certificates/cert-posture-corrective.jpg',
-      file: '/Certificates/POSTURE & FUNCTIONAL CORRECTIVE EXERCISE SPECIALIST.pdf',
-    },
-    {
-      kind: 'Certification',
-      title: 'Certified Nutrition Specialist',
-      issuer: 'Mission India Fitness Institute',
-      image: '/Certificates/cert-nutrition.jpg',
-      file: '/Certificates/Certified Nutrition Specialist.pdf',
-    },
-    /* Dr. Kartik's, not Hardik's — the only credential here that is his.
-       Published on the client's explicit approval, 2026-08-11. Note the scan
-       carries his registration number, father's name, college address and
-       mobile number in full; if that is ever reconsidered, replace the image
-       with a redacted copy rather than deleting the entry. */
-    {
-      kind: 'Qualification',
-      title: 'Provisional Registration Certificate — B.A.M.S',
-      issuer: 'Board of Ayurvedic & Unani Tibbi Systems of Medicine, U.P.',
-      date: 'November 2025',
-      image: '/Certificates/cert-provisional-registration.jpg',
-      file: '/Certificates/Provisional Registration Certificate.png',
-    },
-    {
-      kind: 'Press',
-      title: 'The problem millions of Indian men are too ashamed to discuss — and how Hardik DhawalSingh is fixing it naturally',
-      issuer: 'The Hindustan Wires',
-      date: '28 April 2026',
-      image: '/proof/press-hindustan-wires.jpg',
-      href: 'https://thehindustanwires.com/the-problem-millions-of-indian-men-are-too-ashamed-to-discuss-and-how-hardik-dhawalsingh-is-fixing-it-naturally/',
-    },
-    {
-      kind: 'Press',
-      title: 'The problem millions of Indian men are too ashamed to discuss — and how Hardik DhawalSingh is fixing it naturally',
-      issuer: 'The Business Stories',
-      date: '28 April 2026',
-      image: '/proof/press-business-stories.jpg',
-      href: 'https://thebusinessstories.com/the-problem-millions-of-indian-men-are-too-ashamed-to-discuss-and-how-hardik-dhawalsingh-is-fixing-it-naturally/',
     },
   ],
   credentialsEyebrow: 'Certificates',
