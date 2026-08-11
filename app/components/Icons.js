@@ -221,6 +221,19 @@ export function Triglyceride({ size = 14 }) {
   );
 }
 
+/* Premature ejaculation — a stopwatch, the one marker on this row that is
+   about timing rather than a blood value. */
+export function Stopwatch({ size = 14 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base} aria-hidden="true">
+      <circle cx="12" cy="13.6" r="7.6" />
+      <path d="M12 9.8v3.8l2.6 1.6" />
+      <path d="M9.6 2.6h4.8" />
+      <path d="M18.6 6.4l1.4-1.4" />
+    </svg>
+  );
+}
+
 /* Blood pressure — the dial of a sphygmomanometer. */
 export function Gauge({ size = 14 }) {
   return (
@@ -232,8 +245,74 @@ export function Gauge({ size = 14 }) {
   );
 }
 
+/* ── Programme timeline icons (2026-08-11) ────────────────────────────────
+   One per component of the 12-week programme, chosen to match what the step
+   actually is rather than for decoration. */
+export function Leaf({ size = 18 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
+      strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+      <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+    </svg>
+  );
+}
+
+export function Heart({ size = 18 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
+      strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+    </svg>
+  );
+}
+
+export function Dumbbell({ size = 18 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
+      strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M14.4 14.4 9.6 9.6" />
+      <path d="M18.657 21.485a2 2 0 1 1-2.829-2.828l-1.767 1.768a2 2 0 1 1-2.829-2.829l6.364-6.364a2 2 0 1 1 2.829 2.829l-1.768 1.767a2 2 0 1 1 2.828 2.829z" />
+      <path d="m21.5 21.5-1.4-1.4" />
+      <path d="M3.9 3.9 2.5 2.5" />
+      <path d="M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.828-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z" />
+    </svg>
+  );
+}
+
+export function Chat({ size = 18 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
+      strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </svg>
+  );
+}
+
+export function Chart({ size = 18 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
+      strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+      <path d="m19 9-5 5-4-4-3 3" />
+    </svg>
+  );
+}
+
+/* Disclosure chevron for the collapsible order summary. Rotated by CSS. */
+export function ChevronDown({ size = 14 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"
+      strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M6 9l6 6 6-6" />
+    </svg>
+  );
+}
+
+/* Hero health-marker chips: keyed from `icon` on each entry in hero.markers. */
 export const markerIcons = {
   testosterone: Mars,
+  pe: Stopwatch,
   hba1c: Droplet,
   belly: Tape,
   ldl: Artery,
@@ -242,6 +321,16 @@ export const markerIcons = {
 };
 
 export const pointerIcons = { report: Report, target: Target, route: Route };
+
+/* Programme timeline: keyed from `icon` on each item in `programme.items`. */
+export const programmeIcons = {
+  report: Report,
+  leaf: Leaf,
+  heart: Heart,
+  dumbbell: Dumbbell,
+  chat: Chat,
+  chart: Chart,
+};
 
 /* Trust-row and CTA chips. A chip with icon:null renders no icon at all. */
 export const trustIcons = {

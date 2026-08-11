@@ -10,9 +10,49 @@
   letter-spacing:.04em; color:var(--ink-soft); }
 .pa-trustchip svg{ color:var(--brand); flex:0 0 14px; }
 
+/* The rating stars. Their own element so they take the brand colour while the
+   "5.0 Review" label stays muted — as ★ glyphs inside the label string they
+   inherited the label colour and could not be tinted at all. */
+.pa-stars{ display:inline-flex; align-items:center; gap:1px; color:var(--brand); }
+.pa-stars svg{ color:var(--brand); flex:0 0 auto; }
+
+/* Overlapping avatar cluster (reference layout). Negative margin does the
+   overlap; the white ring is what keeps the faces legible against each other,
+   so it stays even on the smallest breakpoint. */
+.pa-avatars{ display:inline-flex; align-items:center; flex:0 0 auto; }
+.pa-avatar{ width:34px; height:34px; border-radius:50%; object-fit:cover; background:var(--bg-alt);
+  border:2px solid var(--bg-alt); box-shadow:0 2px 8px rgba(var(--ink-rgb),.18); }
+.pa-avatar + .pa-avatar{ margin-left:-11px; }
+
+/* Mobile: the strip was eating most of the first screen before the headline
+   had a chance. Smaller plates, tighter gaps, one row. */
+@media (max-width:720px){
+  /* Client-specified, 2026-08-11. */
+  .pa-trustrow-inner{ gap:5px 12px; padding:7px 0; }
+  .pa-avatar{ width:26px; height:26px; border-width:2px; }
+  .pa-avatar + .pa-avatar{ margin-left:-9px; }
+  .pa-trustchip{ font-size:10.5px; gap:6px; }
+  .pa-trustchip svg{ flex:0 0 12px; width:12px; height:12px; }
+  .pa-stars svg{ width:11px; height:11px; }
+}
+
 /* ── BEAT 1 · Hero ─────────────────────────────────────────────────────── */
 .pa-hero-inner{ width:100%; text-align:center; padding-top:34px; }
 .pa-pillrow{ width:100%; display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin:26px auto 0; max-width:860px; }
+
+/* Highlighter on the proof phrase inside the markers lede, matching how the
+   reference emphasises its number. <mark> defaults to a yellow browser
+   background, so every property here is doing real work. */
+.pa-hl{ background:rgba(var(--brand-rgb),.15); color:var(--brand-deep); font-weight:700;
+  padding:2px 8px; border-radius:6px; box-decoration-break:clone;
+  -webkit-box-decoration-break:clone; }
+
+/* Inline emphasis inside a paragraph: brand colour and a touch of weight, and
+   nothing else. <em> defaults to italic and would tilt four phrases out of a
+   sentence that is meant to read straight, so the italic is explicitly off —
+   and there is no underline, which on a run of text reads as a link. */
+.pa-em{ font-style:normal; font-weight:700; color:var(--brand); }
+.sdp-dark .pa-em,.sdp-dark-alt .pa-em{ color:var(--brand-bright); }
 
 .pa-pointers{ width:100%; display:flex; flex-wrap:wrap; justify-content:center; gap:14px 30px; margin:26px auto 0; max-width:860px; }
 .pa-pointer{ display:inline-flex; align-items:center; gap:10px; font-family:var(--fb); font-size:13.5px; font-weight:600; color:var(--ink-soft); }
@@ -20,16 +60,73 @@
   background:linear-gradient(135deg,rgba(var(--brand-rgb),.14),rgba(var(--brand-rgb),.06));
   border:1px solid rgba(var(--brand-rgb),.28); color:var(--brand-deep); }
 
-.pa-stats{ width:100%; display:grid; grid-template-columns:repeat(4,1fr); margin:34px auto 0; max-width:860px;
-  border:1px solid var(--border); border-radius:16px; overflow:hidden; background:#fff; box-shadow:var(--shadow-card); }
-.pa-stat{ padding:20px 12px; text-align:center; border-right:1px solid var(--border); }
-.pa-stat:last-child{ border-right:0; }
-.pa-stat-v{ font-family:var(--fh); font-size:clamp(24px,3.6vw,36px); color:var(--brand); letter-spacing:.04em; line-height:1; }
+/* Four separate cards, not one slab with dividers (2026-08-11). Welded
+   together, an oversized "100% Natural" pushed its own cell taller and dragged
+   the whole row with it; as individual cards each stat sits in its own box and
+   an uneven one costs nothing. */
+.pa-stats{ width:100%; display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin:34px auto 0; max-width:860px; }
+.pa-stat{ padding:20px 14px; text-align:center; background:#fff;
+  border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow-card);
+  transition:transform .25s cubic-bezier(.2,.8,.3,1), border-color .25s ease, box-shadow .25s ease; }
+.pa-stat:hover{ transform:translateY(-3px); border-color:rgba(var(--brand-rgb),.32);
+  box-shadow:var(--shadow-card-hover); }
+.pa-stat-v{ font-family:var(--fh); font-size:24px; color:var(--brand); letter-spacing:.04em; line-height:1.15; }
+@media (prefers-reduced-motion:reduce){
+  .pa-stat{ transition:none; }
+  .pa-stat:hover{ transform:none; }
+}
 .pa-stat-l{ font-family:var(--fb); font-size:10.5px; font-weight:700; letter-spacing:.11em; text-transform:uppercase;
   color:var(--muted); margin-top:8px; line-height:1.45; }
 
-.pa-watch{ width:100%; text-align:center; font-family:var(--fb); font-size:12px; font-weight:800; letter-spacing:.18em;
-  text-transform:uppercase; color:var(--brand-deep); margin:34px auto 0; display:flex; align-items:center; justify-content:center; gap:8px; }
+/* Mobile: 2x2 inside the same single card, per the client's reference. Four
+   columns at phone width squeezed "SUCCESS STORIES GLOBALLY" onto three lines
+   and made the row taller than the stats were worth. */
+@media (max-width:720px){
+  .pa-stats{ grid-template-columns:repeat(2,1fr); gap:10px; margin-top:26px; }
+  .pa-stat{ padding:15px 10px; border-radius:12px; }
+  .pa-stat-v{ font-size:18px; }
+  .pa-stat-l{ margin-top:6px; line-height:1.4; }
+}
+
+/* Reference frames this label as a soft highlighted pill sitting just above the
+   player, not as loose tracked-out text. The gap below is deliberately tight —
+   the pill and the video read as one unit. */
+.pa-watch{ width:100%; margin:30px auto 0; display:flex; align-items:center; justify-content:center; }
+/* A real button now — it starts the video below. Styled as the pill it was, so
+   nothing moves, but it has to behave like a control: pointer, focus ring,
+   and a press state. */
+.pa-watch-pill{ display:inline-flex; align-items:center; gap:9px; padding:9px 20px; border-radius:999px;
+  background:rgba(var(--brand-rgb),.12); border:1px solid rgba(var(--brand-rgb),.22);
+  font-family:var(--fb); font-size:12px; font-weight:800; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--brand-deep); line-height:1; cursor:pointer;
+  transition:background-color .25s ease, border-color .25s ease, transform .25s cubic-bezier(.2,.8,.3,1),
+    box-shadow .25s ease; }
+.pa-watch-pill:hover{ background:rgba(var(--brand-rgb),.2); border-color:rgba(var(--brand-rgb),.45);
+  transform:translateY(-2px); box-shadow:0 10px 22px -10px rgba(var(--brand-rgb),.75); }
+.pa-watch-pill:active{ transform:translateY(0); }
+.pa-watch-pill:focus-visible{ outline:2px solid var(--brand); outline-offset:3px; }
+
+/* The arrow keeps nodding at the video. It is the one piece of motion on the
+   page whose whole job is to point somewhere, so it never fully stops. */
+.pa-watch-arrow{ display:grid; place-items:center; width:20px; height:20px; border-radius:50%; flex:0 0 20px;
+  background:rgba(var(--brand-rgb),.18); color:var(--brand-deep);
+  animation:paWatchNudge 1.7s ease-in-out infinite;
+  transition:background-color .25s ease, transform .25s ease; }
+.pa-watch-pill:hover .pa-watch-arrow{ background:var(--brand); color:#fff; animation-duration:.9s; }
+@keyframes paWatchNudge{
+  0%,100%{ transform:translateY(-2px); }
+  50%    { transform:translateY(3px); }
+}
+@media (prefers-reduced-motion:reduce){
+  .pa-watch-arrow{ animation:none; }
+  .pa-watch-pill{ transition:none; }
+  .pa-watch-pill:hover{ transform:none; }
+}
+
+/* Desktop row break for the marker pills: 4 on the first row, 3 on the second.
+   Collapses to nothing on mobile so they wrap by width there. */
+.pa-pillbreak{ flex-basis:100%; height:0; margin:0; }
+@media (max-width:720px){ .pa-pillbreak{ display:none; } }
 
 /* ── BEAT 2 · For-You-If (single centred column, per the Kunal lock) ───── */
 .pa-whowrap{ width:100%; max-width:760px; margin-left:auto; margin-right:auto; }
@@ -52,6 +149,11 @@
   .pa-marquee{ overflow-x:auto; -webkit-mask-image:none; mask-image:none; }
   .pa-marquee-track{ animation:none; }
 }
+
+/* The standalone rule mark, for sections that carry no eyebrow text. Same
+   24x2 bar the eyebrow draws via ::before, so the two are interchangeable. */
+.pa-rule{ display:block; width:24px; height:2px; margin:0 auto 18px; background:var(--brand); border-radius:2px; }
+.sdp-dark .pa-rule,.sdp-dark-alt .pa-rule{ background:var(--brand-bright); }
 
 /* ── BEAT 4 · Case cards (exhibit frame; media slot pending) ──────────── */
 .pa-lede{ width:100%; text-align:center; font-style:italic; color:var(--muted); font-size:14.5px; margin-bottom:8px; }
@@ -111,6 +213,124 @@
 .pa-story{ max-width:62ch; }
 .pa-story p{ font-size:15.5px; line-height:1.8; color:var(--ink-dark-soft); }
 
+/* Mobile: the whole experts block centres together. The prose was already
+   centred while the name and role above it stayed left, which read as two
+   different blocks stacked rather than one. */
+@media (max-width:720px){
+  .pa-founder-name,
+  .pa-founder-role{ text-align:center; }
+  .pa-story{ margin-left:auto; margin-right:auto; }
+}
+
+/* ── BEAT 5c · Credentials wall (2026-08-11) ──────────────────────────────
+   Sits on the dark founder band, so every colour here is the dark-band token,
+   not the light one. Static grid by design — the reference carousel hid four
+   of six cards behind arrows, which is a strange thing to do to your proof. */
+.pa-creds{ margin-top:56px; padding-top:40px; border-top:1px solid var(--border-dark-strong); }
+/* Themed like every other eyebrow on a dark band — brand-bright, not the gold
+   it was borrowing, and carrying the same rule mark so it sits in the system. */
+.pa-creds-eyebrow{ display:inline-flex; align-items:center; gap:10px; margin:0 auto 26px;
+  font-family:var(--fb); font-size:11px; font-weight:800; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--brand-bright); }
+.pa-creds-eyebrow::before{ content:""; width:24px; height:2px; background:var(--brand-bright); flex:0 0 24px; }
+.pa-creds{ text-align:center; }
+.pa-creds-grid{ text-align:left; }
+/* ── Carousel rail ────────────────────────────────────────────────────────
+   A real scroller with snap points, not a JS-only widget: trackpad, touch and
+   the arrow buttons all drive the same element, and it degrades to a plain
+   swipeable strip if the script never runs. */
+.pa-creds-rail-wrap{ position:relative; }
+.pa-creds-rail{ display:flex; gap:22px; overflow-x:auto; scroll-snap-type:x mandatory;
+  padding:4px 2px 10px; scrollbar-width:none; -ms-overflow-style:none; }
+.pa-creds-rail::-webkit-scrollbar{ display:none; }
+.pa-creds-rail > .pa-cred{ scroll-snap-align:start; flex:0 0 clamp(240px,26vw,300px); }
+
+.pa-creds-nav{ position:absolute; top:calc(50% - 34px); z-index:3; width:44px; height:44px; border-radius:50%;
+  display:grid; place-items:center; cursor:pointer; color:var(--bg-dark);
+  background:var(--ink-dark); border:1px solid rgba(255,255,255,.5);
+  box-shadow:0 10px 26px -10px rgba(0,0,0,.9);
+  transition:transform .2s ease, opacity .2s ease, background-color .2s ease; }
+.pa-creds-nav.prev{ left:-14px; transform:scaleX(-1); }
+.pa-creds-nav.next{ right:-14px; }
+.pa-creds-nav:hover:not(:disabled){ background:var(--brand-bright); color:#fff; }
+.pa-creds-nav.next:hover:not(:disabled){ transform:translateX(3px); }
+.pa-creds-nav.prev:hover:not(:disabled){ transform:scaleX(-1) translateX(3px); }
+.pa-creds-nav:disabled{ opacity:0; pointer-events:none; }
+@media (max-width:900px){
+  .pa-creds-nav{ display:none; }         /* touch scrolls it; arrows are clutter */
+  .pa-creds-rail{ gap:16px; }
+  .pa-creds-rail > .pa-cred{ flex-basis:78vw; max-width:300px; }
+}
+
+/* ── Lightbox ─────────────────────────────────────────────────────────── */
+.pa-cred-lb{ position:fixed; inset:0; z-index:1200; display:grid; place-items:center; padding:24px; }
+.pa-cred-lb-bg{ position:absolute; inset:0; background:rgba(var(--ink-rgb),.88); backdrop-filter:blur(8px); }
+/* Flex column, so the meta block claims its height FIRST and the image takes
+   whatever is left. A max-height on the image alone was not enough: a landscape
+   certificate still filled the panel and pushed the "open the original" link
+   out past the panel's own overflow. min-height:0 is what lets the image
+   actually shrink inside a flex parent. */
+.pa-cred-lb-panel{ position:relative; z-index:1; width:min(980px,100%); max-height:90vh;
+  display:flex; flex-direction:column; overflow:hidden;
+  background:var(--bg-dark-alt); border:1px solid var(--border-dark-strong); border-radius:var(--r-lg);
+  box-shadow:0 40px 90px -30px rgba(0,0,0,.9); }
+.pa-cred-lb-img{ display:block; width:100%; min-height:0; flex:1 1 auto; object-fit:contain;
+  background:#fff; border-radius:var(--r-lg) var(--r-lg) 0 0; }
+.pa-cred-lb-meta{ flex:0 0 auto; }
+.pa-cred-lb-meta{ padding:22px 26px 26px; }
+.pa-cred-lb-meta h3{ margin:9px 0 5px; font-size:clamp(18px,2.4vw,23px); color:var(--ink-dark); }
+.pa-cred-lb-meta p{ margin:0; font-size:14px; color:var(--muted-dark); }
+.pa-cred-lb-link{ display:inline-flex; align-items:center; gap:9px; margin-top:16px; padding:10px 18px;
+  border-radius:999px; background:rgba(var(--brand-rgb),.18); border:1px solid rgba(var(--brand-rgb),.45);
+  font-family:var(--fb); font-size:12.5px; font-weight:700; color:var(--brand-bright); text-decoration:none;
+  transition:background-color .2s ease, transform .2s ease; }
+.pa-cred-lb-link:hover{ background:rgba(var(--brand-rgb),.3); transform:translateX(3px); }
+/* The shared .pa-lb-close is white-on-translucent, which vanishes against a
+   white certificate. Solid dark plate here so it is always findable. */
+.pa-cred-lb .pa-lb-close{ position:absolute; top:12px; right:12px; z-index:2;
+  background:rgba(var(--ink-rgb),.86); border-color:rgba(255,255,255,.35); color:#fff;
+  box-shadow:0 6px 18px -6px rgba(0,0,0,.8); }
+.pa-cred-lb .pa-lb-close:hover{ background:var(--brand); border-color:var(--brand); }
+@media (max-width:720px){
+  .pa-cred-lb{ padding:14px; }
+  .pa-cred-lb-meta{ padding:18px 18px 22px; }
+}
+
+/* A button now, not a link — it opens the document in a modal. Padding and
+   text-align are reset because a <button> brings its own. */
+.pa-cred{ display:flex; flex-direction:column; overflow:hidden; text-decoration:none; cursor:pointer;
+  padding:0; text-align:left; font:inherit; color:inherit; appearance:none;
+  background:var(--bg-dark-alt); border:1px solid var(--border-dark-strong); border-radius:16px;
+  transition:transform .25s cubic-bezier(.2,.7,.3,1), border-color .25s ease, box-shadow .25s ease; }
+.pa-cred:focus-visible{ outline:2px solid var(--brand-bright); outline-offset:3px; }
+.pa-cred:hover{ transform:translateY(-4px); border-color:rgba(var(--brand-rgb),.55);
+  box-shadow:0 18px 40px -20px rgba(0,0,0,.8), 0 0 0 1px rgba(var(--brand-rgb),.22); }
+
+/* Art slot: a screenshot of the live article, anchored top-left so the outlet
+   masthead and headline stay in frame at every card width. */
+.pa-cred-art{ position:relative; display:block; width:100%; aspect-ratio:16/10; overflow:hidden;
+  background:var(--bg-dark-elev); border-bottom:1px solid var(--border-dark-strong); }
+.pa-cred-art img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:top left;
+  transition:transform .5s cubic-bezier(.2,.7,.3,1); }
+.pa-cred:hover .pa-cred-art img{ transform:scale(1.03); }
+
+.pa-cred-body{ display:flex; flex-direction:column; gap:7px; padding:18px 20px 22px; }
+.pa-cred-kind{ display:flex; align-items:center; gap:10px; font-family:var(--fb); font-size:10px; font-weight:800;
+  letter-spacing:.18em; text-transform:uppercase; color:var(--brand-bright); }
+.pa-cred-kind em{ font-style:normal; font-weight:600; letter-spacing:.06em; color:var(--muted-dark); }
+.pa-cred-kind em::before{ content:"· "; }
+.pa-cred-title{ font-size:15.5px; line-height:1.45; font-weight:600; color:var(--ink-dark); }
+.pa-cred-issuer{ font-family:var(--fb); font-size:12.5px; color:var(--muted-dark); }
+/* Press cards are links; make that legible without an underline. */
+a.pa-cred .pa-cred-issuer::after{ content:" ↗"; color:var(--brand-bright); }
+
+@media (prefers-reduced-motion:reduce){
+  .pa-cred,
+  .pa-cred-art img{ transition:none; }
+  .pa-cred:hover{ transform:none; }
+  .pa-cred:hover .pa-cred-art img{ transform:none; }
+}
+
 /* Placeholder shell for missing copy */
 .pa-missing{ border:1px dashed rgba(var(--brand-rgb),.45); border-radius:14px; padding:26px 24px;
   background:rgba(var(--brand-rgb),.06); text-align:left; }
@@ -140,15 +360,73 @@
 .pa-closer{ width:100%; text-align:center; margin:26px auto 0; font-size:15px; color:var(--ink-soft); }
 .pa-closer b{ color:var(--brand-deep); }
 
-/* ── BEAT 7 · Programme ledger ───────────────────────────────────────── */
-.pa-ledger{ width:100%; max-width:880px; margin:0 auto; border-top:1px solid var(--border); }
-.pa-lrow{ display:grid; grid-template-columns:64px minmax(0,1fr); gap:18px; padding:24px 6px;
-  border-bottom:1px solid var(--border); align-items:start; transition:background .25s; }
-.pa-lrow:hover{ background:rgba(var(--brand-rgb),.04); }
-.pa-lord{ font-family:var(--fh); font-size:26px; color:var(--brand); letter-spacing:.06em; line-height:1; padding-top:3px; }
-.pa-lrow h3{ font-size:clamp(18px,2.2vw,22px); margin:0 0 7px; letter-spacing:.02em; }
-.pa-lrow p{ margin:0; font-size:14.5px; line-height:1.7; }
-@media (max-width:560px){ .pa-lrow{ grid-template-columns:44px minmax(0,1fr); gap:12px; } .pa-lord{ font-size:20px; } }
+/* ── BEAT 7 · Programme timeline (2026-08-11, was a flat ledger) ──────────
+   One rail behind six nodes, so the components read as a sequence rather than
+   a list. NO week labels by design — see the note in page.js. */
+.pa-tl{ position:relative; width:100%; max-width:820px; margin:0 auto; }
+/* Inset top and bottom so the rail starts and stops at the first and last
+   node instead of floating past them. */
+.pa-tl::before{ content:""; position:absolute; left:23px; top:30px; bottom:34px; width:2px;
+  background:linear-gradient(180deg,rgba(var(--brand-rgb),.06),rgba(var(--brand-rgb),.42) 10%,
+    rgba(var(--brand-rgb),.42) 90%,rgba(var(--brand-rgb),.06)); }
+.pa-tl-row{ position:relative; display:grid; grid-template-columns:48px minmax(0,1fr); gap:20px;
+  padding:14px 6px 26px; }
+.pa-tl-row:last-child{ padding-bottom:4px; }
+.pa-tl-node{ position:relative; z-index:1; width:48px; height:48px; border-radius:14px;
+  display:grid; place-items:center; color:var(--brand-deep); background:#fff;
+  border:1px solid rgba(var(--brand-rgb),.3);
+  box-shadow:0 6px 18px -8px rgba(var(--brand-rgb),.55), inset 0 1px 0 rgba(255,255,255,.9);
+  transition:background .4s ease, color .4s ease, border-color .4s ease,
+    box-shadow .4s ease, transform .4s cubic-bezier(.2,.8,.3,1); }
+
+/* ── Scroll-lit state (2026-08-11) ────────────────────────────────────────
+   Timeline.js sets --fill on the bar and data-lit on each row as its node
+   reaches the playhead. The rail therefore fills as you read down it and the
+   node you have arrived at is the one that is lit — the beat builds instead of
+   sitting there finished. */
+.pa-tl-fill{ position:absolute; left:23px; top:30px; width:2px; height:var(--fill,0%);
+  border-radius:2px; background:linear-gradient(180deg,var(--brand-bright),var(--brand));
+  box-shadow:0 0 12px rgba(var(--brand-rgb),.6);
+  transition:height .18s linear; pointer-events:none; }
+
+.pa-tl-row[data-lit] .pa-tl-node{
+  background:var(--grad-brand); color:#fff; border-color:transparent; transform:scale(1.06);
+  box-shadow:0 0 0 5px rgba(var(--brand-rgb),.14), 0 12px 26px -10px rgba(var(--brand-rgb),.85);
+}
+.pa-tl-row[data-lit] .sdp-num3d{
+  color:#fff; background:var(--grad-brand); border-color:transparent;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35), inset 0 -3px 0 rgba(0,0,0,.14),
+    0 3px 0 rgba(var(--brand-rgb),.45), 0 10px 20px -10px rgba(var(--brand-rgb),.8);
+}
+.pa-tl-row[data-lit] h3{ color:var(--brand-deep); transition:color .4s ease; }
+
+@media (prefers-reduced-motion:reduce){
+  .pa-tl-node,
+  .pa-tl-fill,
+  .pa-tl-row[data-lit] h3{ transition:none; }
+  .pa-tl-row[data-lit] .pa-tl-node{ transform:none; }
+}
+.pa-tl-body{ padding-top:2px; }
+/* Placement only — the plate itself comes from .sdp-num3d, so nothing here may
+   set display, font-size or colour or it will out-specify the badge. */
+.pa-tl-ord{ margin-bottom:9px; }
+.pa-tl-row h3{ font-size:clamp(17px,2.1vw,21px); margin:0 0 7px; letter-spacing:.02em; }
+.pa-tl-row p{ margin:0; font-size:14.5px; line-height:1.7; }
+
+/* Mobile: the timeline KEEPS its rail and its left edge (2026-08-11). Stacking
+   the node above centred copy was tried and reverted — it stopped reading as a
+   sequence, which is the entire point of the beat. Just tightened. */
+@media (max-width:720px){
+  .pa-tl::before,
+  .pa-tl-fill{ left:19px; }
+  .pa-tl-fill{ top:26px; }
+  .pa-tl-row{ grid-template-columns:40px minmax(0,1fr); gap:14px; padding:12px 0 22px; }
+  .pa-tl-node{ width:40px; height:40px; border-radius:12px; }
+  .pa-tl-node svg{ width:17px; height:17px; }
+  .pa-tl-body{ text-align:left; }
+  .pa-tl-ord{ margin-bottom:7px; }
+  .sdp-num3d{ min-width:38px; height:34px; font-size:15px; padding:0 9px; border-radius:11px; }
+}
 .pa-footnote{ width:100%; text-align:center; max-width:680px; margin:26px auto 0; font-size:13px; font-style:italic; color:var(--muted); }
 
 /* ── BEAT 10 · FAQ plaque ────────────────────────────────────────────── */
@@ -179,6 +457,16 @@
   background:linear-gradient(90deg,transparent,var(--border-dark-strong),transparent); }
 .pa-colophon-line{ display:inline-flex; align-items:center; gap:14px; flex-wrap:wrap; justify-content:center;
   font-family:var(--fb); font-size:12px; font-weight:600; letter-spacing:.08em; color:var(--muted-dark); }
+.pa-colophon-links{ display:inline-flex; align-items:center; gap:14px; flex-wrap:wrap; justify-content:center; }
+
+/* Mobile: two centred lines — brand, then the links row. The star separator
+   goes: it only makes sense between things on the same line. */
+@media (max-width:720px){
+  .pa-colophon{ margin-top:44px; }
+  .pa-colophon-line{ flex-direction:column; gap:10px; }
+  .pa-colophon-star{ display:none; }
+  .pa-colophon-links{ gap:18px; }
+}
 .pa-colophon-line a{ text-decoration:none; }
 .pa-colophon-line a:hover{ color:var(--brand-bright); }
 .pa-colophon-star{ color:var(--brand-bright); }
@@ -213,11 +501,17 @@
   text-underline-offset:2px; }
 .pa-credpill a:hover{ opacity:.82; }
 
-/* ── Hero opening block, sits lower in the first screen (2026-08-10) ───────
+/* ── Hero opening block ───────────────────────────────────────────────────
    NO flex, NO wrapper, NO layout change. Padding only.
    Flex here turns .sdp-eyebrow-pill (inline-flex) into a stretched flex item,
-   which blows the pill out to full width. Never do that to this block. */
-.pa-hero-inner{ padding-top:clamp(34px,9vh,110px); }
+   which blows the pill out to full width. Never do that to this block.
+
+   2026-08-10 pushed this down the first screen with clamp(34px,9vh,110px) —
+   81px on a 900px-tall window. The reference sits the gate pill directly under
+   the avatar row (~22px of air), so the clamp is now scaled to land there while
+   still breathing a little on tall windows. Combined with .sdp-hero's own 14px
+   this reads as roughly 25px below the trust row. */
+.pa-hero-inner{ padding-top:clamp(8px,1.2vh,20px); }
 
 /* The H1 lines were not centring. The eyebrow and the sub below it were, so
    text-align was reaching the block; something inside the H1 was winning.
@@ -236,7 +530,7 @@
 .pa-hero-inner .pa-h1-line{ display:block; width:100%; }
 
 @media (max-width:760px){
-  .pa-hero-inner{ padding-top:26px; }
+  .pa-hero-inner{ padding-top:16px; }
 }
 
 /* ── Chip icons: size + optical centring against their own label (2026-08-10) ──
@@ -270,9 +564,12 @@
                          --fm → --fb   · --radius-m → 14px · --bg-grid → --bg-alt
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Video testimonial grid (2-up) ─────────────────────────────────────── */
+/* ── Video testimonial grid ────────────────────────────────────────────── */
+/* 3-up since 2026-08-11: three clips supplied, not Shruti's four. The clips are
+   16:9, so the row is wider than the old portrait 2-up or each frame ends up
+   too short to read a face in. */
 .pa-proof .pa-tcards{ display:grid; grid-template-columns:repeat(2,1fr); gap:24px; max-width:860px; margin:0 auto; }
-.pa-proof .pa-tcards-vid{ margin-bottom:24px; }
+.pa-proof .pa-tcards-vid{ grid-template-columns:repeat(3,1fr); max-width:1080px; margin-bottom:24px; }
 
 /* ── The card shell, shared by video cards and case cards ──────────────── */
 .pa-proof .pa-tcard{ position:relative; display:flex; flex-direction:column; overflow:hidden; padding:0;
@@ -293,12 +590,34 @@
 .pa-proof .pa-tphoto,
 .pa-proof .pa-tcard-body{ position:relative; z-index:2; }
 
-/* ── Video poster frame (9:14 portrait, as on the source) ──────────────── */
-.pa-proof .pa-tphoto{ display:block; position:relative; width:100%; height:0; padding-top:155.56%; flex:0 0 auto;
+/* ── Video poster frame ────────────────────────────────────────────────── */
+/* The frame takes its shape from --ar, which each card sets inline from the
+   clip's own source dimensions (content.js carries w/h). So a 16:9 clip frames
+   landscape and a 9:16 one frames portrait with nothing here to change. The
+   9/14 fallback is the source funnel's portrait crop, used by the placeholders
+   and by any card that arrives without dimensions. */
+.pa-proof .pa-tphoto{ display:block; position:relative; width:100%; aspect-ratio:var(--ar, 9 / 14); flex:0 0 auto;
   overflow:hidden; background:linear-gradient(135deg,var(--bg-alt),var(--bg)); }
-.pa-proof .pa-tphoto video{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain;
+.pa-proof .pa-tphoto video,
+.pa-proof .pa-tphoto img,
+.pa-proof .pa-tphoto iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; object-fit:cover;
   transition:transform .6s cubic-bezier(.2,.7,.3,1), filter .35s ease; }
-.pa-proof .pa-tcard:hover .pa-tphoto video{ transform:scale(1.06); filter:brightness(1.04); }
+/* Hover zoom only while the poster is up — never on a live player. */
+.pa-proof .pa-tcard:not([data-playing]):hover .pa-tphoto video,
+.pa-proof .pa-tcard:not([data-playing]):hover .pa-tphoto img{ transform:scale(1.06); filter:brightness(1.04); }
+/* Once playing, the card stops behaving like a button: no lift, no tint, so the
+   Vimeo controls stay reachable and steady under the cursor (C12).
+   Keyed on [data-playing] rather than a class — see VideoTestimonials.js, a
+   className toggle here would clobber useReveal's imperative `vis`. */
+.pa-proof .pa-tcard[data-playing]{ cursor:default; }
+.pa-proof .pa-tcard[data-playing]:hover{ transform:none; }
+.pa-proof .pa-tcard[data-playing]:hover::before{ opacity:0; }
+
+/* Full-frame hit area for the play disc — a 54px target is too small on a
+   card this size, so the whole poster is the button. */
+.pa-proof .pa-tplay-hit{ position:absolute; inset:0; z-index:2; display:block; width:100%; padding:0;
+  background:none; border:0; appearance:none; cursor:pointer; color:inherit; font:inherit; }
+.pa-proof .pa-tplay-hit:focus-visible{ outline:2px solid var(--brand); outline-offset:-4px; }
 .pa-proof .pa-tglass{ position:absolute; inset:0; z-index:1;
   background:linear-gradient(180deg,transparent 42%,rgba(var(--ink-rgb),.46)); }
 .pa-proof .pa-tplay{ position:absolute; top:50%; left:50%; z-index:2; width:54px; height:54px; margin:-27px 0 0 -27px;
@@ -307,7 +626,8 @@
   transition:transform .35s cubic-bezier(.2,.7,.3,1), box-shadow .35s ease; }
 .pa-proof .pa-tplay svg{ width:22px; height:22px; margin-left:2px; fill:currentColor; stroke:none; }
 .pa-proof .pa-tcard:hover .pa-tplay{ transform:scale(1.08); box-shadow:0 6px 18px rgba(var(--brand-rgb),.45); }
-.pa-proof .pa-tag{ position:absolute; bottom:10px; right:10px; z-index:3; padding:4px 12px; border-radius:3px;
+.pa-proof .pa-tag{ position:absolute; bottom:10px; right:10px; z-index:3; pointer-events:none;
+  padding:4px 12px; border-radius:3px;
   font-family:var(--fb); font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:#fff;
   background:var(--brand); transition:transform .35s cubic-bezier(.2,.7,.3,1), box-shadow .35s ease; }
 .pa-proof .pa-tcard:hover .pa-tag{ transform:scale(1.08); box-shadow:0 6px 18px rgba(var(--brand-rgb),.45); }
@@ -345,9 +665,15 @@
 @keyframes paCaseMarq{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
 @keyframes paCaseMarqRtl{ from{ transform:translateX(-50%); } to{ transform:translateX(0); } }
 
+/* 3-up holds while each frame stays big enough to read a face. Below that go
+   straight to 1-up — 2-up would leave the third clip orphaned on its own row. */
+@media (max-width:900px){
+  .pa-proof .pa-tcards-vid{ grid-template-columns:1fr; max-width:460px; }
+}
+
 @media (max-width:640px){
   .pa-proof .pa-tcards{ grid-template-columns:1fr; gap:18px; }
-  .pa-proof .pa-tcards-vid{ max-width:320px; margin-bottom:18px; }
+  .pa-proof .pa-tcards-vid{ max-width:100%; margin-bottom:18px; }
   .pa-proof .pa-tcard-body{ padding:16px 16px 18px; }
   .pa-proof .pa-tcard-body h4,
   .pa-proof .pa-tcard-body .nm{ font-size:16px; }
@@ -363,15 +689,18 @@
   .pa-case-row{ overflow-x:auto; -webkit-mask-image:none; mask-image:none; }
   .pa-proof .pa-tcard,
   .pa-proof .pa-tphoto video,
+  .pa-proof .pa-tphoto img,
   .pa-proof .pa-tplay,
   .pa-proof .pa-tag{ transition:none; }
   .pa-proof .pa-tcard:hover{ transform:none; }
 }
 
-/* ── Video testimonial placeholders (until the 4 clips land) ───────────── */
-/* Same shell and proportions as a real card, so the layout does not shift
-   when the clips are dropped in. Not clickable, no hover lift. */
+/* ── Video testimonial placeholders ────────────────────────────────────── */
+/* Dead while cases.videoTestimonials is populated; kept as the empty-state so
+   emptying that array degrades to held layout rather than a collapsed section.
+   Pinned to 16:9 to match the clips that shipped. Not clickable, no hover lift. */
 .pa-proof .pa-tcard-ph{ cursor:default; }
+.pa-proof .pa-tcard-ph .pa-tphoto{ --ar:16 / 9; }
 .pa-proof .pa-tcard-ph:hover{ transform:none; border-color:var(--border); box-shadow:none; }
 .pa-proof .pa-tcard-ph:hover::before{ opacity:0; }
 .pa-proof .pa-tcard-ph .pa-tphoto{
@@ -526,4 +855,30 @@
   width:1000px;
   height:900px;
   filter:blur(20px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MERGE RECONCILIATION (2026-08-11)
+   Where the theme pass and the reference-image pass both had an opinion. Both
+   rules above are correct for what they were written against; these settle
+   which one applies where, and must stay LAST in the cascade to do it.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* The hero gate pill is FILLED with the brand gradient (client reference).
+   The eyebrow-colour rule above was written for the bordered form of the pill,
+   and that navy on this gradient is close to unreadable. White here, and the
+   --eyebrow navy still governs every section eyebrow on the light bands, which
+   is what that rule is actually for. */
+.sdp-root .sdp-eyebrow-pill{ color:#fff; }
+.sdp-root .sdp-eyebrow-pill svg{ color:#fff; }
+
+/* Trust row spacing is client-specified at mobile (gap 5px 12px, padding
+   7px 0). The divider treatment above zeroes the column gap and carries the
+   spacing on a pseudo-element instead, which wins on specificity — so the
+   client's numbers are restated here at matching weight. The divider itself
+   is kept on desktop and dropped on phones, where a rule at the start of a
+   wrapped line reads as a stray mark. */
+@media (max-width:720px){
+  .sdp-root .pa-trustrow-inner{ column-gap:12px; row-gap:5px; padding:7px 0; }
+  .sdp-root .pa-trustchip + .pa-trustchip::before{ display:none; }
 }

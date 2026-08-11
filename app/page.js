@@ -2,24 +2,37 @@
 
 import './landing.css';
 
+import { Fragment, useRef, useState } from 'react';
 import useReveal from './components/useReveal';
 import CtaLockup from './components/CtaLockup';
 import VslFrame from './components/VslFrame';
 import CheckinWall from './components/CheckinWall';
+import VideoTestimonials from './components/VideoTestimonials';
+import Timeline from './components/Timeline';
+import Credentials from './components/Credentials';
 import Faq from './components/Faq';
 import StickyCta from './components/StickyCta';
-import { ArrowDown, Check, Play, Shield, Star, User, markerIcons, pointerIcons, trustIcons } from './components/Icons';
+import {
+  ArrowDown,
+  Check,
+  Shield,
+  Star,
+  markerIcons,
+  pointerIcons,
+  programmeIcons,
+  trustIcons,
+} from './components/Icons';
 
 import {
   MISSING,
   announce,
   trustRow,
+  trustAvatars,
   hero,
   forYouIf,
   cases,
   checkinWall,
   founder,
-  mechanism,
   programme,
   guarantee,
   faq,
@@ -27,9 +40,6 @@ import {
   cta,
 } from './content';
 
-/* How many times the announce copy repeats per half of the marquee track.
-   Each half must overflow the widest viewport or the loop shows a blank gap. */
-const ANNOUNCE_REPEAT = 8;
 
 /** Lifts one phrase inside a headline into the accent colour. Falls back to the
     plain string if the phrase is absent, so a copy edit can never break the H1. */
@@ -55,52 +65,56 @@ function H2({ parts }) {
   );
 }
 
-function Missing({ note }) {
-  return (
-    <div className="pa-missing" data-sdp-reveal>
-      <span className="pa-missing-tag">Placeholder</span>
-      <p>
-        <strong>[{note}]</strong>
-        <br />
-        Supply the copy and it drops straight in via <code>app/content.js</code>. Nothing has been
-        written here on our side.
-      </p>
-    </div>
-  );
-}
+/* The <Missing> placeholder block was removed 2026-08-11 — every slot it
+   guarded is now filled. The MISSING map stays in content.js as a record of
+   what the docx never supplied; it just no longer renders to visitors. */
 
 export default function Landing() {
   useReveal();
+
+  /* The VSL's play state lives here, not in VslFrame, because two controls
+     start it: the disc on the poster and the "Watch the short video below"
+     pill above it. */
+  const [vslPlaying, setVslPlaying] = useState(false);
+  const vslRef = useRef(null);
+  const startVsl = () => {
+    setVslPlaying(true);
+    vslRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
 
   return (
     <main className="sdp-root">
       {/* ─────────── BEAT 0a · Announcement strip (§11 · R10) ─────────── */}
       <div className="sdp-announce">
-        {/* The track scrolls by translateX(-50%), so the two halves must be
-            identical AND each half must be wider than the viewport, or a blank
-            gap appears. One short line was nowhere near wide enough, so each
-            half repeats the copy ANNOUNCE_REPEAT times. */}
-        <div className="sdp-announce-track">
-          {[0, 1].map((half) =>
-            Array.from({ length: ANNOUNCE_REPEAT }, (_, rep) =>
-              announce.map((line, i) => (
-                <span key={`${half}-${rep}-${i}`}>
-                  {line} <span className="dot">·</span>
-                </span>
-              ))
-            )
-          )}
-        </div>
+        {/* Static single line since 2026-08-11 — no scroll, no repetition, and
+            it must not wrap. .sdp-announce-line scales its own type down on
+            narrow screens to hold one line all the way to 320px. */}
+        <span className="sdp-announce-line">{announce[0]}</span>
       </div>
 
       {/* ─────────── BEAT 0b · Trust row (§12, light) ─────────── */}
       <div className="pa-trustrow">
         <div className="sdp-wrap pa-trustrow-inner">
+          {/* Overlapping avatar cluster leads the row, as in the reference. */}
+          {trustAvatars.length > 0 && (
+            <span className="pa-avatars">
+              {trustAvatars.map((a) => (
+                <img className="pa-avatar" key={a.src} src={a.src} alt={a.name} loading="eager" />
+              ))}
+            </span>
+          )}
           {trustRow.map((chip) => {
             const Ico = chip.icon ? trustIcons[chip.icon] : null;
             return (
               <span className="pa-trustchip" key={chip.label}>
-                {Ico && <Ico size={20} />}
+                {Ico && <Ico size={14} />}
+                {chip.stars > 0 && (
+                  <span className="pa-stars" aria-label={`${chip.stars} out of 5`}>
+                    {Array.from({ length: chip.stars }, (_, i) => (
+                      <Star key={i} size={13} />
+                    ))}
+                  </span>
+                )}
                 {chip.label}
               </span>
             );
@@ -112,8 +126,11 @@ export default function Landing() {
       <section className="sdp-hero" id="hero">
         <div className="sdp-wrap pa-hero-inner">
           {/* gate = bordered pill + user icon (was a glowing dot), not the filled callout */}
+          {/* Back to the pulsing glow dot, 2026-08-11. The theme pass had swapped
+              it for a user glyph; the dot is the live mark this pill was built
+              around and reads as "open now" rather than "a person". */}
           <span className="sdp-eyebrow-pill" data-sdp-reveal>
-            <User size={18} />
+            <span className="glowdot" />
             {hero.gate}
           </span>
 
@@ -133,33 +150,65 @@ export default function Landing() {
           </h1>
 
           <p className="sdp-sub" data-sdp-reveal style={{ '--d': '.1s' }}>
-            {hero.sub}
+            {hero.sub.map((run, i) =>
+              run.em ? (
+                <em className="pa-em" key={i}>
+                  {run.text}
+                </em>
+              ) : (
+                <span key={i}>{run.text}</span>
+              )
+            )}
           </p>
 
           {/* the health-marker row the finalised copy leads the hero with */}
-          {hero.markersLede && (
+          {hero.markersLede.length > 0 && (
             <p className="pa-markers-lede" data-sdp-reveal style={{ '--d': '.13s' }}>
-              {hero.markersLede}
+              {hero.markersLede.map((run, i) =>
+                run.mark ? (
+                  <mark className="pa-hl" key={i}>
+                    {run.text}
+                  </mark>
+                ) : (
+                  <span key={i}>{run.text}</span>
+                )
+              )}
             </p>
           )}
           <div className="pa-pillrow" data-sdp-reveal style={{ '--d': '.15s' }}>
-            {hero.markers.map((marker) => {
+            {hero.markers.map((marker, i) => {
               const Ico = markerIcons[marker.icon];
               return (
-                <span className="sdp-marker-chip" key={marker.label}>
-                  {Ico ? <Ico size={15} /> : <span className="sdp-marker-dot" />}
-                  {marker.label}
-                </span>
+                <Fragment key={marker.label}>
+                  <span className="sdp-marker-chip">
+                    {Ico ? <Ico size={15} /> : <span className="sdp-marker-dot" />}
+                    {marker.label}
+                  </span>
+                  {/* Forces the desktop row break at 4 + 3. A zero-height
+                      flex-basis:100% item is the only way to break a wrapping
+                      flex row at a chosen point; it collapses on mobile so
+                      the pills wrap naturally there. */}
+                  {i === 3 && <span className="pa-pillbreak" aria-hidden="true" />}
+                </Fragment>
               );
             })}
           </div>
 
+          {/* The label is the video's second play button: pressing it starts
+              the clip below and brings it into view, so the instruction and the
+              thing it points at are one control. */}
           <div className="pa-watch" data-sdp-reveal style={{ '--d': '.2s' }}>
-            {cta.aboveVideo}
-            <ArrowDown size={13} />
+            <button type="button" className="pa-watch-pill" onClick={startVsl}>
+              {cta.aboveVideo}
+              <span className="pa-watch-arrow">
+                <ArrowDown size={13} />
+              </span>
+            </button>
           </div>
 
-          <VslFrame />
+          <div ref={vslRef}>
+            <VslFrame playing={vslPlaying} onPlay={() => setVslPlaying(true)} />
+          </div>
 
           {/* post-video order is exact: CTA → pointers → urgency (inside lockup)
               → reassurance (inside lockup) → credibility table → outcome pills */}
@@ -242,58 +291,19 @@ export default function Landing() {
           docx defines this as a single beat. */}
       <section className="sdp-section sdp-light-alt pa-proof">
         <div className="sdp-wrap">
-          {/* no eyebrow on this section by design */}
+          {/* No eyebrow TEXT on this section by design, but the rule mark above
+              the heading is part of the section rhythm — without it this was
+              the one beat on the page whose heading started cold. */}
+          <span className="pa-rule" data-sdp-reveal aria-hidden="true" />
           <H2 parts={cases.h2} />
           <p className="pa-lede" data-sdp-reveal>
             {cases.lede}
           </p>
 
-          {/* Video testimonials, 2-up. Structure matches Shruti's .tcards-vid.
-              Until clips land, cases.videoSlots empty boxes hold the layout. */}
-          <div className="pa-tcards pa-tcards-vid pa-mt-24">
-            {cases.videoTestimonials.length > 0
-              ? cases.videoTestimonials.map((v, i) => (
-                  <button
-                    className="pa-tcard pa-tcard-vid"
-                    key={v.name}
-                    data-sdp-reveal
-                    style={{ '--d': `${i * 0.05}s` }}
-                    type="button"
-                  >
-                    <span className="pa-tphoto">
-                      <video src={v.src} poster={v.poster} preload="none" muted loop playsInline />
-                      <span className="pa-tglass" />
-                      <span className="pa-tplay">
-                        <Play size={22} />
-                      </span>
-                      <span className="pa-tag">Video</span>
-                    </span>
-                    <span className="pa-tcard-body">
-                      <span className="nm">{v.name}</span>
-                    </span>
-                  </button>
-                ))
-              : Array.from({ length: cases.videoSlots }, (_, i) => (
-                  <div
-                    className="pa-tcard pa-tcard-vid pa-tcard-ph"
-                    key={`vid-slot-${i}`}
-                    data-sdp-reveal
-                    style={{ '--d': `${i * 0.05}s` }}
-                  >
-                    <span className="pa-tphoto">
-                      <span className="pa-tglass" />
-                      <span className="pa-tplay">
-                        <Play size={22} />
-                      </span>
-                      <span className="pa-tag">Video</span>
-                    </span>
-                    <span className="pa-tcard-body">
-                      <span className="nm">Video testimonial {i + 1}</span>
-                    </span>
-                  </div>
-                ))}
-          </div>
-          {cases.videoTestimonials.length === 0 && <Missing note={MISSING.videoTestimonials} />}
+          {/* Video testimonials, 3-up. Three clips supplied, so the fourth slot
+              Shruti's funnel carries is gone. Poster/iframe swap and the
+              per-clip aspect ratio live in the component. */}
+          <VideoTestimonials items={cases.videoTestimonials} slots={cases.videoSlots} />
         </div>
 
         {/* Case-card marquee. Two identical sets, track animates to -50%, so the
@@ -359,9 +369,12 @@ export default function Landing() {
           )}
 
           <div className="pa-founder pa-mt-24">
+            {/* The "combined shot of Hardik & Dr. Kartik" placeholder was
+                removed on the client's call, 2026-08-11. MISSING.expertsPhoto
+                still records the gap in content.js; it just no longer shows on
+                the page. Swap `founder.photo` when the combined shot lands. */}
             <div className="pa-founder-photo" data-sdp-reveal>
               <img src={founder.photo} alt={`${founder.name}, ${founder.role}`} />
-              <Missing note={MISSING.expertsPhoto} />
             </div>
 
             <div>
@@ -372,68 +385,32 @@ export default function Landing() {
                 {founder.role}
               </div>
 
-              {/* BEAT 5a — credential + press row, from the finalised copy */}
-              {founder.certifications.length > 0 && (
-                <div className="pa-credrow" data-sdp-reveal>
-                  {founder.certifications.map((c) => (
-                    <span className="pa-credpill" key={c.label}>
-                      <Check size={12} />
-                      {c.label}
-                      <a href={c.href} target="_blank" rel="noopener noreferrer">
-                        {c.linkLabel}
-                      </a>
-                    </span>
-                  ))}
-                </div>
-              )}
+              {/* BEAT 5a — the "Certification (Hardik) / (Kartik) — Featured"
+                  pill row was removed 2026-08-11. It pointed at the same two
+                  articles the Certificates wall below already shows in full,
+                  so it was the same proof stated twice, weaker the first time.
+                  founder.certifications stays in content.js as the record. */}
 
               {/* BEAT 5b — the one reliably-TEXT beat. Prose, never a component. */}
               <div className="pa-story pa-mt-24">
-                {founder.story ? (
-                  founder.story.map((para, i) => <p key={i}>{para}</p>)
-                ) : (
-                  <Missing note={MISSING.founderStory} />
-                )}
+                {founder.story.map((para, i) => (
+                  <p key={i}>{para}</p>
+                ))}
               </div>
             </div>
           </div>
+
+          {/* BEAT 5c — credentials carousel: certificates and press in one
+              rail, each card opening the full document in a modal. */}
+          <Credentials />
         </div>
       </section>
 
-      {/* ─────────── BEAT 6 · MECHANISM (§1 numbered pillars, light-alt) ─────────── */}
-      <section className="sdp-section sdp-light-alt">
-        <div className="sdp-wrap">
-          <span className="sdp-eyebrow center" data-sdp-reveal>
-            {mechanism.eyebrow}
-          </span>
-          <H2 parts={mechanism.h2} />
-          <p className="sdp-sub" data-sdp-reveal>
-            {mechanism.sub}
-          </p>
-
-          <div className="pa-pillars">
-            {mechanism.pillars.map((p, i) => (
-              <div className="sdp-card pa-pillar" key={p.title} data-sdp-reveal style={{ '--d': `${i * 0.06}s` }}>
-                <span className="sdp-pillar-num">{String(i + 1).padStart(2, '0')}</span>
-                <h3>{p.title}</h3>
-                <p>{p.body}</p>
-              </div>
-            ))}
-          </div>
-
-          <blockquote className="pa-pullquote" data-sdp-reveal>
-            <p>{mechanism.reframe}</p>
-          </blockquote>
-
-          <p className="pa-closer" data-sdp-reveal>
-            {mechanism.closer}
-          </p>
-
-          <div className="pa-mt-lockup">
-            <CtaLockup />
-          </div>
-        </div>
-      </section>
+      {/* ─────────── BEAT 6 · MECHANISM — REMOVED 2026-08-11 ───────────
+          Cut on the client's call. It was the one section on the page with no
+          source in the finalised docx (MISSING.mechanismSource flagged it as
+          carried over from an earlier draft), so nothing approved was lost.
+          `mechanism` stays in content.js should it ever be wanted back. */}
 
       {/* ─────────── BEAT 7 · PROGRAMME (§3 itemized ledger, light) ─────────── */}
       <section className="sdp-section sdp-light">
@@ -446,17 +423,12 @@ export default function Landing() {
             {programme.sub}
           </p>
 
-          <div className="pa-ledger">
-            {programme.items.map((item, i) => (
-              <div className="pa-lrow" key={item.title} data-sdp-reveal style={{ '--d': `${i * 0.04}s` }}>
-                <span className="pa-lord">{String(i + 1).padStart(2, '0')}</span>
-                <div>
-                  <h3>{item.title}</h3>
-                  <p>{item.body}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+          {/* Timeline, not a plain ledger (2026-08-11). The rail is drawn on
+              .pa-tl, and each node snaps in on reveal — see the lego keyframes
+              in globals.css. Deliberately NO week numbering: the docx never
+              staged these, and inventing "Week 1 / Week 2" would promise an
+              order of delivery nobody has agreed to. */}
+          <Timeline />
 
           <p className="pa-footnote" data-sdp-reveal>
             {programme.footnote}
@@ -513,11 +485,16 @@ export default function Landing() {
             <Faq />
           </div>
 
-          <div className="pa-plaque" data-sdp-reveal>
-            {faq.plaque.map((line) => (
-              <span key={line}>{line}</span>
-            ))}
-          </div>
+          {/* Guarded: faq.plaque is empty (no plaque copy in the docx), and an
+              unguarded .pa-plaque still renders its own border, padding and
+              background — an empty white slab under the FAQ. */}
+          {faq.plaque.length > 0 && (
+            <div className="pa-plaque" data-sdp-reveal>
+              {faq.plaque.map((line) => (
+                <span key={line}>{line}</span>
+              ))}
+            </div>
+          )}
 
           <div className="pa-mt-lockup">
             <CtaLockup />
@@ -537,16 +514,20 @@ export default function Landing() {
           </div>
 
           <div className="pa-colophon">
+            {/* Brand and links are separate spans so mobile can stack them on
+                two centred lines without the star drifting between them. */}
             <div className="pa-colophon-line">
-              <span>{finalCta.colophon}</span>
+              <span className="pa-colophon-brand">{finalCta.colophon}</span>
               <span className="pa-colophon-star">
                 <Star size={11} />
               </span>
-              {finalCta.links.map((l) => (
-                <a key={l.label} href={l.href}>
-                  {l.label}
-                </a>
-              ))}
+              <span className="pa-colophon-links">
+                {finalCta.links.map((l) => (
+                  <a key={l.label} href={l.href}>
+                    {l.label}
+                  </a>
+                ))}
+              </span>
             </div>
           </div>
         </div>
