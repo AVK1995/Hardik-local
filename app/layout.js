@@ -1,12 +1,14 @@
-import { Bebas_Neue, Manrope } from 'next/font/google';
+import { Schibsted_Grotesk, Manrope } from 'next/font/google';
 import './globals.css';
 
 /* Type roles never swap, only the faces do:
-   --fh = DISPLAY (condensed all-caps) · --fb = BODY (clean geometric) */
-const bebas = Bebas_Neue({
-  weight: '400',
+   --fh = DISPLAY (heavy editorial grotesque) · --fb = BODY (clean geometric)
+   Display carries real weights and true lowercase, so headlines can run in
+   sentence case instead of being forced into all-caps by the face. */
+const display = Schibsted_Grotesk({
+  weight: ['600', '700', '800'],
   subsets: ['latin'],
-  variable: '--font-bebas',
+  variable: '--font-display',
   display: 'swap',
 });
 
@@ -37,7 +39,7 @@ export default function RootLayout({ children }) {
        this element's attributes only, not on any child. */
     <html
       lang="en"
-      className={`no-js ${bebas.variable} ${manrope.variable}`}
+      className={`no-js ${display.variable} ${manrope.variable}`}
       suppressHydrationWarning
     >
       <head>

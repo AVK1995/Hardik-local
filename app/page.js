@@ -8,7 +8,7 @@ import VslFrame from './components/VslFrame';
 import CheckinWall from './components/CheckinWall';
 import Faq from './components/Faq';
 import StickyCta from './components/StickyCta';
-import { ArrowDown, Check, Play, Shield, Star, pointerIcons, trustIcons } from './components/Icons';
+import { ArrowDown, Check, Play, Shield, Star, User, markerIcons, pointerIcons, trustIcons } from './components/Icons';
 
 import {
   MISSING,
@@ -30,6 +30,20 @@ import {
 /* How many times the announce copy repeats per half of the marquee track.
    Each half must overflow the widest viewport or the loop shows a blank gap. */
 const ANNOUNCE_REPEAT = 8;
+
+/** Lifts one phrase inside a headline into the accent colour. Falls back to the
+    plain string if the phrase is absent, so a copy edit can never break the H1. */
+function Highlight({ text, phrase }) {
+  if (!phrase || !text.includes(phrase)) return text;
+  const [before, ...rest] = text.split(phrase);
+  return (
+    <>
+      {before}
+      <em className="pa-hi">{phrase}</em>
+      {rest.join(phrase)}
+    </>
+  );
+}
 
 /** H2 formula: [plain setup clause] + [ONE accent tail on the payoff/mechanism]. */
 function H2({ parts }) {
@@ -86,7 +100,7 @@ export default function Landing() {
             const Ico = chip.icon ? trustIcons[chip.icon] : null;
             return (
               <span className="pa-trustchip" key={chip.label}>
-                {Ico && <Ico size={14} />}
+                {Ico && <Ico size={20} />}
                 {chip.label}
               </span>
             );
@@ -97,9 +111,9 @@ export default function Landing() {
       {/* ─────────── BEAT 1 · HERO (§8 focal media, light) ─────────── */}
       <section className="sdp-hero" id="hero">
         <div className="sdp-wrap pa-hero-inner">
-          {/* gate = bordered pill + glowing dot (post-Kunal), not the filled callout */}
+          {/* gate = bordered pill + user icon (was a glowing dot), not the filled callout */}
           <span className="sdp-eyebrow-pill" data-sdp-reveal>
-            <span className="glowdot" />
+            <User size={18} />
             {hero.gate}
           </span>
 
@@ -107,10 +121,14 @@ export default function Landing() {
             <span className="sdp-h1-l1">
               {hero.h1.map((line) => (
                 <span className="pa-h1-line" key={line}>
-                  {line}
+                  <Highlight text={line} phrase={hero.h1Highlight} />
                 </span>
               ))}
             </span>
+            {/* bright blue accent rule, sits between the headline and its
+                qualifier line. No data-sdp-reveal: the parent h1 already
+                carries one and nesting them fights the transition. */}
+            <span className="pa-hrule" aria-hidden="true" />
             <span className="sdp-h1-l2">{hero.h1tail}</span>
           </h1>
 
@@ -125,12 +143,15 @@ export default function Landing() {
             </p>
           )}
           <div className="pa-pillrow" data-sdp-reveal style={{ '--d': '.15s' }}>
-            {hero.markers.map((marker) => (
-              <span className="sdp-marker-chip" key={marker}>
-                <span className="sdp-marker-dot" />
-                {marker}
-              </span>
-            ))}
+            {hero.markers.map((marker) => {
+              const Ico = markerIcons[marker.icon];
+              return (
+                <span className="sdp-marker-chip" key={marker.label}>
+                  {Ico ? <Ico size={15} /> : <span className="sdp-marker-dot" />}
+                  {marker.label}
+                </span>
+              );
+            })}
           </div>
 
           <div className="pa-watch" data-sdp-reveal style={{ '--d': '.2s' }}>
