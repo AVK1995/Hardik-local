@@ -355,13 +355,16 @@ h2.sdp-h2{ text-align:center; font-size:clamp(25px,3.8vw,44px); letter-spacing:-
    desktop hero dwarfed the copy above it and pushed the CTA below the fold.
    The reference holds the player to roughly a third of the viewport and mats it
    in a white frame with a soft brand glow, so it reads as a framed exhibit. */
-.sdp-vsl{ position:relative; width:100%; max-width:560px; margin:18px auto 0; aspect-ratio:16/9;
+.sdp-vsl{ position:relative; width:100%; max-width:560px; margin:18px auto 0; aspect-ratio:var(--ar, 16 / 9);
   border-radius:22px; overflow:hidden;
   background:linear-gradient(160deg,var(--bg-alt),var(--border)); border:6px solid var(--bg-alt);
   box-shadow:0 0 0 1px rgba(var(--brand-rgb),.28), 0 22px 55px -20px rgba(var(--brand-rgb),.45),
     0 0 60px rgba(var(--brand-rgb),.16); }
 .sdp-vsl-poster{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
 .sdp-vsl-video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; background:#000; }
+/* The Vimeo embed fills the frame. No object-fit — the player letterboxes its
+   own content, and --ar already matches the source, so there is nothing to crop. */
+.sdp-vsl-embed{ position:absolute; inset:0; width:100%; height:100%; border:0; background:#000; }
 .sdp-vsl-play{ position:absolute; inset:0; display:grid; place-items:center; cursor:pointer; border:0;
   background:radial-gradient(circle at 50% 50%, rgba(var(--ink-rgb),.14), rgba(var(--ink-rgb),.40)); transition:background .3s; }
 .sdp-vsl-disc{ position:relative; width:82px; height:82px; border-radius:50%; display:grid; place-items:center;

@@ -26,7 +26,7 @@
  */
 
 export const MISSING = {
-  vslUrl: 'MISSING — VSL video (docx marks the slot "VSL VIDEO")',
+  /* vslUrl — RESOLVED 2026-08-11. "Hardik VSL" supplied; see `vsl` below. */
   /* videoTestimonials — RESOLVED 2026-08-11. Three Vimeo clips supplied
      (Mahendra, Mayur, Prateek); see `cases.videoTestimonials`. */
   expertsPhoto: 'MISSING — combined photo of Hardik & Dr. Kartik (docx: "PHOTO OF HARDIK & KARTIK")',
@@ -64,6 +64,21 @@ export const cta = {
   urgencyLabel: 'OFFER ENDS IN :',
   urgencyHours: 5, // docx: "TIMER OF 5 HOURS"
   guaranteeLine: null, // now carried in the chips row above
+};
+
+/* ── BEAT 1 · The hero VSL (supplied 2026-08-11) ────────────────────────── */
+/* Same shape and reasoning as cases.videoTestimonials: a Vimeo id rather than a
+   file URL, `w`/`h` are the SOURCE dimensions so the frame takes its aspect
+   ratio from the clip itself, and the poster is pulled local rather than
+   hotlinked off i.vimeocdn.com (those URLs carry a region param and rotate).
+   NEXT_PUBLIC_VSL_URL still overrides everything here, so the video can be
+   swapped from the environment without touching code. */
+export const vsl = {
+  vimeoId: '1217229742',
+  w: 1280,
+  h: 720,
+  poster: '/proof/vsl-poster.jpg',
+  title: 'Reverse ED naturally — with Hardik & Dr. Kartik',
 };
 
 /* ── BEAT 0a · Announcement strip ───────────────────────────────────────── */
