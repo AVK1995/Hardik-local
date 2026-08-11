@@ -12,13 +12,15 @@ a{ color:inherit; }
 
 /* =========================================================================
    PART 1 — THEME  ·  PROJECT ALPHA WELLNESS
-   Deep Navy + Off-White + Electric Blue + Burgundy + Warm Gold.
-   Applied 2026-08-10 from Atul's first-choice palette. Part 2 untouched.
+   Deep Navy + Off-White + the three moodboard blues + Burgundy + Warm Gold.
+   Applied 2026-08-10, blues standardised to the moodboard. Part 2 untouched.
 
-   ROLE MAP (his spec → the token that carries it)
+   ROLE MAP (spec → the token that carries it)
+     BLUES, and there are only these three:
+       #002163  deep    → --brand-deep    structural text, labels, gradient floor
+       #1051BC  mid     → --brand         THE accent: CTAs, icons, numbers, links
+       #01A6FD  bright  → --brand-bright  decoration + anything on a dark band
      Deep Navy      #071A33  Primary Brand    → --bg-dark (every dark band)
-     Rich Blue      #123B6D  Secondary Navy   → --brand-deep + --bg-dark-elev
-     Electric Blue  #2F80ED  Primary Accent   → --brand (CTAs, icons, numbers)
      Off-White      #F8FAFC  Background       → --bg
      White          #FFFFFF  Card Background  → --bg-alt (and Part 2's cards)
      Dark Navy      #0B172A  Text             → --ink
@@ -26,12 +28,26 @@ a{ color:inherit; }
      Burgundy       #8E2F4F  Confidence       → --confidence, drives the urgency band
      Warm Gold      #C9A24E  Premium          → --gold + --star
      Muted Green    #3E8E68  Success          → --success
+
+   The no-fourth-blue rule governs BRAND and ACCENT usage. The dark-band
+   surfaces and borders below are structural neutrals, tinted navy to sit under
+   the blues, and are not part of the accent system.
    ========================================================================= */
 .sdp-root {
-  /* ---- ACCENT (the one brand colour) ---- */
-  --brand:#2F80ED; --brand-rgb:47,128,237;
-  --brand-bright:#5B9EF7; --brand-deep:#123B6D;
+  /* ---- THE THREE MOODBOARD BLUES (the whole blue system, no others) ----
+     #002163 deep   → --brand-deep   structural text, labels, gradient floor
+     #1051bc mid    → --brand        THE accent: CTAs, icons, numbers, highlights
+     #01a6fd bright → --brand-bright decorative accents + anything on a dark band
+     Nothing anywhere should introduce a fourth blue. Every component pulls one
+     of these three, so changing them here re-skins the entire page. */
+  --brand:#1051BC; --brand-rgb:16,81,188;
+  --brand-bright:#01A6FD; --brand-bright-rgb:1,166,253;
+  --brand-deep:#002163; --brand-deep-rgb:0,33,99;
   --brand-soft:rgba(var(--brand-rgb),.10); --brand-ring:rgba(var(--brand-rgb),.25);
+  /* Eyebrows carry their own blue, set by Atul 2026-08-10. Note it is within a
+     hair of --brand (#1051BC vs #1155C1, about 2% apart and indistinguishable
+     side by side); kept as its own token so it is deliberate rather than drift. */
+  --eyebrow:#1155C1;
 
   /* ---- CONFIDENCE ACCENT (burgundy) ---- */
   --confidence:#8E2F4F; --confidence-rgb:142,47,79; --confidence-bright:#A93A5E;
@@ -43,7 +59,9 @@ a{ color:inherit; }
   --border:#E2E8F0; --border-strong:#CBD5E1;
 
   /* ---- DARK NEUTRALS (for .sdp-dark bands) ---- */
-  --bg-dark:#071A33; --bg-dark-alt:#0B2242; --bg-dark-elev:#123B6D;
+  /* elevated dark surface uses the deep moodboard blue, so the guarantee card
+     gradient stays inside the sanctioned set instead of adding a fourth blue */
+  --bg-dark:#071A33; --bg-dark-alt:#0B2242; --bg-dark-elev:#002163;
   --ink-dark:#F8FAFC; --ink-dark-soft:#C7D3E4; --muted-dark:#8FA3BE;
   --border-dark:#12294A; --border-dark-strong:#1E416F;
 
@@ -51,7 +69,7 @@ a{ color:inherit; }
   --success:#3E8E68; --danger:#DC2626; --danger-rgb:220,38,38; --star:#C9A24E; --gold:#C9A24E;
 
   /* ---- TYPE (swap the two faces; the ROLES never change) ---- */
-  --fh: var(--font-bebas), 'Bebas Neue', 'Helvetica Neue', sans-serif;
+  --fh: var(--font-display), 'Schibsted Grotesk', 'Helvetica Neue', sans-serif;
   --fb: var(--font-manrope), 'Manrope', 'Helvetica Neue', sans-serif;
 
   /* ---- RADII ---- */
@@ -59,14 +77,20 @@ a{ color:inherit; }
 
   /* ---- DERIVED DESIGN TOKENS ---- */
   --grad-brand:    linear-gradient(135deg,var(--brand-deep),var(--brand));
-  --grad-announce: linear-gradient(90deg,var(--brand-deep),var(--brand) 50%,var(--brand-deep));
+  /* the top sliding bar runs navy, not electric blue: deep navy at the edges
+     with the deep blue through the centre so it keeps depth without going
+     bright. A #1155c1 centre was tried and rejected: too light for this bar. */
+  --grad-announce: linear-gradient(90deg,var(--bg-dark) 0%,var(--brand-deep) 50%,var(--bg-dark) 100%);
   --grad-cta:      linear-gradient(180deg,var(--brand-bright) 0%,var(--brand) 50%,var(--brand-deep) 100%);
   /* urgency runs burgundy, not alarm red: confident rather than panicked, which
      is the whole point of the confidence accent in this palette */
   --grad-urgency:  linear-gradient(135deg,var(--confidence) 0%,var(--confidence-bright) 100%);
   --grad-guarantee:linear-gradient(135deg,var(--bg-dark-alt),var(--bg-dark-elev));
-  --hero-stage:    linear-gradient(180deg,#FFFFFF 0%,#EEF3F9 100%);
-  --hero-bloom:    radial-gradient(circle,rgba(var(--brand-rgb),.18),transparent 65%);
+  /* a real cool-blue wash rather than an off-white that only hints at blue,
+     with the light coming from a single soft source above (see landing.css,
+     where the 44px grid overlay is switched off) */
+  --hero-stage:    linear-gradient(180deg,#FFFFFF 0%,#EDF3FC 52%,#DCE7F7 100%);
+  --hero-bloom:    radial-gradient(circle,rgba(var(--brand-bright-rgb),.26),transparent 66%);
   --glow-cta:      0 8px 28px rgba(var(--brand-rgb),.35);
   --glow-cta-hover:0 12px 36px rgba(var(--brand-rgb),.5);
   --shadow-card:   0 2px 12px rgba(var(--ink-rgb),.04);
@@ -83,8 +107,11 @@ a{ color:inherit; }
    ========================================================================= */
 
 /* ---- Base + section-band rhythm ---- */
+/* The display face is a weighted grotesque, not a condensed caps face: it needs
+   real weight (800) and NEGATIVE tracking at size, where Bebas needed 400 and
+   positive tracking. Uppercase micro-labels keep their positive tracking. */
 .sdp-root h1,.sdp-root h2,.sdp-root h3,.sdp-root h4{ font-family:var(--fh); color:var(--ink);
-  line-height:1.05; letter-spacing:.01em; font-weight:400; margin:0 0 .5em; }
+  line-height:1.08; letter-spacing:-.018em; font-weight:800; margin:0 0 .5em; }
 /* CRITICAL: bottom margin ONLY. Setting left/right/top here silently drifts
    whole sections off-centre by out-specifying child margin:auto. */
 .sdp-root p{ font-family:var(--fb); color:var(--ink-soft); margin-bottom:1em; }
@@ -112,7 +139,7 @@ a{ color:inherit; }
 .sdp-eyebrow.center{ display:block; text-align:center; margin-left:auto; margin-right:auto; max-width:600px; }
 .sdp-eyebrow.center::before{ display:inline-block; vertical-align:middle; margin-right:10px; }
 
-h2.sdp-h2{ text-align:center; font-size:clamp(28px,4.4vw,52px); letter-spacing:.02em; line-height:1.18; margin-bottom:14px; }
+h2.sdp-h2{ text-align:center; font-size:clamp(25px,3.8vw,44px); letter-spacing:-.02em; line-height:1.16; margin-bottom:14px; }
 .sdp-light h2.sdp-h2 em,.sdp-light-alt h2.sdp-h2 em{ font-style:normal; color:var(--brand); }
 .sdp-dark  h2.sdp-h2 em,.sdp-dark-alt h2.sdp-h2 em{ font-style:normal; color:var(--brand-bright); }
 
@@ -120,7 +147,7 @@ h2.sdp-h2{ text-align:center; font-size:clamp(28px,4.4vw,52px); letter-spacing:.
 .sdp-dark .sdp-sub,.sdp-dark-alt .sdp-sub{ color:var(--ink-dark-soft); }
 
 .sdp-h1{ max-width:1000px; margin:0 auto 18px; line-height:1.04; }
-.sdp-h1-l1{ display:block; font-family:var(--fh); font-size:clamp(34px,5.6vw,70px); color:var(--ink); line-height:1.0; letter-spacing:.02em; text-wrap:balance; }
+.sdp-h1-l1{ display:block; font-family:var(--fh); font-size:clamp(30px,4.7vw,58px); color:var(--ink); line-height:1.06; letter-spacing:-.028em; text-wrap:balance; }
 .sdp-h1-l2{ display:block; font-family:var(--fb); font-weight:600; font-size:clamp(15px,1.8vw,20px); color:var(--brand-deep); line-height:1.5; margin-top:14px; text-wrap:balance; }
 
 /* Reveal — fail-open: visible if JS never adds .vis */

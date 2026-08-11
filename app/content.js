@@ -76,6 +76,8 @@ export const announce = ['7+ Years of Experience and 120+ Success Stories'];
    They used to be ★ glyphs inside the string, which meant they inherited the
    muted label colour and could not be tinted separately (2026-08-11). */
 export const trustRow = [
+  /* Supersedes the ★-glyph version: the stars are now their own tinted element
+     (see .pa-stars), so the row needs no icon of its own. */
   { label: '5.0 Review', stars: 5, icon: null },
   { label: '100% Money-Back Guarantee', icon: 'shield' },
 ];
@@ -101,6 +103,9 @@ export const hero = {
     'Restore Natural Erections &',
     'Get Your Sexual Confidence Back',
   ],
+  /* Phrase lifted into the accent colour inside the H1. Must match the line
+     text exactly; if it does not appear, the line renders plain. */
+  h1Highlight: 'Sexual Confidence',
   h1tail: 'Naturally, Without Depending On Pills, Sprays & Painful Procedures',
   /* Runs, not a string (2026-08-11). `em: true` lifts a phrase into the brand
      colour — colour only, no underline and no weight change, so the line still
@@ -127,8 +132,16 @@ export const hero = {
       text: ' have used Project Alpha Wellness to improve the health issues that often go hand-in-hand with ED, including:',
     },
   ],
-  /* FLAG: "Cholestrol" is a typo in the approved docx. Reproduced as written. */
-  markers: ['Testosterone', 'HbA1c', 'Belly Fat', 'LDL Cholestrol', 'Triglycerides', 'Blood Pressure'],
+  /* FLAG: "Cholestrol" is a typo in the approved docx. Reproduced as written.
+     icon keys resolve through markerIcons in components/Icons.js. */
+  markers: [
+    { label: 'Testosterone', icon: 'testosterone' },
+    { label: 'HbA1c', icon: 'hba1c' },
+    { label: 'Belly Fat', icon: 'belly' },
+    { label: 'LDL Cholestrol', icon: 'ldl' },
+    { label: 'Triglycerides', icon: 'triglycerides' },
+    { label: 'Blood Pressure', icon: 'bp' },
+  ],
   featurePills: [], // ← no source in the docx. Not invented.
   pointers: [], // ← no source in the docx. Not invented.
   stats: [

@@ -134,6 +134,17 @@ export function Close({ size = 18 }) {
   );
 }
 
+/* Solid, not stroked: the only filled icon in the family. It sits inside the
+   hero's eyebrow pill at 15px, where a 1.6 stroke reads as a thin scratch. */
+export function User({ size = 14 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true">
+      <circle cx="12" cy="7.6" r="4" />
+      <path d="M12 13.4c-4.1 0-7.4 2.7-7.4 6 0 .6.5 1 1.1 1h12.6c.6 0 1.1-.4 1.1-1 0-3.3-3.3-6-7.4-6z" />
+    </svg>
+  );
+}
+
 export function Users({ size = 14 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" {...base} aria-hidden="true">
@@ -155,10 +166,75 @@ export function Globe({ size = 14 }) {
   );
 }
 
+/* ── Health markers. One mark per marker, chosen to be distinguishable from
+   each other at 14px rather than merely thematic. ───────────────────────── */
+
+/* Testosterone — the Mars glyph, the standard mark for the male hormone. */
+export function Mars({ size = 14 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base} aria-hidden="true">
+      <circle cx="10" cy="14" r="5.6" />
+      <path d="M14.8 9.2 20.5 3.5" />
+      <path d="M15.5 3.5h5v5" />
+    </svg>
+  );
+}
+
+/* HbA1c — a blood droplet; the marker is read off a blood sample. */
+export function Droplet({ size = 14 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base} aria-hidden="true">
+      <path d="M12 3.2c3.4 4 5.6 6.9 5.6 9.6a5.6 5.6 0 1 1-11.2 0c0-2.7 2.2-5.6 5.6-9.6z" />
+    </svg>
+  );
+}
+
+/* Belly fat — a tape measure round the waist. */
+export function Tape({ size = 14 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base} aria-hidden="true">
+      <rect x="3" y="7" width="18" height="10" rx="4.2" />
+      <path d="M8 7v10M12 7v10M16 7v10" />
+    </svg>
+  );
+}
+
+/* LDL cholesterol — an artery in cross-section, narrowed by plaque. */
+export function Artery({ size = 14 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base} aria-hidden="true">
+      <circle cx="12" cy="12" r="8.4" />
+      <path d="M12 6.6a5.4 5.4 0 0 1 0 10.8 5.4 5.4 0 0 1-3.4-9.6" />
+    </svg>
+  );
+}
+
+/* Triglycerides — a glycerol backbone carrying its three fatty-acid chains. */
+export function Triglyceride({ size = 14 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base} aria-hidden="true">
+      <path d="M6 4.5v15" />
+      <path d="M6 7h5.5l3 2 3-2" />
+      <path d="M6 12h5.5l3 2 3-2" />
+      <path d="M6 17h5.5l3 2 3-2" />
+    </svg>
+  );
+}
+
+/* Blood pressure — the dial of a sphygmomanometer. */
+export function Gauge({ size = 14 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base} aria-hidden="true">
+      <path d="M3.6 17.5a9 9 0 1 1 16.8 0" />
+      <path d="M12 17.5 16.4 10" />
+      <circle cx="12" cy="17.5" r="1.5" />
+    </svg>
+  );
+}
+
 /* ── Programme timeline icons (2026-08-11) ────────────────────────────────
    One per component of the 12-week programme, chosen to match what the step
-   actually is rather than for decoration. All share the 24-box and stroke
-   weight of the set above so they sit together on the rail. */
+   actually is rather than for decoration. */
 export function Leaf({ size = 18 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
@@ -220,6 +296,16 @@ export function ChevronDown({ size = 14 }) {
   );
 }
 
+/* Hero health-marker chips: keyed from `icon` on each entry in hero.markers. */
+export const markerIcons = {
+  testosterone: Mars,
+  hba1c: Droplet,
+  belly: Tape,
+  ldl: Artery,
+  triglycerides: Triglyceride,
+  bp: Gauge,
+};
+
 export const pointerIcons = { report: Report, target: Target, route: Route };
 
 /* Programme timeline: keyed from `icon` on each item in `programme.items`. */
@@ -238,6 +324,7 @@ export const trustIcons = {
   lock: Lock,
   star: Star,
   check: Check,
+  user: User,
   users: Users,
   globe: Globe,
   clock: Clock,
