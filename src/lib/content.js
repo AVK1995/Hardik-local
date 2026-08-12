@@ -242,8 +242,11 @@ export const transformations = {
 export const cases = {
   /* No eyebrow on this section by design (Atul, 2026-08-10). Not a gap. */
   eyebrow: null,
-  lede: 'See what changed when they stopped treating the symptoms and started addressing the root causes.',
-  h2: ['See How Men Like You Went From ED & Low Confidence ', 'To Stronger Erections & Better Health'],
+  /* Shortened 2026-08-11 on the client's call. The old heading ran to fourteen
+     words and restated the whole promise a second time; the payoff already sits
+     in the hero. Two beats now — the claim, then the proof underneath it. */
+  lede: 'From ED & low confidence to stronger erections & better health.',
+  h2: ['Real Men. ', 'Real Results.'],
   /* docx: "[Video Testimonials - like how we have done for Shruti's funnel]".
      Shruti's funnel runs four; this one has three, so the grid is 3-up and the
      fourth placeholder slot is gone (Atul, 2026-08-11).
@@ -760,6 +763,40 @@ export const book = {
   /* authored */
   noShowNote:
     'Please add it to your calendar the moment you book. These slots are held one-to-one, so a missed call is a slot another man could not take.',
+
+  /* ── Fallback when no slot on the calendar suits (2026-08-11) ────────────
+     Sits directly under the scheduler. A man who has already paid and cannot
+     find a workable time is the single most likely place to lose someone on
+     this page, so it gets a real way out rather than a support link.
+
+     The message bodies are pre-filled and ASK FOR THE FOUR THINGS needed to
+     book him by hand — name, email, phone, preferred day/time — so the reply
+     arrives complete instead of starting a thread. Encoded properly: %26 for
+     the ampersand, %E2%80%94 for the em dash, %0D%0A for the mail line breaks. */
+  fallback: {
+    eyebrow: 'Preferred slot not available?',
+    h2: ["Can't find a time ", 'that works for you?'],
+    body: [
+      { text: 'Your payment is confirmed and your session is held, so you will not lose it. If none of the times above suit you, message us your ' },
+      { text: 'name, email, phone number, and your preferred day and time', strong: true },
+      { text: ', and we will set up your slot personally.' },
+    ],
+    whatsappLabel: 'Message us on WhatsApp',
+    emailLabel: 'Email us',
+    phoneDisplay: '+91 87918 04416',
+    email: 'hardikdhawal@gmail.com',
+    whatsappHref:
+      'https://api.whatsapp.com/send/?phone=918791804416' +
+      '&text=Hi+Hardik+%26+Dr.+Kartik+%E2%80%94+I%27ve+paid+for+my+consultation+but+can%27t+find+a+slot+that+works.' +
+      '+My+name%2C+email%2C+phone+and+preferred+day%2Ftime+are%3A' +
+      '&type=phone_number&app_absent=0',
+    emailHref:
+      'mailto:hardikdhawal@gmail.com' +
+      '?subject=Can%27t%20find%20a%20call%20slot%20%E2%80%94%20Project%20Alpha%20Wellness' +
+      '&body=Hi%20Hardik%20%26%20Dr.%20Kartik%2C%0D%0A%0D%0A' +
+      'I%27ve%20paid%20for%20my%20consultation%20but%20can%27t%20find%20a%20slot%20that%20works.%0D%0A%0D%0A' +
+      'Name%3A%0D%0AEmail%3A%0D%0APhone%3A%0D%0APreferred%20day%20%26%20time%3A%0D%0A',
+  },
 
   /* ── Sections added 2026-08-11 to the client's reference structure ──────
      Layout and section order follow the reference page; every word is ours,

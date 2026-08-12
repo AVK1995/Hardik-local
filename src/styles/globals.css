@@ -151,7 +151,13 @@ h2.sdp-h2{ text-align:center; font-size:clamp(25px,3.8vw,44px); letter-spacing:-
    the 4.7vw ramp and the 30px floor stay, so the headline still scales down
    through the tablet range, and the ≤720px override further down is untouched. */
 .sdp-h1-l1{ display:block; font-family:var(--fh); font-size:clamp(30px,4.7vw,42px); color:var(--ink); line-height:1.06; letter-spacing:-.028em; text-wrap:balance; }
-.sdp-h1-l2{ display:block; font-family:var(--fb); font-weight:600; font-size:clamp(15px,1.8vw,20px); color:var(--brand-deep); line-height:1.5; margin-top:14px; text-wrap:balance; }
+/* The qualifier line, set as the tail of the headline rather than a deck under
+   it (2026-08-11). It shares the headline's display face and its 1.06 leading,
+   and sits on a 6px gap — at the old 14px with 1.5 leading and the body face it
+   read as a separate paragraph that happened to be blue. Smaller and lighter is
+   what separates it now; distance no longer has to. */
+.sdp-h1-l2{ display:block; font-family:var(--fh); font-weight:700; font-size:clamp(17px,2.3vw,26px);
+  color:var(--brand-deep); line-height:1.06; letter-spacing:-.02em; margin-top:6px; text-wrap:balance; }
 
 /* Reveal — fail-open: visible if JS never adds .vis */
 [data-sdp-reveal]{ opacity:0; transform:translateY(28px); transition:opacity .7s ease, transform .7s cubic-bezier(.2,.8,.2,1); transition-delay:var(--d,0s); }
@@ -533,11 +539,11 @@ h2.sdp-h2{ text-align:center; font-size:clamp(25px,3.8vw,44px); letter-spacing:-
   .sdp-root .fp-panel-h,
   .sdp-root .fp-sectionh{ font-size:22px !important; line-height:1.28 !important; }
 
-  /* The hero's blue tail is its own case (client, 2026-08-11): 18px, and it has
-     to hold TWO lines on every phone. Fixed 18px spills to three lines below
-     ~360px, so it is fluid with 18px as the ceiling — 4.7vw keeps the line
-     count at two from 320px up, and stops growing once 18px is reached. */
-  .sdp-root .sdp-h1-l2{ font-size:clamp(15px,4.7vw,18px) !important; line-height:1.34 !important; }
+  /* The hero's tail on mobile. Still capped at 18px so it holds TWO lines on
+     every phone (fixed 18px spills to three below ~360px), but now on the
+     headline's leading rather than 1.34 — it is the last line of the headline,
+     not a paragraph under it. */
+  .sdp-root .sdp-h1-l2{ font-size:clamp(15px,4.7vw,18px) !important; line-height:1.14 !important; }
 
   /* The hero gate pill is its own case: 86 characters of tracked-out caps that
      must land in TWO lines on every phone. Fixed 10.5px made three below

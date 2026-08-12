@@ -154,10 +154,10 @@ export default function Landing() {
                 </span>
               ))}
             </span>
-            {/* bright blue accent rule, sits between the headline and its
-                qualifier line. No data-sdp-reveal: the parent h1 already
-                carries one and nesting them fights the transition. */}
-            <span className="pa-hrule" aria-hidden="true" />
+            {/* The accent rule that used to sit here is gone (2026-08-11). The
+                qualifier is not a separate deck — it is the last line of the
+                headline, set smaller. A rule between them split one thought
+                into two blocks. */}
             <span className="sdp-h1-l2">{hero.h1tail}</span>
           </h1>
 

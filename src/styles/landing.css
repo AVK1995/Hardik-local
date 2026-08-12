@@ -729,18 +729,11 @@
    and contrast minimums do not apply to it: this is the one place on a light
    band where the bright blue is used at full strength, which is what makes it
    read as an accent against the deep and mid blues around it. */
-.pa-hrule{
-  display:block;
-  width:68px;
-  height:5px;
-  border-radius:999px;
-  background:var(--brand-bright);
-  /* no bottom margin: .sdp-h1-l2 below it already carries margin-top:14px, and
-     .sdp-h1 carries the gap down to the sub */
-  margin:22px auto 0;
-}
-.sdp-dark .pa-hrule,
-.sdp-dark-alt .pa-hrule{ background:var(--brand-bright); }
+/* .pa-hrule is retired — the hero no longer emits one. Kept only as this note
+   so nobody re-adds the rule between the headline and its qualifier: they are
+   one thought, and a bar across the middle made them read as two.
+   (Not to be confused with .pa-rule, the standalone eyebrow mark above the
+   proof section's heading, which is still in use.) */
 
 /* ── Eyebrow colour (2026-08-10) ──────────────────────────────────────────
    Overridden here rather than in globals Part 2, which the README says never
