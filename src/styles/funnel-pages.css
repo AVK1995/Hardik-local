@@ -323,6 +323,75 @@
 .fp-page .fp-mast h1.sdp-h2 em,
 .fp-page .fp-mast h2.sdp-h2 em{ font-style:normal; color:var(--brand); }
 
+/* ---- Book-a-call: "can't find a time" fallback ----
+   Reference layout, our palette. The card is a dark panel on the light band so
+   it separates from the scheduler above without another section break, and the
+   diagonal hatch is the same trick the reference uses to stop a large dark
+   block reading as a hole in the page. */
+.bk-fallback{ position:relative; overflow:hidden; width:100%; max-width:880px; margin:44px auto 0;
+  padding:40px 34px 34px; text-align:center; border-radius:var(--r-xl);
+  background:var(--grad-guarantee); border:1px solid var(--border-dark-strong);
+  box-shadow:0 30px 70px -34px rgba(var(--ink-rgb),.55); }
+.bk-fallback::before{ content:""; position:absolute; inset:0; pointer-events:none; opacity:.5;
+  background:repeating-linear-gradient(135deg,
+    rgba(var(--brand-bright-rgb),.05) 0 10px, transparent 10px 20px); }
+.bk-fallback > *{ position:relative; z-index:1; }
+
+.bk-fallback-eyebrow{ display:inline-flex; align-items:center; gap:9px; margin-bottom:18px;
+  padding:8px 18px; border-radius:999px;
+  background:rgba(var(--brand-bright-rgb),.12); border:1px solid rgba(var(--brand-bright-rgb),.34);
+  font-family:var(--fb); font-size:11px; font-weight:800; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--brand-bright); line-height:1; }
+.bk-fallback-eyebrow svg{ flex:0 0 auto; }
+
+.bk-fallback .sdp-h2{ margin-bottom:14px; color:var(--ink-dark); }
+.bk-fallback .sdp-h2 em{ font-style:normal; color:var(--brand-bright); }
+/* Doubled class deliberately. This is a DARK panel sitting inside a LIGHT
+   section, so `.sdp-dark p` never matches it while `.sdp-root p` does — and
+   that paints the copy #475569 slate on deep navy, which is around 2:1 and
+   effectively unreadable. Two classes out-specify it. Same trap as
+   `.sdp-root h1..h4` catching the centred headings. */
+.bk-fallback .bk-fallback-body{ max-width:62ch; margin:0 auto; font-size:15.5px; line-height:1.75;
+  color:var(--ink-dark-soft); }
+.bk-fallback .bk-fallback-body strong{ color:var(--ink-dark); font-weight:800; }
+
+.bk-fallback-actions{ display:flex; flex-wrap:wrap; justify-content:center; gap:14px; margin-top:28px; }
+.bk-fb-btn{ display:inline-flex; align-items:center; gap:11px; padding:15px 28px; border-radius:999px;
+  font-family:var(--fb); font-size:15px; font-weight:800; letter-spacing:.02em; text-decoration:none;
+  transition:transform .22s cubic-bezier(.2,.8,.3,1), box-shadow .22s ease,
+    background-color .22s ease, border-color .22s ease; }
+/* Primary runs the site's CTA gradient rather than WhatsApp green — the brief
+   was to keep this on our own theme. Swap to #25D366 if the green's
+   recognisability is worth more than the palette here. */
+.bk-fb-btn.primary{ background:var(--grad-cta); color:var(--cta-ink); border:0;
+  box-shadow:var(--glow-cta), var(--inset-hi); }
+.bk-fb-btn.primary:hover{ transform:translateY(-2px); box-shadow:var(--glow-cta-hover), var(--inset-hi); }
+.bk-fb-btn.ghost{ background:transparent; color:var(--brand-bright);
+  border:1px solid rgba(var(--brand-bright-rgb),.45); }
+.bk-fb-btn.ghost:hover{ transform:translateY(-2px);
+  background:rgba(var(--brand-bright-rgb),.1); border-color:var(--brand-bright); }
+.bk-fb-btn:focus-visible{ outline:2px solid var(--brand-bright); outline-offset:3px; }
+
+/* Doubled for the same reason as the body above. */
+.bk-fallback .bk-fallback-contact{ display:flex; flex-wrap:wrap; align-items:center; justify-content:center;
+  gap:8px 14px; margin:24px 0 0; font-family:var(--fb); font-size:13.5px; color:var(--muted-dark); }
+.bk-fallback-contact a{ color:var(--ink-dark-soft); text-decoration:underline; text-underline-offset:3px;
+  text-decoration-color:rgba(var(--brand-bright-rgb),.5); transition:color .2s ease; }
+.bk-fallback-contact a:hover{ color:var(--brand-bright); }
+
+@media (max-width:720px){
+  .bk-fallback{ margin-top:34px; padding:30px 20px 26px; border-radius:var(--r-lg); }
+  .bk-fallback-actions{ flex-direction:column; gap:11px; }
+  .bk-fb-btn{ justify-content:center; width:100%; padding:14px 20px; font-size:14px; }
+  .bk-fallback-body{ font-size:14px; }
+  .bk-fallback-contact{ flex-direction:column; gap:7px; }
+  .bk-fallback-contact span{ display:none; }
+}
+@media (prefers-reduced-motion:reduce){
+  .bk-fb-btn{ transition:none; }
+  .bk-fb-btn:hover{ transform:none; }
+}
+
 /* ---- Book-a-call ---- */
 .bk-slot{ padding:10px 0 56px; background:var(--bg); }
 .bk-slot .sdp-h2{ margin-bottom:10px; }

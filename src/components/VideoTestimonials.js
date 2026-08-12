@@ -38,9 +38,6 @@ export default function VideoTestimonials({ items = [], slots = 3 }) {
               </span>
               <span className="pa-tag">Video</span>
             </span>
-            <span className="pa-tcard-body">
-              <span className="nm">Video testimonial {i + 1}</span>
-            </span>
           </div>
         ))}
       </div>
@@ -96,9 +93,9 @@ export default function VideoTestimonials({ items = [], slots = 3 }) {
                 </>
               )}
             </span>
-            <span className="pa-tcard-body">
-              <span className="nm">{v.name}</span>
-            </span>
+            {/* No name caption under the player (2026-08-11). The card is the
+                video; the man says who he is in it. `v.name` still drives the
+                play button's aria-label above, so the control stays labelled. */}
           </div>
         );
       })}
