@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Play } from '@/components/Icons';
 import { vsl } from '@/lib/content';
 
@@ -19,11 +19,18 @@ const POSTER = process.env.NEXT_PUBLIC_VSL_POSTER || vsl.poster;
      playsinline=1 iOS Safari otherwise seizes the video into its own fullscreen
                    player the moment it starts. This is the single param that
                    makes iPhone behave like every other device.
-     dnt=1         no Vimeo tracking cookies. */
+
+   NO dnt=1. It was here until 2026-08-11 and it was silently switching Vimeo
+   analytics off: dnt ("do not track") stops Vimeo recording the session, so
+   plays, watch time and drop-off never reach the dashboard. For a VSL that is
+   the whole point of the page, that data is the reason the video exists.
+   Vimeo then sets its usual cookies — which is why the privacy policy lists a
+   video provider under "who else touches your data". Do not re-add dnt unless
+   the client accepts losing the analytics with it. */
 const EMBED = URL_OVERRIDE
   ? URL_OVERRIDE
   : `https://player.vimeo.com/video/${vsl.vimeoId}` +
-    `?autoplay=1&muted=0&playsinline=1&title=0&byline=0&portrait=0&dnt=1`;
+    `?autoplay=1&muted=0&playsinline=1&title=0&byline=0&portrait=0`;
 
 /**
  * §8 Focal media — the hero VSL (R2/R7).
@@ -33,17 +40,81 @@ const EMBED = URL_OVERRIDE
  * paint of the landing page. It is the heaviest thing the hero could load and
  * most visitors scroll past it.
  *
- * The frame takes its aspect ratio from the clip's own dimensions via --ar, so
- * a portrait VSL would frame portrait with no CSS change.
+ * ── Sound ────────────────────────────────────────────────────────────────
+ * The URL asks for unmuted autoplay, but a URL cannot force it: every browser
+ * reserves the right to refuse, and iOS in Low Power Mode refuses outright.
+ * So the Player SDK is loaded on demand (dynamic import — it stays out of the
+ * initial bundle) and used to actually assert it: unmute, volume to full,
+ * play. If the browser still refuses, we do NOT leave a sales video running
+ * silently — the player is muted deliberately so it at least plays, and a
+ * "Tap for sound" control appears. One tap fixes it, because by then the tap
+ * is a fresh user gesture and no browser blocks that.
  */
 export default function VslFrame({ playing: playingProp, onPlay }) {
   const [playingSelf, setPlayingSelf] = useState(false);
+  const [needsSound, setNeedsSound] = useState(false);
+  const frameRef = useRef(null);
+  const playerRef = useRef(null);
+
   /* Controlled when the page passes `playing` — the "Watch the short video
      below" pill starts it from outside the frame — and self-managed otherwise,
      so the component still works standalone. */
   const controlled = playingProp !== undefined;
   const playing = controlled ? playingProp : playingSelf;
   const start = () => (controlled ? onPlay?.() : setPlayingSelf(true));
+
+  useEffect(() => {
+    if (!playing || !frameRef.current || URL_OVERRIDE) return;
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const { default: Player } = await import('@vimeo/player');
+        if (cancelled || !frameRef.current) return;
+
+        const player = new Player(frameRef.current);
+        playerRef.current = player;
+
+        await player.ready();
+        if (cancelled) return;
+
+        await player.setMuted(false);
+        await player.setVolume(1);
+
+        try {
+          await player.play();
+        } catch {
+          /* Unmuted autoplay refused. Play muted rather than not at all, and
+             ask for the one tap that buys the sound back. */
+          if (cancelled) return;
+          await player.setMuted(true).catch(() => {});
+          await player.play().catch(() => {});
+          if (!cancelled) setNeedsSound(true);
+        }
+      } catch {
+        /* SDK failed to load or the player would not talk to us. The iframe's
+           own autoplay params still apply, so this is a degradation, not a
+           break — and Vimeo's own play button remains. */
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [playing]);
+
+  const enableSound = async () => {
+    const player = playerRef.current;
+    if (!player) return;
+    try {
+      await player.setMuted(false);
+      await player.setVolume(1);
+      await player.play().catch(() => {});
+      setNeedsSound(false);
+    } catch {
+      /* Leave the control up; another tap is free. */
+    }
+  };
 
   return (
     /* data-playing, not a className — rewriting className here wipes the `vis`
@@ -57,14 +128,25 @@ export default function VslFrame({ playing: playingProp, onPlay }) {
       style={{ '--d': '.1s', '--ar': `${vsl.w} / ${vsl.h}` }}
     >
       {playing ? (
-        <iframe
-          className="sdp-vsl-embed"
-          src={EMBED}
-          title={vsl.title}
-          allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
-          referrerPolicy="strict-origin-when-cross-origin"
-          allowFullScreen
-        />
+        <>
+          <iframe
+            ref={frameRef}
+            className="sdp-vsl-embed"
+            src={EMBED}
+            title={vsl.title}
+            allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
+          />
+          {needsSound && (
+            <button type="button" className="sdp-vsl-unmute" onClick={enableSound}>
+              <span className="sdp-vsl-unmute-ico" aria-hidden="true">
+                <SoundOff />
+              </span>
+              Tap for sound
+            </button>
+          )}
+        </>
       ) : (
         <>
           <img className="sdp-vsl-poster" src={POSTER} alt="" />
@@ -76,5 +158,16 @@ export default function VslFrame({ playing: playingProp, onPlay }) {
         </>
       )}
     </div>
+  );
+}
+
+/* Local to this file — the only place a muted-speaker mark is needed. */
+function SoundOff() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9"
+      strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M11 5 6.5 8.8H3v6.4h3.5L11 19z" />
+      <path d="m16.5 9.5 5 5M21.5 9.5l-5 5" />
+    </svg>
   );
 }

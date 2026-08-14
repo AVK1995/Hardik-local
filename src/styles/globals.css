@@ -438,6 +438,28 @@ h2.sdp-h2{ text-align:center; font-size:clamp(25px,3.8vw,44px); letter-spacing:-
 /* The Vimeo embed fills the frame. No object-fit — the player letterboxes its
    own content, and --ar already matches the source, so there is nothing to crop. */
 .sdp-vsl-embed{ position:absolute; inset:0; width:100%; height:100%; border:0; background:#000; }
+
+/* Shown only when the browser refused unmuted autoplay and the video is
+   therefore running silent. Sits top-left, clear of Vimeo's own controls in the
+   bottom bar and its fullscreen button top-right. Deliberately loud: a sales
+   video playing with no sound is worse than one that has not started. */
+.sdp-vsl-unmute{ position:absolute; top:12px; left:12px; z-index:3;
+  display:inline-flex; align-items:center; gap:8px; padding:9px 15px 9px 11px;
+  border-radius:999px; cursor:pointer; border:1px solid rgba(255,255,255,.35);
+  background:rgba(var(--ink-rgb),.82); backdrop-filter:blur(6px); color:#fff;
+  font-family:var(--fb); font-size:12.5px; font-weight:800; letter-spacing:.03em; line-height:1;
+  box-shadow:0 8px 22px -8px rgba(0,0,0,.9);
+  animation:sdpUnmuteNudge 2.4s ease-in-out infinite;
+  transition:background-color .2s ease, transform .2s ease; }
+.sdp-vsl-unmute:hover{ background:var(--brand); transform:translateY(-1px); }
+.sdp-vsl-unmute:focus-visible{ outline:2px solid var(--brand-bright); outline-offset:2px; }
+.sdp-vsl-unmute-ico{ display:grid; place-items:center; flex:0 0 auto; }
+@keyframes sdpUnmuteNudge{ 0%,100%{ box-shadow:0 8px 22px -8px rgba(0,0,0,.9); }
+  50%{ box-shadow:0 8px 22px -8px rgba(0,0,0,.9), 0 0 0 6px rgba(var(--brand-rgb),.22); } }
+@media (prefers-reduced-motion:reduce){ .sdp-vsl-unmute{ animation:none; } }
+@media (max-width:560px){
+  .sdp-vsl-unmute{ top:9px; left:9px; padding:8px 12px 8px 9px; font-size:11.5px; }
+}
 .sdp-vsl-play{ position:absolute; inset:0; display:grid; place-items:center; cursor:pointer; border:0;
   background:radial-gradient(circle at 50% 50%, rgba(var(--ink-rgb),.14), rgba(var(--ink-rgb),.40)); transition:background .3s; }
 .sdp-vsl-disc{ position:relative; width:82px; height:82px; border-radius:50%; display:grid; place-items:center;
