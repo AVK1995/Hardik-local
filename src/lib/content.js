@@ -27,8 +27,9 @@
 
 export const MISSING = {
   /* vslUrl — RESOLVED 2026-08-11. "Hardik VSL" supplied; see `vsl` below. */
-  /* videoTestimonials — RESOLVED 2026-08-11. Three Vimeo clips supplied
-     (Mahendra, Mayur, Prateek); see `cases.videoTestimonials`. */
+  /* videoTestimonials — RESOLVED 2026-08-11. Three Vimeo clips supplied, then
+     replaced the same day with blurred re-cuts for client privacy; the names
+     went with them. See `cases.videoTestimonials`. */
   expertsPhoto: 'MISSING — combined photo of Hardik & Dr. Kartik (docx: "PHOTO OF HARDIK & KARTIK")',
   ratingAvatars: 'MISSING — client photos for the rating row (docx marks the slot "[Photos]")',
   mechanismSource: 'NOT IN FINALISED DOCX — mechanism section carried over from the previous draft',
@@ -256,10 +257,18 @@ export const cases = {
      so a portrait clip added later renders portrait without a CSS change.
      Posters are Vimeo's own thumbnails, pulled local so the page does not
      hotlink i.vimeocdn.com (those URLs carry a region param and rotate). */
+  /* Swapped to the blurred re-cuts 2026-08-11. The clients' faces are blurred
+     in these and their names are gone with them — `name` is now a neutral
+     label, not a person. That is deliberate: the captions under the players
+     were already removed, so the only thing the old first names still fed were
+     the aria-label and the iframe title, which would have announced the very
+     identity the blur exists to protect.
+
+     Posters are the new clips' own Vimeo thumbnails, pulled local as before. */
   videoTestimonials: [
-    { name: 'Mahendra', vimeoId: '1216899106', w: 1280, h: 720, poster: '/proof/vt-mahendra.jpg' },
-    { name: 'Mayur',    vimeoId: '1216899107', w: 1280, h: 720, poster: '/proof/vt-mayur.jpg' },
-    { name: 'Prateek',  vimeoId: '1216899105', w: 1280, h: 720, poster: '/proof/vt-prateek.jpg' },
+    { name: 'Client testimonial 1', vimeoId: '1218249120', w: 1280, h: 720, poster: '/proof/vt-blurred-1.jpg' },
+    { name: 'Client testimonial 2', vimeoId: '1218249121', w: 1280, h: 720, poster: '/proof/vt-blurred-2.jpg' },
+    { name: 'Client testimonial 3', vimeoId: '1218249122', w: 1280, h: 720, poster: '/proof/vt-blurred-3.jpg' },
   ],
   videoSlots: 3,
   items: [

@@ -76,7 +76,7 @@ export default function VideoTestimonials({ items = [], slots = 3 }) {
                 <iframe
                   className="pa-tframe"
                   src={`https://player.vimeo.com/video/${v.vimeoId}?autoplay=1&muted=0&playsinline=1&title=0&byline=0&portrait=0`}
-                  title={`${v.name} — client testimonial`}
+                  title={v.name}
                   allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
                   referrerPolicy="strict-origin-when-cross-origin"
                   allowFullScreen
@@ -89,7 +89,7 @@ export default function VideoTestimonials({ items = [], slots = 3 }) {
                     type="button"
                     className="pa-tplay-hit"
                     onClick={() => setActiveId(v.vimeoId)}
-                    aria-label={`Play ${v.name}'s testimonial`}
+                    aria-label={`Play ${v.name}`}
                   >
                     <span className="pa-tplay">
                       <Play size={22} />
@@ -99,9 +99,9 @@ export default function VideoTestimonials({ items = [], slots = 3 }) {
                 </>
               )}
             </span>
-            {/* No name caption under the player (2026-08-11). The card is the
-                video; the man says who he is in it. `v.name` still drives the
-                play button's aria-label above, so the control stays labelled. */}
+            {/* No caption under the player. `v.name` is a neutral label, not a
+                person — these clips are blurred for privacy, so nothing on the
+                page or in the accessibility tree names the client. */}
           </div>
         );
       })}
