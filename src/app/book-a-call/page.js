@@ -8,7 +8,7 @@ import FunnelSteps from '@/components/FunnelSteps';
 import CalendlyEmbed from '@/components/CalendlyEmbed';
 import SiteFooter from '@/components/SiteFooter';
 import Faq from '@/components/Faq';
-import { Arrow, Check, Clock } from '@/components/Icons';
+import { Alert, Arrow, Check, Clock, Mail, WhatsApp } from '@/components/Icons';
 import { book } from '@/lib/content';
 
 const SLOT_ID = 'pick-slot';
@@ -163,6 +163,49 @@ export default function BookACall() {
             {/* The [MISSING call length] flag was removed 2026-08-11. The
                 duration is still unstated in the docx, so the pill simply omits
                 it rather than announcing the gap. See MISSING.callLength. */}
+          </div>
+
+          {/* ── No workable slot? ──
+              Directly under the scheduler, because this is where a man who has
+              already paid and cannot find a time would otherwise just leave. */}
+          <div className="bk-fallback" data-sdp-reveal>
+            <span className="bk-fallback-eyebrow">
+              <Alert size={13} />
+              {book.fallback.eyebrow}
+            </span>
+
+            <h2 className="sdp-h2">
+              {book.fallback.h2[0]}
+              <em>{book.fallback.h2[1]}</em>
+            </h2>
+
+            <p className="bk-fallback-body">
+              {book.fallback.body.map((run, i) =>
+                run.strong ? <strong key={i}>{run.text}</strong> : <span key={i}>{run.text}</span>
+              )}
+            </p>
+
+            <div className="bk-fallback-actions">
+              <a
+                className="bk-fb-btn primary"
+                href={book.fallback.whatsappHref}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <WhatsApp size={19} />
+                {book.fallback.whatsappLabel}
+              </a>
+              <a className="bk-fb-btn ghost" href={book.fallback.emailHref}>
+                <Mail size={17} />
+                {book.fallback.emailLabel}
+              </a>
+            </div>
+
+            <p className="bk-fallback-contact">
+              <a href={`tel:+${'918791804416'}`}>{book.fallback.phoneDisplay}</a>
+              <span aria-hidden="true">·</span>
+              <a href={`mailto:${book.fallback.email}`}>{book.fallback.email}</a>
+            </p>
           </div>
         </div>
       </section>

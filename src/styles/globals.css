@@ -151,7 +151,13 @@ h2.sdp-h2{ text-align:center; font-size:clamp(25px,3.8vw,44px); letter-spacing:-
    the 4.7vw ramp and the 30px floor stay, so the headline still scales down
    through the tablet range, and the ≤720px override further down is untouched. */
 .sdp-h1-l1{ display:block; font-family:var(--fh); font-size:clamp(30px,4.7vw,42px); color:var(--ink); line-height:1.06; letter-spacing:-.028em; text-wrap:balance; }
-.sdp-h1-l2{ display:block; font-family:var(--fb); font-weight:600; font-size:clamp(15px,1.8vw,20px); color:var(--brand-deep); line-height:1.5; margin-top:14px; text-wrap:balance; }
+/* The qualifier line, set as the tail of the headline rather than a deck under
+   it (2026-08-11). It shares the headline's display face and its 1.06 leading,
+   and sits on a 6px gap — at the old 14px with 1.5 leading and the body face it
+   read as a separate paragraph that happened to be blue. Smaller and lighter is
+   what separates it now; distance no longer has to. */
+.sdp-h1-l2{ display:block; font-family:var(--fh); font-weight:700; font-size:clamp(17px,2.3vw,26px);
+  color:var(--brand-deep); line-height:1.06; letter-spacing:-.02em; margin-top:6px; text-wrap:balance; }
 
 /* Reveal — fail-open: visible if JS never adds .vis */
 [data-sdp-reveal]{ opacity:0; transform:translateY(28px); transition:opacity .7s ease, transform .7s cubic-bezier(.2,.8,.2,1); transition-delay:var(--d,0s); }
@@ -432,6 +438,28 @@ h2.sdp-h2{ text-align:center; font-size:clamp(25px,3.8vw,44px); letter-spacing:-
 /* The Vimeo embed fills the frame. No object-fit — the player letterboxes its
    own content, and --ar already matches the source, so there is nothing to crop. */
 .sdp-vsl-embed{ position:absolute; inset:0; width:100%; height:100%; border:0; background:#000; }
+
+/* Shown only when the browser refused unmuted autoplay and the video is
+   therefore running silent. Sits top-left, clear of Vimeo's own controls in the
+   bottom bar and its fullscreen button top-right. Deliberately loud: a sales
+   video playing with no sound is worse than one that has not started. */
+.sdp-vsl-unmute{ position:absolute; top:12px; left:12px; z-index:3;
+  display:inline-flex; align-items:center; gap:8px; padding:9px 15px 9px 11px;
+  border-radius:999px; cursor:pointer; border:1px solid rgba(255,255,255,.35);
+  background:rgba(var(--ink-rgb),.82); backdrop-filter:blur(6px); color:#fff;
+  font-family:var(--fb); font-size:12.5px; font-weight:800; letter-spacing:.03em; line-height:1;
+  box-shadow:0 8px 22px -8px rgba(0,0,0,.9);
+  animation:sdpUnmuteNudge 2.4s ease-in-out infinite;
+  transition:background-color .2s ease, transform .2s ease; }
+.sdp-vsl-unmute:hover{ background:var(--brand); transform:translateY(-1px); }
+.sdp-vsl-unmute:focus-visible{ outline:2px solid var(--brand-bright); outline-offset:2px; }
+.sdp-vsl-unmute-ico{ display:grid; place-items:center; flex:0 0 auto; }
+@keyframes sdpUnmuteNudge{ 0%,100%{ box-shadow:0 8px 22px -8px rgba(0,0,0,.9); }
+  50%{ box-shadow:0 8px 22px -8px rgba(0,0,0,.9), 0 0 0 6px rgba(var(--brand-rgb),.22); } }
+@media (prefers-reduced-motion:reduce){ .sdp-vsl-unmute{ animation:none; } }
+@media (max-width:560px){
+  .sdp-vsl-unmute{ top:9px; left:9px; padding:8px 12px 8px 9px; font-size:11.5px; }
+}
 .sdp-vsl-play{ position:absolute; inset:0; display:grid; place-items:center; cursor:pointer; border:0;
   background:radial-gradient(circle at 50% 50%, rgba(var(--ink-rgb),.14), rgba(var(--ink-rgb),.40)); transition:background .3s; }
 .sdp-vsl-disc{ position:relative; width:82px; height:82px; border-radius:50%; display:grid; place-items:center;
@@ -533,11 +561,11 @@ h2.sdp-h2{ text-align:center; font-size:clamp(25px,3.8vw,44px); letter-spacing:-
   .sdp-root .fp-panel-h,
   .sdp-root .fp-sectionh{ font-size:22px !important; line-height:1.28 !important; }
 
-  /* The hero's blue tail is its own case (client, 2026-08-11): 18px, and it has
-     to hold TWO lines on every phone. Fixed 18px spills to three lines below
-     ~360px, so it is fluid with 18px as the ceiling — 4.7vw keeps the line
-     count at two from 320px up, and stops growing once 18px is reached. */
-  .sdp-root .sdp-h1-l2{ font-size:clamp(15px,4.7vw,18px) !important; line-height:1.34 !important; }
+  /* The hero's tail on mobile. Still capped at 18px so it holds TWO lines on
+     every phone (fixed 18px spills to three below ~360px), but now on the
+     headline's leading rather than 1.34 — it is the last line of the headline,
+     not a paragraph under it. */
+  .sdp-root .sdp-h1-l2{ font-size:clamp(15px,4.7vw,18px) !important; line-height:1.14 !important; }
 
   /* The hero gate pill is its own case: 86 characters of tracked-out caps that
      must land in TWO lines on every phone. Fixed 10.5px made three below
