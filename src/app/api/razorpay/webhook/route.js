@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 
-import { brand, pricing, CANONICAL_CHECKOUT_URL } from '@/lib/config';
+import { brand, pricing, CANONICAL_CHECKOUT_URL, TRACKING_HOST } from '@/lib/config';
 import { sendMetaCapiEvent, sha256 } from '@/lib/meta-capi';
+import { isTrackingHost, requestHost, resolveFbc } from '@/lib/request-context';
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Razorpay webhook — the single tracking authority for a completed payment.
@@ -109,6 +110,22 @@ export async function POST(req) {
     return NextResponse.json({ ok: true, skipped: 'test_mode', paymentId });
   }
 
+  /* ─── 4b. Host gate ────────────────────────────────────────────────────────
+     Nothing downstream of here — Pabbly row or Meta event — may fire from a
+     preview deploy or a local tunnel. Gating once, here, covers both.
+
+     console.ERROR, not warn: reaching this line means Razorpay is calling a
+     webhook URL that is NOT the production host, which would silently cost
+     real conversions. That must be impossible to miss in the logs.
+     Prerequisite: the Razorpay webhook URL must point at TRACKING_HOST. */
+  if (!isTrackingHost(req)) {
+    console.error(
+      `[webhook] paymentId=${paymentId} REJECTED — arrived on host "${requestHost(req)}", expected "${TRACKING_HOST}". ` +
+        'No Pabbly row, no Meta event. Check the Razorpay webhook URL.'
+    );
+    return NextResponse.json({ ok: true, skipped: 'wrong_host', paymentId });
+  }
+
   // ─── 5. Unpack the notes create-order packed ────────────────────────────
   const cust = safeParseJson(notes.cust);
   const utm = safeParseJson(notes.utm);
@@ -123,12 +140,26 @@ export async function POST(req) {
   const customerType = cust.tp ?? '';
   const fullPhone = `${dialCode}${phoneDigits}`;
 
-  const fbc = notes.fbc || undefined;
   const fbp = notes.fbp || undefined;
   const clientIp = notes.ip || undefined;
   const clientUserAgent = notes.ua || undefined;
   const eventSourceUrl = notes.esu || CANONICAL_CHECKOUT_URL;
   const fbclid = notes.clid ?? '';
+
+  /* First-touch session context — CRM columns only, never Meta user_data. */
+  const referrer = notes.rf ?? '';
+  const landingUrl = notes.lu ?? '';
+
+  /* Defensive hybrid rebuild. create-order already resolves _fbc, so notes.fbc
+     is normally populated; this covers orders created before that shipped and
+     any case where the cookie was absent at order time. Costs nothing when
+     notes.fbc is already set. */
+  const fbc =
+    resolveFbc({
+      cookieFbc: notes.fbc || '',
+      fbclid,
+      fbclidTs: Number(notes.ts) || undefined,
+    }) || undefined;
 
   // ─── 6. Server-derived values ───────────────────────────────────────────
   /* Razorpay sends paise; Pabbly and Meta both want rupees. The SDK has
@@ -180,9 +211,16 @@ export async function POST(req) {
     client_user_agent: clientUserAgent ?? '',
     external_id: externalId,
     event_source_url: eventSourceUrl,
-    is_test: 'false',
+    /* Reflects the actual mode rather than a hardcoded 'false'. trackingEnabled
+       goes false on the ₹1 live-test fee, which is exactly when a row must be
+       marked as a test in the CRM. */
+    is_test: pricing.trackingEnabled ? 'false' : 'true',
     purchase_event_id: paymentId,
     fbclid,
+    /* SOP fields #24/#25 — first-touch context, so an ops team can still
+       classify a buyer whose utm_* all came through blank. */
+    referrer,
+    landing_url: landingUrl,
   };
 
   // ─── 8. Fire Pabbly (never throws into the response) ────────────────────

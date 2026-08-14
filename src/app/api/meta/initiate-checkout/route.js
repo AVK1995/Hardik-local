@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { pricing } from '@/lib/config';
 import { sendInitiateCheckoutEvent } from '@/lib/meta-capi';
-import { readRequestContext } from '@/lib/request-context';
+import { isTrackingHost, readRequestContext, requestHost, resolveFbc } from '@/lib/request-context';
 
 /* ═══════════════════════════════════════════════════════════════════════════
    `ic_event` — the visitor's form validated clean and they are one step from
@@ -31,6 +31,13 @@ export async function POST(req) {
     return NextResponse.json({ ok: true, skipped: 'test_mode' });
   }
 
+  /* Matches the browser pixel's host gate — no preview or localhost traffic
+     in the live dataset. */
+  if (!isTrackingHost(req)) {
+    console.log(`[ic] host "${requestHost(req)}" is not the tracking host — skipping`);
+    return NextResponse.json({ ok: true, skipped: 'wrong_host' });
+  }
+
   const pixelId = process.env.META_PIXEL_ID;
   const accessToken = process.env.META_CAPI_ACCESS_TOKEN;
   if (!pixelId || !accessToken) {
@@ -38,7 +45,13 @@ export async function POST(req) {
     return NextResponse.json({ ok: true, skipped: 'env_missing' });
   }
 
-  const { fbc, fbp, clientIp, clientUserAgent } = readRequestContext(req);
+  const { fbc: cookieFbc, fbp, clientIp, clientUserAgent } = readRequestContext(req);
+
+  const fbc = resolveFbc({
+    cookieFbc,
+    fbclid: body?.fbclid,
+    fbclidTs: body?.fbclidTs,
+  });
 
   try {
     await sendInitiateCheckoutEvent({
