@@ -63,13 +63,19 @@ export default function VideoTestimonials({ items = [], slots = 3 }) {
           >
             <span className="pa-tphoto">
               {playing ? (
-                /* dnt=1 keeps Vimeo from setting tracking cookies. title/byline/
-                   portrait off so the card chrome stays ours, not Vimeo's.
-                   allow list and referrerPolicy mirror what Vimeo's own oEmbed
-                   hands back — trimming them costs fullscreen and web-share. */
+                /* title/byline/portrait off so the card chrome stays ours, not
+                   Vimeo's. allow list and referrerPolicy mirror what Vimeo's
+                   own oEmbed hands back — trimming them costs fullscreen and
+                   web-share.
+
+                   dnt=1 removed 2026-08-11 alongside the hero VSL: it was
+                   switching Vimeo analytics off, so no testimonial ever
+                   registered a play. muted=0 and playsinline=1 added to match
+                   the hero — without playsinline, iOS Safari yanks the clip
+                   into its own fullscreen player the moment it starts. */
                 <iframe
                   className="pa-tframe"
-                  src={`https://player.vimeo.com/video/${v.vimeoId}?autoplay=1&title=0&byline=0&portrait=0&dnt=1`}
+                  src={`https://player.vimeo.com/video/${v.vimeoId}?autoplay=1&muted=0&playsinline=1&title=0&byline=0&portrait=0`}
                   title={`${v.name} — client testimonial`}
                   allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
                   referrerPolicy="strict-origin-when-cross-origin"
