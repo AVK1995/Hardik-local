@@ -18,6 +18,8 @@
    PageView and nothing else; every conversion signal is server-side CAPI.
    ═══════════════════════════════════════════════════════════════════════════ */
 
+import { restoreFbclid, restoreFbclidTs } from '@/lib/utm';
+
 const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID || '';
 
 const MAM_COOKIE_NAME = 'apw_mam';
@@ -146,7 +148,14 @@ export function fireAddToCartOnce() {
   }
 
   const url = '/api/meta/add-to-cart';
-  const payload = JSON.stringify({ eventSourceUrl: window.location.href });
+  /* fbclid + click time ride along so the server can rebuild _fbc when Meta's
+     own cookie is absent — the iOS / in-app case where attribution otherwise
+     degrades to probabilistic. */
+  const payload = JSON.stringify({
+    eventSourceUrl: window.location.href,
+    fbclid: restoreFbclid(),
+    fbclidTs: restoreFbclidTs(),
+  });
 
   try {
     if (navigator.sendBeacon) {
@@ -201,7 +210,12 @@ export async function fireInitiateCheckoutOnce(customer) {
     const res = await fetch('/api/meta/initiate-checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ customer, eventSourceUrl: window.location.href }),
+      body: JSON.stringify({
+        customer,
+        eventSourceUrl: window.location.href,
+        fbclid: restoreFbclid(),
+        fbclidTs: restoreFbclidTs(),
+      }),
     });
 
     if (res.ok) {

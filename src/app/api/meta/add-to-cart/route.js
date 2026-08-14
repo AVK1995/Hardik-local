@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { pricing } from '@/lib/config';
 import { sendAddToCartEvent } from '@/lib/meta-capi';
-import { readRequestContext } from '@/lib/request-context';
+import { isTrackingHost, readRequestContext, requestHost, resolveFbc } from '@/lib/request-context';
 
 /* ═══════════════════════════════════════════════════════════════════════════
    `atc_event` — fired when a visitor clicks a landing CTA for the first time.
@@ -22,6 +22,14 @@ export async function POST(req) {
     return NextResponse.json({ ok: true, skipped: 'test_mode' });
   }
 
+  /* The browser pixel has always been host-gated; this route was not, so a
+     CTA click on localhost or a preview deploy fired a real event into the
+     live dataset. */
+  if (!isTrackingHost(req)) {
+    console.log(`[atc] host "${requestHost(req)}" is not the tracking host — skipping`);
+    return NextResponse.json({ ok: true, skipped: 'wrong_host' });
+  }
+
   const pixelId = process.env.META_PIXEL_ID;
   const accessToken = process.env.META_CAPI_ACCESS_TOKEN;
   if (!pixelId || !accessToken) {
@@ -33,7 +41,15 @@ export async function POST(req) {
      event does not depend on it — eventSourceUrl is reduced to the origin
      anyway — so a bad body must never cost us the event. */
   const body = await req.json().catch(() => ({}));
-  const { fbc, fbp, clientIp, clientUserAgent } = readRequestContext(req);
+  const { fbc: cookieFbc, fbp, clientIp, clientUserAgent } = readRequestContext(req);
+
+  /* The fbc lever applies to EVERY server event, not just the purchase — an
+     atc_event with a rebuilt fbc still tells Meta which ad produced the click. */
+  const fbc = resolveFbc({
+    cookieFbc,
+    fbclid: body?.fbclid,
+    fbclidTs: body?.fbclidTs,
+  });
 
   try {
     await sendAddToCartEvent({

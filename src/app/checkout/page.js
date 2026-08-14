@@ -13,7 +13,7 @@ import { checkout } from '@/lib/content';
 import { brand, pricing } from '@/lib/config';
 import { setMetaAdvancedMatching } from '@/lib/analytics';
 import { trackPayClickAttempt, trackValidatedCheckoutIntent } from '@/lib/funnel-events';
-import { restoreUtm, restoreFbclid } from '@/lib/utm';
+import { restoreUtm, restoreFbclid, restoreFbclidTs, restoreContext } from '@/lib/utm';
 
 const stripIcons = [Lock, Shield, Lock];
 
@@ -203,7 +203,13 @@ export default function Checkout() {
         body: JSON.stringify({
           customer,
           utm: restoreUtm(),
+          /* fbclid + its click time drive the server-side _fbc rebuild when
+             Meta's own cookie is missing; referrer + landing_url are CRM-only
+             context for classifying untagged buyers. */
           fbclid: restoreFbclid(),
+          fbclidTs: restoreFbclidTs(),
+          referrer: restoreContext().referrer,
+          landingUrl: restoreContext().landing_url,
         }),
       });
 

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
 
 import { pricing, CANONICAL_CHECKOUT_URL } from '@/lib/config';
-import { readRequestContext } from '@/lib/request-context';
+import { readRequestContext, resolveFbc } from '@/lib/request-context';
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Creates the Razorpay order — and, just as importantly, snapshots everything
@@ -51,14 +51,20 @@ export async function POST(req) {
     }
 
     const body = await req.json().catch(() => ({}));
-    const { customer, utm, fbclid } = body;
+    const { customer, utm, fbclid, fbclidTs, referrer, landingUrl } = body;
 
     /* The server is the price authority. The client does not get to name the
        amount — it only ever says "start a payment". */
     const amount = pricing.paise;
     const currency = pricing.currency;
 
-    const { fbc, fbp, clientIp, clientUserAgent } = readRequestContext(req);
+    const { fbc: cookieFbc, fbp, clientIp, clientUserAgent } = readRequestContext(req);
+
+    /* Hybrid _fbc, resolved ONCE here so the same value reaches both the
+       order notes (and therefore the webhook's CAPI event) and Pabbly. On
+       iOS / in-app browsers the cookie is absent and this rebuild is the only
+       thing keeping attribution deterministic. */
+    const fbc = resolveFbc({ cookieFbc, fbclid, fbclidTs });
 
     const notes = {
       kind: FUNNEL_KIND,
@@ -84,10 +90,19 @@ export async function POST(req) {
         })
       ),
       clid: truncate(fbclid ?? ''),
+      /* Click time in epoch ms. Carried so the webhook can defensively rebuild
+         _fbc for orders created before this shipped, or if `fbc` were ever to
+         arrive empty. */
+      ts: truncate(String(Number(fbclidTs) > 0 ? Number(fbclidTs) : '')),
       fbc: truncate(fbc),
       fbp: truncate(fbp),
       ip: truncate(clientIp),
       ua: truncate(clientUserAgent),
+      /* First-touch session context. CRM columns only — these are NEVER part
+         of Meta user_data. They are what classifies an untagged buyer by
+         channel when every utm_* comes through blank. */
+      rf: truncate(referrer ?? ''),
+      lu: truncate(landingUrl ?? ''),
       /* Canonical, query-free. The live URL routinely blows past 256 chars
          once utm_* and fbclid are on it, and the query data is preserved in
          the `utm` + `clid` notes anyway. */
