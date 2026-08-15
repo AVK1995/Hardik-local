@@ -28,8 +28,14 @@
    already missing. The cookie is the durable copy.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-const ATTR_KEY = 'apw_attr';
-const ATTR_TTL_SECONDS = 30 * 24 * 60 * 60; // matches Meta's attribution window
+/* Shape + cookie name are shared with src/middleware.js and the server-side
+   resolver so the two writers never disagree. Middleware is now the PRIMARY
+   capture (it runs before hydration); this module is the supplement that
+   covers client-side route changes and acts as a second writer. */
+import { ATTR_COOKIE, ATTR_TTL_SECONDS as SHARED_TTL } from '@/lib/attribution';
+
+const ATTR_KEY = ATTR_COOKIE;
+const ATTR_TTL_SECONDS = SHARED_TTL;
 
 /* Superseded first-touch store. Read once so visitors who landed before this
    shipped keep their attribution instead of silently going blank. */

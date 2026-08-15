@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import { brand, pricing, CANONICAL_CHECKOUT_URL, TRACKING_HOST } from '@/lib/config';
 import { sendMetaCapiEvent, sha256 } from '@/lib/meta-capi';
 import { isTrackingHost, requestHost, resolveFbc } from '@/lib/request-context';
+import { resolveAttribution } from '@/lib/attribution';
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Razorpay webhook — the single tracking authority for a completed payment.
@@ -150,6 +151,39 @@ export async function POST(req) {
   const referrer = notes.rf ?? '';
   const landingUrl = notes.lu ?? '';
 
+  /* L6 — last line of defence. create-order already resolves attribution, but
+     this repairs orders created before that shipped, and any case where the
+     notes still arrived blank: utm_* is re-parsed out of the referrer, and
+     fbclid is derived from Meta's own _fbc.
+
+     Deliberately NOT parsing fbclid from `rf`: that note is capped at 256
+     chars and a real fbclid runs ~195, so a referrer-parsed fbclid is usually
+     truncated. _fbc carries it in full. */
+  const resolvedAttr = resolveAttribution({
+    cookieAttr: {
+      source: utm.s ?? '',
+      medium: utm.m ?? '',
+      campaign: utm.c ?? '',
+      content: utm.n ?? '',
+      term: utm.t ?? '',
+      fbclid: notes.clid ?? '',
+      ts: Number(notes.ts) || 0,
+    },
+    referrer,
+    landingUrl,
+    fbc: notes.fbc || '',
+  });
+
+  /* create-order's verdict wins when it had one; otherwise this run's. */
+  const attributionSource = notes.asrc || resolvedAttr.provenance;
+  if (resolvedAttr.utmSource === 'none') {
+    console.error(
+      `[webhook] paymentId=${paymentId} ATTRIBUTION MISSING — utm blank in notes, referrer and url`
+    );
+  } else {
+    console.log(`[webhook] paymentId=${paymentId} attribution ${attributionSource}`);
+  }
+
   /* Defensive hybrid rebuild. create-order already resolves _fbc, so notes.fbc
      is normally populated; this covers orders created before that shipped and
      any case where the cookie was absent at order time. Costs nothing when
@@ -157,8 +191,8 @@ export async function POST(req) {
   const fbc =
     resolveFbc({
       cookieFbc: notes.fbc || '',
-      fbclid,
-      fbclidTs: Number(notes.ts) || undefined,
+      fbclid: resolvedAttr.fbclid || fbclid,
+      fbclidTs: resolvedAttr.fbclidTs || Number(notes.ts) || undefined,
     }) || undefined;
 
   // ─── 6. Server-derived values ───────────────────────────────────────────
@@ -198,11 +232,13 @@ export async function POST(req) {
     payment_date: paymentDate.toLocaleDateString('en-IN', { timeZone: brand.paymentTimezone }),
     payment_time: paymentDate.toLocaleTimeString('en-IN', { timeZone: brand.paymentTimezone }),
     payment_timestamp: paymentDate.toISOString(),
-    utm_source: utm.s ?? '',
-    utm_medium: utm.m ?? '',
-    utm_campaign: utm.c ?? '',
-    utm_content: utm.n ?? '',
-    utm_term: utm.t ?? '',
+    /* Resolved, not raw: falls back through cookie -> body -> referrer so a
+       blank notes.utm still produces a populated CRM row. */
+    utm_source: resolvedAttr.utm.source,
+    utm_medium: resolvedAttr.utm.medium,
+    utm_campaign: resolvedAttr.utm.campaign,
+    utm_content: resolvedAttr.utm.content,
+    utm_term: resolvedAttr.utm.term,
     lead_id: paymentId,
     created_at: paymentDate.toISOString(),
     fbc: fbc ?? '',
@@ -216,7 +252,12 @@ export async function POST(req) {
        marked as a test in the CRM. */
     is_test: pricing.trackingEnabled ? 'false' : 'true',
     purchase_event_id: paymentId,
-    fbclid,
+    /* Resolved: derived from _fbc when the captured value was lost. _fbc is
+       the only COMPLETE source — a referrer-parsed fbclid is truncated. */
+    fbclid: resolvedAttr.fbclid,
+    /* Which layer supplied the attribution, e.g. "utm:cookie|clid:fbc".
+       Map this to a CRM column: it turns a silent blank row into a diagnosis. */
+    attribution_source: attributionSource,
     /* SOP fields #24/#25 — first-touch context, so an ops team can still
        classify a buyer whose utm_* all came through blank. */
     referrer,

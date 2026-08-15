@@ -3,6 +3,12 @@ import Razorpay from 'razorpay';
 
 import { pricing, CANONICAL_CHECKOUT_URL } from '@/lib/config';
 import { readRequestContext, resolveFbc } from '@/lib/request-context';
+import {
+  ATTR_COOKIE,
+  packJsonNote,
+  readAttrCookie,
+  resolveAttribution,
+} from '@/lib/attribution';
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Creates the Razorpay order — and, just as importantly, snapshots everything
@@ -60,40 +66,80 @@ export async function POST(req) {
 
     const { fbc: cookieFbc, fbp, clientIp, clientUserAgent } = readRequestContext(req);
 
+    /* L2 — the SERVER's own view of attribution comes first. Middleware wrote
+       this cookie off the real query string on the first request, so it does
+       not depend on the browser having hydrated, or on the browser being
+       honest. The client body is a supplement, not the source of truth. */
+    const cookieAttr = readAttrCookie(req.cookies.get(ATTR_COOKIE)?.value);
+    const bodyAttr = {
+      source: utm?.source ?? '',
+      medium: utm?.medium ?? '',
+      campaign: utm?.campaign ?? '',
+      content: utm?.content ?? '',
+      term: utm?.term ?? '',
+      fbclid: fbclid ?? '',
+      ts: Number(fbclidTs) || 0,
+      referrer: referrer ?? '',
+      landing_url: landingUrl ?? '',
+    };
+
+    /* L3 + L4 — falls back to parsing utm_* out of the referrer, then to
+       deriving fbclid + click-ts from Meta's own _fbc cookie. */
+    const resolved = resolveAttribution({
+      cookieAttr,
+      bodyAttr,
+      referrer: referrer || cookieAttr.referrer || '',
+      landingUrl: landingUrl || cookieAttr.landing_url || '',
+      fbc: cookieFbc,
+    });
+
     /* Hybrid _fbc, resolved ONCE here so the same value reaches both the
        order notes (and therefore the webhook's CAPI event) and Pabbly. On
        iOS / in-app browsers the cookie is absent and this rebuild is the only
        thing keeping attribution deterministic. */
-    const fbc = resolveFbc({ cookieFbc, fbclid, fbclidTs });
+    const fbc = resolveFbc({
+      cookieFbc,
+      fbclid: resolved.fbclid,
+      fbclidTs: resolved.fbclidTs,
+    });
+
+    if (resolved.utmSource === 'none') {
+      console.error('[create-order] ATTRIBUTION MISSING — no utm from url/cookie/body/referrer');
+    } else {
+      console.log(`[create-order] attribution ${resolved.provenance}`);
+    }
 
     const notes = {
       kind: FUNNEL_KIND,
-      cust: truncate(
-        JSON.stringify({
-          fn: customer?.firstName ?? '',
-          ln: customer?.lastName ?? '',
-          em: customer?.email ?? '',
-          ph: customer?.phone ?? '',
-          ct: customer?.city ?? '',
-          co: customer?.countryCode ?? '',
-          dl: customer?.dialCode ?? '',
-          tp: customer?.customerType ?? '',
-        })
-      ),
-      utm: truncate(
-        JSON.stringify({
-          s: utm?.source ?? '',
-          m: utm?.medium ?? '',
-          c: utm?.campaign ?? '',
-          n: utm?.content ?? '',
-          t: utm?.term ?? '',
-        })
-      ),
-      clid: truncate(fbclid ?? ''),
+      /* L5 — packJsonNote shortens the longest VALUE until the blob fits 256.
+         The old truncate(JSON.stringify(...)) sliced mid-JSON on a long
+         campaign name, which made the note unparseable and lost every utm
+         field at once rather than clipping one. */
+      cust: packJsonNote({
+        fn: customer?.firstName ?? '',
+        ln: customer?.lastName ?? '',
+        em: customer?.email ?? '',
+        ph: customer?.phone ?? '',
+        ct: customer?.city ?? '',
+        co: customer?.countryCode ?? '',
+        dl: customer?.dialCode ?? '',
+        tp: customer?.customerType ?? '',
+      }),
+      utm: packJsonNote({
+        s: resolved.utm.source,
+        m: resolved.utm.medium,
+        c: resolved.utm.campaign,
+        n: resolved.utm.content,
+        t: resolved.utm.term,
+      }),
+      clid: truncate(resolved.fbclid),
       /* Click time in epoch ms. Carried so the webhook can defensively rebuild
          _fbc for orders created before this shipped, or if `fbc` were ever to
          arrive empty. */
-      ts: truncate(String(Number(fbclidTs) > 0 ? Number(fbclidTs) : '')),
+      ts: truncate(String(resolved.fbclidTs || '')),
+      /* Which layer supplied the attribution. Written through to Pabbly so a
+         blank row is diagnosable instead of mysterious. */
+      asrc: truncate(resolved.provenance),
       fbc: truncate(fbc),
       fbp: truncate(fbp),
       ip: truncate(clientIp),
@@ -101,8 +147,8 @@ export async function POST(req) {
       /* First-touch session context. CRM columns only — these are NEVER part
          of Meta user_data. They are what classifies an untagged buyer by
          channel when every utm_* comes through blank. */
-      rf: truncate(referrer ?? ''),
-      lu: truncate(landingUrl ?? ''),
+      rf: truncate(resolved.referrer),
+      lu: truncate(resolved.landingUrl),
       /* Canonical, query-free. The live URL routinely blows past 256 chars
          once utm_* and fbclid are on it, and the query data is preserved in
          the `utm` + `clid` notes anyway. */
