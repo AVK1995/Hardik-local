@@ -27,10 +27,62 @@ const POSTER = process.env.NEXT_PUBLIC_VSL_POSTER || vsl.poster;
    Vimeo then sets its usual cookies — which is why the privacy policy lists a
    video provider under "who else touches your data". Do not re-add dnt unless
    the client accepts losing the analytics with it. */
-const EMBED = URL_OVERRIDE
-  ? URL_OVERRIDE
-  : `https://player.vimeo.com/video/${vsl.vimeoId}` +
-    `?autoplay=1&muted=0&playsinline=1&title=0&byline=0&portrait=0`;
+const PLAY_PARAMS = 'autoplay=1&muted=0&playsinline=1&title=0&byline=0&portrait=0';
+
+/**
+ * Normalise whatever is in NEXT_PUBLIC_VSL_URL into something that can actually
+ * live in an iframe.
+ *
+ * 2026-08-15 outage: the env var was set to the Vimeo WATCH url
+ * (`https://vimeo.com/1217229742`). vimeo.com serves that page with
+ * X-Frame-Options, so the browser refused the frame and the hero rendered
+ * "vimeo.com refused to connect" — on the live funnel, mid-ad-spend.
+ * Only `player.vimeo.com/video/<id>` is embeddable.
+ *
+ * Rather than rely on whoever edits Vercel pasting the player URL, convert it
+ * here. A watch link is the natural thing to copy out of the address bar, so
+ * treating it as valid input is the robust design.
+ */
+function toEmbedUrl(raw) {
+  if (!raw) return '';
+  try {
+    const u = new URL(raw);
+    const host = u.hostname.replace(/^www\./, '');
+
+    /* Already an embeddable player URL — leave it alone. */
+    if (host === 'player.vimeo.com' || host.endsWith('youtube-nocookie.com')) return raw;
+
+    /* Vimeo watch page: /<id> or /<id>/<privacyHash> */
+    if (host === 'vimeo.com') {
+      const seg = u.pathname.split('/').filter(Boolean);
+      const id = seg.find((s) => /^\d+$/.test(s));
+      if (!id) return raw;
+      const hash = seg[seg.indexOf(id) + 1];
+      const q = `${PLAY_PARAMS}${hash ? `&h=${encodeURIComponent(hash)}` : ''}`;
+      return `https://player.vimeo.com/video/${id}?${q}`;
+    }
+
+    /* YouTube watch / short links fail the same way for the same reason. */
+    if (host === 'youtube.com' || host === 'm.youtube.com') {
+      const id = u.searchParams.get('v');
+      if (id) return `https://www.youtube-nocookie.com/embed/${id}?${PLAY_PARAMS}`;
+      if (u.pathname.startsWith('/embed/')) return raw;
+    }
+    if (host === 'youtu.be') {
+      const id = u.pathname.split('/').filter(Boolean)[0];
+      if (id) return `https://www.youtube-nocookie.com/embed/${id}?${PLAY_PARAMS}`;
+    }
+
+    /* Anything else (a hosted mp4, a custom player) is used verbatim. */
+    return raw;
+  } catch {
+    return raw;
+  }
+}
+
+const EMBED =
+  toEmbedUrl(URL_OVERRIDE) ||
+  `https://player.vimeo.com/video/${vsl.vimeoId}?${PLAY_PARAMS}`;
 
 /**
  * §8 Focal media — the hero VSL (R2/R7).
