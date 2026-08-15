@@ -83,14 +83,46 @@ export function parseFbc(fbc) {
   };
 }
 
+/**
+ * Read the attribution cookie, tolerating every encoding it can arrive in.
+ *
+ * There are three writers and they do not agree on encoding:
+ *   - middleware  -> NextResponse.cookies.set() percent-encodes for us
+ *   - lib/utm.js  -> writes document.cookie with its own encodeURIComponent
+ *   - req.cookies.get() already decodes ONE layer before we see the value
+ *
+ * So the same cookie reaches this function as raw JSON, single-encoded, or
+ * (before the middleware fix) double-encoded. A single hardcoded
+ * decodeURIComponent silently failed on two of those three and returned {} —
+ * which made the CLIENT treat storage as empty and overwrite the middleware's
+ * capture with landing_url=/checkout, reintroducing the exact bug L1 fixes.
+ *
+ * decodeURIComponent also THROWS on a stray '%' (a utm value containing a
+ * literal percent), which the old catch turned into silent data loss.
+ *
+ * Parse first, decode only if that fails, and try at most twice.
+ */
 export function readAttrCookie(raw) {
   if (!isFilled(raw)) return {};
-  try {
-    const parsed = JSON.parse(decodeURIComponent(raw));
-    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
-  } catch {
-    return {};
+
+  let candidate = raw;
+  for (let i = 0; i < 3; i += 1) {
+    try {
+      const parsed = JSON.parse(candidate);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) return parsed;
+      return {};
+    } catch {
+      /* Not JSON yet — peel one encoding layer and retry. */
+    }
+    try {
+      const decoded = decodeURIComponent(candidate);
+      if (decoded === candidate) return {};
+      candidate = decoded;
+    } catch {
+      return {};
+    }
   }
+  return {};
 }
 
 /* ── merge ───────────────────────────────────────────────────────────────── */

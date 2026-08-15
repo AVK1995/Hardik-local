@@ -46,8 +46,15 @@ export function middleware(req) {
     /* Only write when something actually changed: attribution is last-touch,
        context is first-touch, and an untagged internal navigation must not
        churn the cookie on every page view. */
+    /* Raw JSON, NOT encodeURIComponent'd: NextResponse.cookies.set() already
+       percent-encodes. Pre-encoding here double-encoded the value, so the
+       browser-side reader (one decodeURIComponent) failed to parse it, treated
+       storage as empty, and overwrote the middleware's capture with
+       landing_url=/checkout — reintroducing the very bug this layer fixes.
+       Caught in production via the Set-Cookie header showing %257B ('{'
+       encoded twice). */
     if (changed) {
-      res.cookies.set(ATTR_COOKIE, encodeURIComponent(JSON.stringify(attr)), {
+      res.cookies.set(ATTR_COOKIE, JSON.stringify(attr), {
         path: '/',
         maxAge: ATTR_TTL_SECONDS,
         sameSite: 'lax',
