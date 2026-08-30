@@ -7,7 +7,9 @@
 > **Scope:** how a funnel captures `utm_*` / `fbclid` / `_fbc` / `_fbp` / referrer, and how
 > those reach (a) Meta CAPI and (b) the Pabbly → Google Sheet CRM.
 >
-> **Origin:** written after a live post-mortem on Project Alpha Wellness (2026-08-15) where
+> **Origin:** two live post-mortems. Project Alpha Wellness (2026-08-15), below; and Reset by
+> Shruti (2026-08-30), where ~2–3 in 10 paid leads were reported as `link_in_bio` because an
+> organic bio tap outranked the real ad utm (**F11**). Written after the first, where
 > the first paid ad lead produced a CRM row with **every UTM blank and no fbclid**, while the
 > referrer field still held the complete ad URL. The root cause is architectural, not a typo,
 > and it is present in every funnel built on this architecture.
@@ -117,7 +119,7 @@ grep -rn "hostname\|TRACKING_HOST" src app lib 2>/dev/null | grep -v node_module
 
 ---
 
-## 3. The 9 known failure modes — check each, with its detection signature
+## 3. The 11 known failure modes — check each, with its detection signature
 
 | # | Failure | Detection signature | Impact |
 |---|---|---|---|
@@ -130,6 +132,8 @@ grep -rn "hostname\|TRACKING_HOST" src app lib 2>/dev/null | grep -v node_module
 | **F7** | **No provenance field** | no `attribution_source` in the Pabbly payload | A blank row is indistinguishable from organic. You find out from a lead, not a monitor |
 | **F8** | **CAPI routes not host-gated** | API routes fire CAPI with no hostname check | localhost + Vercel previews fire real events into the live dataset |
 | **F9** | **`restoreParams` ignores the live URL** | restore reads storage only | Misses attribution when the user lands straight on a tagged `/checkout` |
+| **F10** | **Double-encoded attribution cookie** | `Set-Cookie` shows `%257B` (`{` encoded twice) — the framework's `cookies.set()` already encodes, so a manual `encodeURIComponent` doubles it | The browser reader's single decode fails, concludes storage is empty, and **overwrites the server's capture**. Reintroduces F1 invisibly |
+| **F11** | **Organic bio utm outranks a real ad utm** | resolver trusts the cookie by position; referrer/landing recovery only runs when utm is ALL blank | A buyer who touched the ad *and* the IG bio link is reported `link_in_bio`. ~2–3 in 10 paid leads at one client |
 
 **F6 is the one to flag as urgent regardless of everything else** — it is stack-independent,
 traffic-independent, and silently destroys all five UTM fields at once.
@@ -195,8 +199,50 @@ race against a link tap"* to *"the server saw the query string"*.
 | **L6** | Webhook-side repair | pre-existing orders |
 | **L7** | `attribution_source` provenance column | F7 |
 
-**Precedence, per field:** `URL → cookie → body → referrer → _fbc → none`
+**Precedence for `fbclid`:** `URL → cookie → body → _fbc → none`.
 `referrer` is skipped for `fbclid`; `_fbc` is the only complete source.
+
+**Precedence for `utm_*` — QUALITY-RANKED, not positional (F11).** Scan
+`landing → referrer → cookie → body` and take the first **ad-grade** utm found
+anywhere. Only if no source has one do you fall back to the best-filled value —
+which for a genuine bio buyer correctly stays `link_in_bio`. Whole sets are
+chosen, never merged field-by-field: mixing `utm_source` from the ad with
+`utm_content` from the bio link is worse than either.
+
+```js
+const isAdUtm = (u) => u.source && hasUtm(u) && !isOrganicUtm(u);
+// organic = utm_content 'link_in_bio', OR utm_source in {ig, fb, instagram,
+// facebook, linktr.ee, …}, OR medium 'social' with no campaign. Tune per client.
+const candidates = [
+  { label:'landing',  utm: utmSetOf(parseAttributionFromUrl(landingUrl)) },
+  { label:'referrer', utm: utmSetOf(parseAttributionFromUrl(referrer)) },
+  { label:'cookie',   utm: utmSetOf(cookieAttr) },
+  { label:'body',     utm: utmSetOf(bodyAttr) },
+];
+let chosen = candidates.find(c => isAdUtm(c.utm));          // any ad-grade wins
+let utmQuality = 'ad';
+if (!chosen) { chosen = candidates.find(c => hasUtm(c.utm));
+  utmQuality = chosen ? (isOrganicUtm(chosen.utm) ? 'organic' : 'other') : 'none'; }
+```
+
+**Also make capture AD-STICKY** (defence-in-depth), in BOTH the edge merge and
+the client module — they share one cookie and must agree:
+
+```js
+if (hasUtm(liveUtm) && (isAdUtm(liveUtm) || !isAdUtm(utmSetOf(stored)))) {
+  for (const k of UTM_KEYS) stored[k] = liveUtm[k];     // ad beats bio; latest ad wins
+}
+if (live.fbclid) stored.fbclid = live.fbclid;           // click id = PURE last-touch
+```
+
+> **The one caveat:** ad vs bio is told apart by `utm_source`. Keep paid ads'
+> `utm_source` distinct from the bio link's (ads `Instagram_Reels` /
+> `Facebook_Mobile_Reels`…, bio `ig` / `link_in_bio`) and it just works. If a
+> client tags a real ad `utm_source=ig`, edit `ORGANIC_SOURCES`.
+
+**Provenance becomes `utm:<layer>/<quality>|clid:<layer>`** — e.g.
+`utm:landing/ad|clid:fbc`. Chart the quality half: a rising `organic` share on
+paid traffic is F11 reappearing.
 
 ---
 
@@ -343,7 +389,10 @@ export function middleware(req) {
       now: Date.now(),
     });
     if (changed) {
-      res.cookies.set(ATTR_COOKIE, encodeURIComponent(JSON.stringify(attr)), {
+      /* F10: pass RAW JSON — cookies.set() already percent-encodes. Doubling
+         it breaks the browser-side reader. And make the reader parse-first,
+         decode-only-on-failure, so cookies already in the wild still work. */
+      res.cookies.set(ATTR_COOKIE, JSON.stringify(attr), {
         path: '/', maxAge: ATTR_TTL_SECONDS, sameSite: 'lax',
         httpOnly: false,                                  // the client module reads it as fallback
         secure: req.nextUrl.protocol === 'https:',
@@ -440,6 +489,11 @@ Assertions:
 - [ ] first-touch `landing_url` set once; clean internal URL does not wipe attribution
 - [ ] last-touch: a second tagged URL overwrites
 - [ ] untagged internal nav writes **no** cookie (no churn)
+- [ ] ad utm in `landing_url` beats a `link_in_bio` cookie (F11)
+- [ ] ad utm in `referrer` beats it too, when `landing_url` is an untagged page like `/terms`
+- [ ] a genuine bio buyer still reports `link_in_bio` — **no ad is fabricated**
+- [ ] ad-sticky: an organic tap after an ad tap does NOT overwrite the ad; `fbclid` still refreshes
+- [ ] the attribution cookie reads back correctly raw, single- AND double-encoded (F10)
 - [ ] `packJsonNote` on a >256-char blob → **valid** JSON, fits, only the longest value clipped
 - [ ] old `truncate(JSON.stringify(...))` on the same input → **invalid** JSON (proves the bug)
 

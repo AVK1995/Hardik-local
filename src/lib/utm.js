@@ -32,7 +32,15 @@
    resolver so the two writers never disagree. Middleware is now the PRIMARY
    capture (it runs before hydration); this module is the supplement that
    covers client-side route changes and acts as a second writer. */
-import { ATTR_COOKIE, ATTR_TTL_SECONDS as SHARED_TTL } from '@/lib/attribution';
+import {
+  ATTR_COOKIE,
+  ATTR_TTL_SECONDS as SHARED_TTL,
+  UTM_KEYS,
+  hasUtm,
+  isAdUtm,
+  readAttrCookie,
+  utmSetOf,
+} from '@/lib/attribution';
 
 const ATTR_KEY = ATTR_COOKIE;
 const ATTR_TTL_SECONDS = SHARED_TTL;
@@ -89,9 +97,13 @@ function readAttr() {
   }
   try {
     const m = document.cookie.match(new RegExp(`(?:^|;\\s*)${ATTR_KEY}=([^;]+)`));
+    /* Shared reader: tolerates raw JSON, single- and double-encoded values.
+       A hardcoded single decodeURIComponent here silently failed on the
+       double-encoded cookies middleware wrote before 84c9200, which made this
+       module treat storage as empty and clobber the server's capture. */
     if (m) {
-      const parsed = JSON.parse(decodeURIComponent(m[1]));
-      if (parsed && typeof parsed === 'object') return parsed;
+      const parsed = readAttrCookie(m[1]);
+      if (parsed && Object.keys(parsed).length > 0) return parsed;
     }
   } catch {
     /* Malformed cookie — treat as empty rather than throwing on page load. */
@@ -151,10 +163,28 @@ export function captureLandingParams() {
       changed = true;
     }
 
-    /* ATTRIBUTION — last-touch. Overwrite whenever this URL carries params. */
+    /* ATTRIBUTION — AD-STICKY last-touch. Mirrors mergeAttribution in
+       lib/attribution.js; the two writers must agree or they fight over the
+       same cookie.
+
+       A later organic bio tap must NOT overwrite a stored ad utm — that is how
+       a real ad sale ends up reported as link_in_bio. A real ad tap always
+       wins, and the latest ad wins. Click IDs stay pure last-touch. */
     if (hasAttribution) {
-      Object.assign(attr, live, { ts: Date.now() });
-      changed = true;
+      const liveUtm = utmSetOf(live);
+      let touched = false;
+
+      if (hasUtm(liveUtm) && (isAdUtm(liveUtm) || !isAdUtm(utmSetOf(attr)))) {
+        for (const k of UTM_KEYS) attr[k] = liveUtm[k];
+        touched = true;
+      }
+      if (live.fbclid) { attr.fbclid = live.fbclid; touched = true; }
+      if (live.gclid) { attr.gclid = live.gclid; touched = true; }
+
+      if (touched) {
+        attr.ts = Date.now();
+        changed = true;
+      }
     }
 
     if (changed) writeAttr(attr);

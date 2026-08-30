@@ -44,6 +44,42 @@ export const UTM_KEYS = ['source', 'medium', 'campaign', 'content', 'term'];
 
 const isFilled = (v) => typeof v === 'string' && v.length > 0;
 
+/* ── ad-grade vs organic (ATTRIBUTION_UTM_PRIORITY_ADDENDUM, 2026-08-30) ──
+   A buyer can touch TWO tagged entries inside the 30-day window — the paid ad
+   AND the Instagram bio link — both writing the same cookie in the same in-app
+   browser. Last-touch then lets a later bio tap overwrite the ad, and the CRM
+   reports link_in_bio for a sale the ad actually produced. (~2-3 in 10 paid
+   leads at Reset by Shruti.)
+
+   So utm sources are RANKED, not just ordered: a real ad utm found anywhere
+   beats an organic bio utm sitting in the cookie. Meta was always fine — it
+   attributes on fbclid — this only corrects our own CRM columns.
+
+   The distinction is made on utm_source. Keep paid ads' utm_source distinct
+   from the bio link's (ads use Instagram_Reels / Facebook_Mobile_Reels…, the
+   bio uses ig / link_in_bio) and this just works. Tune the set per client. */
+export const ORGANIC_SOURCES = new Set([
+  'ig', 'fb', 'instagram', 'facebook', 'l.instagram.com', 'lm.facebook.com',
+  'linktr.ee', 'taplink.cc', 'beacons.ai', 'bio.link',
+]);
+
+export const utmSetOf = (o = {}) => ({
+  source: o.source || '', medium: o.medium || '', campaign: o.campaign || '',
+  content: o.content || '', term: o.term || '',
+});
+
+export const hasUtm = (u = {}) => UTM_KEYS.some((k) => isFilled(u[k]));
+
+export function isOrganicUtm(u = {}) {
+  if (!hasUtm(u)) return false;
+  if ((u.content || '').toLowerCase() === 'link_in_bio') return true;
+  if (ORGANIC_SOURCES.has((u.source || '').toLowerCase())) return true;
+  if ((u.medium || '').toLowerCase() === 'social' && !(u.campaign || '').length) return true;
+  return false;
+}
+
+export const isAdUtm = (u = {}) => isFilled(u.source) && hasUtm(u) && !isOrganicUtm(u);
+
 /* ── parsing ─────────────────────────────────────────────────────────────── */
 
 /** Pull attribution out of any URL or query string. Never throws. */
@@ -145,9 +181,28 @@ export function mergeAttribution(stored, { live, landingUrl, referrer, now }) {
     changed = true;
   }
 
+  /* AD-STICKY last-touch (addendum §3b). An organic bio tap must not overwrite
+     a stored ad utm; a real ad tap always wins, and the latest ad wins. This
+     stops the cookie being contaminated in the first place, so §3a's ranking
+     is defence-in-depth rather than the only guard.
+
+     Click IDs stay PURE last-touch — fbclid identifies the click, not the
+     campaign, and Meta's attribution depends on it being current. */
   if (live && Object.keys(live).length > 0) {
-    Object.assign(attr, live, { ts: now });
-    changed = true;
+    const liveUtm = utmSetOf(live);
+    let touched = false;
+
+    if (hasUtm(liveUtm) && (isAdUtm(liveUtm) || !isAdUtm(utmSetOf(attr)))) {
+      for (const k of UTM_KEYS) attr[k] = liveUtm[k];
+      touched = true;
+    }
+    if (isFilled(live.fbclid)) { attr.fbclid = live.fbclid; touched = true; }
+    if (isFilled(live.gclid)) { attr.gclid = live.gclid; touched = true; }
+
+    if (touched) {
+      attr.ts = now;
+      changed = true;
+    }
   }
 
   return { attr, changed };
@@ -169,37 +224,32 @@ export function resolveAttribution({
   fbc = '',
   now = Date.now(),
 } = {}) {
-  const utm = {};
-  let utmSource = 'none';
+  /* Quality-aware selection. Sources are scanned landing -> referrer -> cookie
+     -> body and the FIRST ad-grade utm wins, wherever it lives. Only if no
+     source carries an ad-grade utm do we fall back to the best-filled one —
+     which for a genuine bio buyer correctly stays link_in_bio.
 
-  /* 1 + 2. cookie (server-observed by middleware) then 3. client body. */
-  for (const [label, src] of [
-    ['cookie', cookieAttr],
-    ['body', bodyAttr],
-  ]) {
-    for (const key of UTM_KEYS) {
-      if (!isFilled(utm[key]) && isFilled(src?.[key])) {
-        utm[key] = src[key];
-        if (utmSource === 'none') utmSource = label;
-      }
-    }
-  }
+     This replaces the old "cookie, then body, then referrer ONLY IF all blank"
+     logic. That never looked at the landing_url when the cookie held
+     link_in_bio, which is exactly how a real ad sale got reported as organic.
 
-  /* 4. referrer — the landing URL we recorded still holds the query string.
-        Safe for utm_*; deliberately NOT used for fbclid (see parseFbc). */
-  if (UTM_KEYS.every((k) => !isFilled(utm[k]))) {
-    const fromRef = parseAttributionFromUrl(referrer);
-    const fromLanding = parseAttributionFromUrl(landingUrl);
-    const recovered = { ...fromLanding, ...fromRef };
-    let used = false;
-    for (const key of UTM_KEYS) {
-      if (isFilled(recovered[key])) {
-        utm[key] = recovered[key];
-        used = true;
-      }
-    }
-    if (used) utmSource = 'referrer';
+     Whole SETS are chosen, never merged field-by-field: mixing utm_source from
+     the ad with utm_content from the bio link would be worse than either. */
+  const candidates = [
+    { label: 'landing', utm: utmSetOf(parseAttributionFromUrl(landingUrl)) },
+    { label: 'referrer', utm: utmSetOf(parseAttributionFromUrl(referrer)) },
+    { label: 'cookie', utm: utmSetOf(cookieAttr) },
+    { label: 'body', utm: utmSetOf(bodyAttr) },
+  ];
+
+  let chosen = candidates.find((c) => isAdUtm(c.utm));
+  let utmQuality = 'ad';
+  if (!chosen) {
+    chosen = candidates.find((c) => hasUtm(c.utm));
+    utmQuality = chosen ? (isOrganicUtm(chosen.utm) ? 'organic' : 'other') : 'none';
   }
+  const utm = chosen ? { ...chosen.utm } : utmSetOf({});
+  const utmSource = chosen ? chosen.label : 'none';
 
   for (const key of UTM_KEYS) if (!isFilled(utm[key])) utm[key] = '';
 
@@ -240,9 +290,12 @@ export function resolveAttribution({
     gclid,
     referrer: resolvedReferrer,
     landingUrl: resolvedLanding,
-    /* e.g. "utm:cookie|clid:fbc" — one column, tells you which layer saved you. */
-    provenance: `utm:${utmSource}|clid:${clidSource}`,
+    /* e.g. "utm:landing/ad|clid:fbc" — which layer saved you AND whether the
+       utm is ad-grade or organic. Chart this: a rising organic share on paid
+       traffic is the mis-attribution bug reappearing. */
+    provenance: `utm:${utmSource}/${utmQuality}|clid:${clidSource}`,
     utmSource,
+    utmQuality,
     clidSource,
   };
 }
