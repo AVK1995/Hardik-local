@@ -322,6 +322,19 @@ export function Mail({ size = 18 }) {
   );
 }
 
+/* Hourglass — the "wait for the redirect" mark on checkout. Stroked at the
+   family weight so it sits beside Lock and Shield in the same row, rather
+   than the emoji the pattern spec suggested. */
+export function Hourglass({ size = 16 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base} aria-hidden="true">
+      <path d="M7 3h10M7 21h10" />
+      <path d="M8 3v3.2c0 1.5 1.2 2.6 2.4 3.5.9.7.9 1.9 0 2.6C9.2 13.2 8 14.3 8 15.8V21" />
+      <path d="M16 3v3.2c0 1.5-1.2 2.6-2.4 3.5-.9.7-.9 1.9 0 2.6 1.2.9 2.4 2 2.4 3.5V21" />
+    </svg>
+  );
+}
+
 export function Alert({ size = 14 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" {...base} aria-hidden="true">

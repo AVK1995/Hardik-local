@@ -8,7 +8,7 @@ import useReveal from '@/hooks/useReveal';
 import FunnelSteps from '@/components/FunnelSteps';
 import SiteFooter from '@/components/SiteFooter';
 import { payMarks } from '@/components/PayMarks';
-import { Arrow, Check, ChevronDown, Lock, Shield } from '@/components/Icons';
+import { Arrow, Check, ChevronDown, Hourglass, Lock, Shield } from '@/components/Icons';
 import { checkout } from '@/lib/content';
 import { brand, pricing } from '@/lib/config';
 import { setMetaAdvancedMatching } from '@/lib/analytics';
@@ -122,6 +122,12 @@ export default function Checkout() {
   const [errors, setErrors] = useState({});
   const [paying, setPaying] = useState(false);
   const [payErr, setPayErr] = useState('');
+  /* Booking-awareness consent. `consent` gates the gateway; `consentError`
+     is only ever set by a blocked pay attempt, and cleared the moment he
+     ticks the box. See checkout.bookingNotice in content.js for why. */
+  const [consent, setConsent] = useState(false);
+  const [consentError, setConsentError] = useState(false);
+  const consentRef = useRef(null);
   const formRef = useRef(null);
 
   const countryCode =
@@ -182,6 +188,15 @@ export default function Checkout() {
         ?.querySelector(`[name="${firstBad}"]`)
         ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       formRef.current?.querySelector(`[name="${firstBad}"]`)?.focus({ preventScroll: true });
+      return;
+    }
+
+    /* Fields are clean but the box is not ticked. Block BEFORE Razorpay
+       opens — the point is that he reads it first. trackPayClickAttempt()
+       already fired above, so the gate does not swallow the intent signal. */
+    if (!consent) {
+      setConsentError(true);
+      consentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
 
@@ -359,8 +374,49 @@ export default function Checkout() {
                 native validation would swallow the submit event and GA4's
                 "he tried to pay" signal with it. */}
             <form ref={formRef} onSubmit={handleSubmit} noValidate>
+              <div className="co-notice" role="note">
+                <span className="co-notice-icon" aria-hidden="true">
+                  <Hourglass size={17} />
+                </span>
+                <p className="co-notice-text">
+                  {checkout.bookingNotice.map((run, i) =>
+                    run.strong ? <strong key={i}>{run.text}</strong> : <span key={i}>{run.text}</span>
+                  )}
+                </p>
+              </div>
+
               <div className="fp-fieldrow">{half.map(field)}</div>
               {full.map(field)}
+
+              {/* Real checkbox inside the label, so the whole row is a tap
+                  target and it is announced properly. The native box is
+                  visually hidden and .co-consent-box draws the themed one. */}
+              <label className="co-consent" data-err={consentError ? '' : undefined} ref={consentRef}>
+                <input
+                  type="checkbox"
+                  className="co-consent-input"
+                  checked={consent}
+                  aria-invalid={consentError || undefined}
+                  aria-describedby={consentError ? 'co-consent-msg' : undefined}
+                  onChange={(e) => {
+                    setConsent(e.target.checked);
+                    if (e.target.checked) setConsentError(false);
+                  }}
+                />
+                <span className="co-consent-box" aria-hidden="true">
+                  <Check size={13} />
+                </span>
+                <span className="co-consent-text">
+                  {checkout.bookingConsent.map((run, i) =>
+                    run.strong ? <strong key={i}>{run.text}</strong> : <span key={i}>{run.text}</span>
+                  )}
+                </span>
+              </label>
+              {consentError && (
+                <p className="co-consent-msg" id="co-consent-msg" role="alert">
+                  {checkout.bookingConsentError}
+                </p>
+              )}
 
               <div className="fp-paybtn">
                 <button className="sdp-cta" type="submit" disabled={paying}>

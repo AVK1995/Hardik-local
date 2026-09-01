@@ -711,6 +711,28 @@ export const checkout = {
      because the button already renders an arrow icon and it was doubling up. */
   button: 'Pay ₹97 & Book My Call',
   microline: '256-bit SSL · Encrypted Payment · 100% Confidential',
+
+  /* ── Booking-awareness notice + consent (2026-08-15) ────────────────────
+     Payment here does not end the funnel: Razorpay succeeds, then the man is
+     redirected to /book-a-call to pick a slot. People close the tab in that
+     gap, so they have paid and — as far as they can tell — got nothing. That
+     is a refund request and a support ticket, not a sale.
+
+     Two additions set the expectation BEFORE he pays: a notice above the
+     fields, and a consent box he must tick, which gates the gateway. Runs
+     with `strong: true` take the emphasis, same shape as hero.sub. */
+  bookingNotice: [
+    { text: 'Important — do not close this page after paying.', strong: true },
+    { text: ' The moment your payment succeeds, wait about ' },
+    { text: '2 minutes', strong: true },
+    { text: ' without closing or refreshing. You will be redirected automatically to pick your call slot. Leaving early may stop your booking from being completed.' },
+  ],
+  bookingConsent: [
+    { text: 'I understand that after a successful payment I will be redirected to book my call, and I will keep this page open for up to ' },
+    { text: '2 minutes', strong: true },
+    { text: ' to finish.' },
+  ],
+  bookingConsentError: 'Please confirm you will wait for the redirect to book your call.',
   refundNote: null,
   /* authored · split to the reference form. `half: true` pairs two fields onto
      one row; the phone field renders a country-code select beside it. */
