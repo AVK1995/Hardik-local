@@ -66,6 +66,32 @@ export function middleware(req) {
     /* Attribution must never be able to break page delivery. */
   }
 
+  /* ── Never let a document be served from a stale cache ──────────────────
+     2026-09-01: Instagram/Android in-app browser users were landing on an
+     unstyled checkout. The IAB caches the HTML document hard, so it replayed
+     HTML from an earlier deploy — and that HTML names CONTENT-HASHED assets:
+
+       <link href="/_next/static/css/<hash>.css">
+
+     A hash only changes when the file changes. globals.css had been stable,
+     so its link still resolved and the pay button stayed styled; funnel-pages
+     .css changes most deploys, so its hash moved and the old URL 404d. That
+     is the exact split seen in the recordings, and it is why it read as
+     "CSS is broken" rather than "this one asset is gone".
+
+     Documents must therefore always be revalidated. Static assets are NOT
+     touched — the matcher below excludes _next/static, so they keep their
+     immutable long cache. Only the HTML stops being reusable, which is the
+     one thing that has to be current for the hashes inside it to resolve.
+
+     This is the free half of the fix. Vercel Skew Protection is the other
+     half (it also covers JS chunks, where the symptom is a page that looks
+     perfect and a pay button that silently does nothing); it is a Pro
+     feature and is currently disabled on this project. */
+  res.headers.set('Cache-Control', 'no-store, must-revalidate');
+  res.headers.set('Pragma', 'no-cache');
+  res.headers.set('Expires', '0');
+
   return res;
 }
 
