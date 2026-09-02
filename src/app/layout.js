@@ -45,10 +45,38 @@ export default function RootLayout({ children }) {
       suppressHydrationWarning
     >
       <head>
-        {/* Reveals fail open: this only arms the hidden state once JS is confirmed. */}
+        {/* Two jobs, one inline script so it costs no extra request.
+
+            1. Reveals fail open (the original job): arm the hidden state only
+               once JS is confirmed.
+
+            2. Recover a page whose CSS 404d. An in-app browser (Instagram on
+               Android) can replay HTML from an older deploy, and that HTML
+               names content-hashed stylesheets that no longer exist — see the
+               long note in middleware.js. Result: a live, unstyled checkout.
+               If a sheet is missing we reload ONCE with a cache-busting param,
+               turning a broken page into a brief flicker.
+
+            Two things here look wrong and are not — both were measured in a
+            headless browser against the real build, so do not "tidy" them:
+
+            • It polls instead of listening for a stylesheet error event. Next
+              emits the <link> tags BEFORE any script in <head>, and resource
+              error events neither bubble nor replay — a listener would attach
+              after the event had already fired and would silently never run.
+
+            • It tests cssRules.length, not link.sheet. A 404d stylesheet does
+              NOT leave sheet null: Chrome attaches a sheet with ZERO rules.
+              (Measured: healthy sheet 189 rules, 404d sheet 0.)
+
+            The 500ms delay after DOMContentLoaded avoids reading a sheet
+            mid-parse; a spurious reload on a HEALTHY page would be worse than
+            the bug being fixed. sessionStorage caps it at one attempt per
+            session, so a reload that is also broken cannot loop. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: "document.documentElement.classList.remove('no-js');",
+            __html:
+              "document.documentElement.classList.remove('no-js');(function(){var K='__cssRecover';function broken(){var l=document.querySelectorAll('link[rel=\"stylesheet\"][href*=\"/_next/static/css/\"]');if(!l.length)return false;for(var i=0;i<l.length;i++){var sh=l[i].sheet;if(!sh)return true;try{if(sh.cssRules.length===0)return true;}catch(e){}}return false;}function check(){try{if(!broken()){sessionStorage.removeItem(K);return;}if(sessionStorage.getItem(K))return;sessionStorage.setItem(K,'1');var s=location.search,u=location.pathname+(s?s+'&':'?')+'__r='+Date.now()+location.hash;location.replace(u);}catch(e){}}function arm(){setTimeout(check,500);}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',arm);}else{arm();}window.addEventListener('load',check);window.addEventListener('load',function(){try{var sp=new URLSearchParams(location.search);if(!sp.has('__r'))return;sp.delete('__r');var q=sp.toString();history.replaceState(null,'',location.pathname+(q?'?'+q:'')+location.hash);}catch(e){}});})();",
           }}
         />
       </head>
