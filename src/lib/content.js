@@ -721,18 +721,28 @@ export const checkout = {
      Two additions set the expectation BEFORE he pays: a notice above the
      fields, and a consent box he must tick, which gates the gateway. Runs
      with `strong: true` take the emphasis, same shape as hero.sub. */
+  /* Reworded 2026-09-02 (client). Two substantive changes on top of the
+     phrasing: the wait is now stated as UP TO 10 SECONDS rather than "about 2
+     minutes", and the notice names what he will actually see next (the
+     calendar, to pick a date and time) instead of the vaguer "pick your call
+     slot". Naming the destination is what makes the instruction obey-able.
+
+     `strong: true` runs are deliberate and minimal — the opening warning and
+     the duration. Bolding the whole paragraph would flatten it back to noise;
+     these are the two things he must retain to not close the tab. */
   bookingNotice: [
-    { text: 'Important — do not close this page after paying.', strong: true },
-    { text: ' The moment your payment succeeds, wait about ' },
-    { text: '2 minutes', strong: true },
-    { text: ' without closing or refreshing. You will be redirected automatically to pick your call slot. Leaving early may stop your booking from being completed.' },
+    { text: 'Important: Please don’t close this page after paying.', strong: true },
+    { text: ' The moment your payment succeeds, please wait ' },
+    { text: 'up to 10 seconds', strong: true },
+    { text: ' without closing or refreshing this tab. You’ll then be automatically taken to the calendar to select your preferred date and time and book your call. Leaving early may stop your booking from being completed.' },
   ],
   bookingConsent: [
-    { text: 'I understand that after a successful payment I will be redirected to book my call, and I will keep this page open for up to ' },
-    { text: '2 minutes', strong: true },
-    { text: ' to finish.' },
+    { text: 'I understand that after payment, I’ll wait ' },
+    { text: 'up to 10 seconds', strong: true },
+    { text: ' for the booking page to open, then select my preferred date and time to book my call.' },
   ],
-  bookingConsentError: 'Please confirm you will wait for the redirect to book your call.',
+  bookingConsentError:
+    'Please confirm you’ll stay on this page for up to 10 seconds to complete your call booking.',
   refundNote: null,
   /* authored · split to the reference form. `half: true` pairs two fields onto
      one row; the phone field renders a country-code select beside it. */
