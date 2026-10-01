@@ -61,3 +61,27 @@ export const pricing = {
   currency: 'INR',
   trackingEnabled: feeInr > 1,
 };
+
+/* ── Contact, in one place ────────────────────────────────────────────────
+   The number reaches the site in three spots now: the book-a-call fallback,
+   and the WhatsApp bridge on /thank-you. It used to be written inline inside
+   a URL string in content.js, so changing it meant finding every copy — the
+   kind of duplication where one copy silently stays stale. */
+export const contact = {
+  /* E.164 WITHOUT the leading +, which is the form api.whatsapp.com wants. */
+  phoneE164: '918791804416',
+  phoneDisplay: '+91 87918 04416',
+  email: 'hardikdhawal@gmail.com',
+};
+
+/* A wa.me-style deep link carrying a pre-filled first message.
+
+   The pre-fill is not decoration: WhatsApp only lets a business send template
+   messages to someone who has messaged first, so this tap is what opens the
+   24-hour window the booking reminders depend on. Callers pass plain readable
+   copy; encoding happens here so no caller has to hand-escape apostrophes. */
+export function whatsappUrl(text) {
+  return `https://api.whatsapp.com/send/?phone=${contact.phoneE164}`
+    + `&text=${encodeURIComponent(text)}`
+    + '&type=phone_number&app_absent=0';
+}

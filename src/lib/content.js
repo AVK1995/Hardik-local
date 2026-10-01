@@ -25,6 +25,8 @@
  * this file must not diverge from the approved source.
  */
 
+import { contact, whatsappUrl } from '@/lib/config';
+
 export const MISSING = {
   /* vslUrl — RESOLVED 2026-08-11. "Hardik VSL" supplied; see `vsl` below. */
   /* videoTestimonials — RESOLVED 2026-08-11. Three Vimeo clips supplied, then
@@ -824,13 +826,12 @@ export const book = {
     ],
     whatsappLabel: 'Message us on WhatsApp',
     emailLabel: 'Email us',
-    phoneDisplay: '+91 87918 04416',
-    email: 'hardikdhawal@gmail.com',
-    whatsappHref:
-      'https://api.whatsapp.com/send/?phone=918791804416' +
-      '&text=Hi+Hardik+%26+Dr.+Kartik+%E2%80%94+I%27ve+paid+for+my+consultation+but+can%27t+find+a+slot+that+works.' +
-      '+My+name%2C+email%2C+phone+and+preferred+day%2Ftime+are%3A' +
-      '&type=phone_number&app_absent=0',
+    phoneDisplay: contact.phoneDisplay,
+    email: contact.email,
+    whatsappHref: whatsappUrl(
+      "Hi Hardik & Dr. Kartik — I've paid for my consultation but can't find a slot that works."
+      + ' My name, email, phone and preferred day/time are:'
+    ),
     emailHref:
       'mailto:hardikdhawal@gmail.com' +
       '?subject=Can%27t%20find%20a%20call%20slot%20%E2%80%94%20Project%20Alpha%20Wellness' +
@@ -933,7 +934,7 @@ export const book = {
 export const thankYou = {
   seal: 'Your call is booked.',
   bridge:
-    'The confirmation and calendar invite are on their way to your inbox. Bring nothing but honest answers — the more accurate you are, the more useful your roadmap will be.',
+    'Confirm on WhatsApp and your joining link and reminders come through there. Bring nothing but honest answers — the more accurate you are, the more useful your roadmap will be.',
   /* authored · preparation, not upsell */
   prep: [
     {
@@ -953,16 +954,52 @@ export const thankYou = {
 
   /* ── Sections added 2026-08-11 to the client's reference structure ────── */
   /* One static line, matching book-a-call. */
-  marquee: 'Booking Confirmed · Call Link On Its Way · A Diagnosis, Not a Pitch',
-  h1: ['Your call with ', 'Hardik & Dr. Kartik is confirmed.'],
-  /* The slot card in the hero. `slotLabel` heads it; the time itself comes from
-     Calendly's redirect params at runtime — see CalendlyEmbed.js for how to
-     switch those on. `slotPending` is what shows when they are absent, which is
-     honest rather than a blank space where a time should be. */
-  slotLabel: 'Your session',
-  sessionName: '1:1 Personalised Health Strategy Call with Hardik & Dr. Kartik',
-  slotPending: 'Your call time is in the confirmation email',
+  marquee: 'Slot Reserved · One Step Left · A Diagnosis, Not a Pitch',
+  /* The page no longer opens by declaring the call confirmed — ConfirmationStep
+     does, and it says the opposite. These two run UNDER the slot card now, as
+     the reassurance after the WhatsApp step rather than before it. */
+  h1: ['Your slot is held. ', 'One step left.'],
+  /* slotLabel / sessionName / slotPending lived here for the slot card under
+     the mast, removed 2026-10-01. The card restated a time the man had just
+     picked and pulled against the WhatsApp step, which is the only thing this
+     page now asks for. Nothing renders them, so they are gone rather than left
+     as copy that looks live. */
 
+  /* ── The WhatsApp confirmation step (2026-10-01) ──────────────────────
+     Booking a Calendly slot does not get the man into WhatsApp, and WhatsApp
+     will not let a business message someone who has not messaged first. So
+     every reminder in the ops workflow depends on this one tap happening.
+     That is why the page now leads with it instead of a tick mark.
+
+     Wording note: this block never names who takes the call. The rest of the
+     page says "Hardik & Dr. Kartik"; in practice Hardik takes it and Dr.
+     Kartik joins only when a consult needs him. Staying unnamed here avoids
+     asserting either version while that is settled. */
+  confirm: {
+    /* Browser tab. The alert word first so it is legible in a narrow tab. */
+    title: 'WAIT! Confirm your call — Project Alpha Wellness',
+    alert: 'WAIT!',
+    h1: ' Your Strategy Call Has Not Been Confirmed Yet…',
+    photo: '/Hardik-img/Hardik-Image.png',
+    photoAlt: 'Hardik Dhawalsingh',
+    step: [
+      { text: 'You’ve just ' },
+      { text: 'completed the first step', strong: true },
+      { text: '.' },
+    ],
+    lead: [
+      { text: 'Connect on WhatsApp to ' },
+      { text: 'get the next steps to confirm your Strategy Call', strong: true },
+      { text: '.' },
+    ],
+    /* Two runs, same pattern as cta.button: one line on desktop, a clean
+       break on mobile rather than an orphaned word. */
+    cta: ['Click Here To Confirm', 'My Call On WhatsApp'],
+    note: 'This is also how your joining link and reminders reach you.',
+    /* Pre-filled so the first message is useful rather than a bare "hi", and
+       so ops can tell a confirmation apart from a support question. */
+    waText: 'Hi, I’ve picked my call slot. What’s the next step to confirm it?',
+  },
   coverEyebrow: 'The Call Itself',
   coverH2: ['What We Will Cover ', 'On The Call.'],
   coverSub: 'Three things, in order.',

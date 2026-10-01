@@ -432,23 +432,8 @@
    may shrink but the button never does. */
 .bk-stuck .sdp-cta{ flex:0 0 auto; }
 
-/* ---- Thank-you: the booked slot ---- */
-.ty-slot{ width:100%; max-width:520px; margin:30px auto 0; padding:24px 26px; text-align:center;
-  background:#fff; border:1px solid var(--border); border-radius:var(--r-lg); box-shadow:var(--shadow-card);
-  border-top:3px solid var(--success); }
-.ty-slot-label{ display:block; font-family:var(--fb); font-size:10.5px; font-weight:800; letter-spacing:.18em;
-  text-transform:uppercase; color:var(--muted); margin-bottom:14px; }
-.ty-slot-when{ display:flex; align-items:center; justify-content:center; gap:10px; font-family:var(--fh);
-  font-size:clamp(20px,3vw,26px); letter-spacing:.03em; color:var(--ink); line-height:1.2; }
-.ty-slot-when svg{ color:var(--success); flex:0 0 auto; }
-.ty-slot-time{ display:block; margin-top:8px; font-family:var(--fh); font-size:clamp(28px,4.6vw,40px);
-  line-height:1; letter-spacing:.03em; color:var(--brand); }
-.ty-slot-time em{ display:block; margin-top:8px; font-family:var(--fb); font-size:11.5px; font-style:normal;
-  font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
-/* Pending state: same card, quieter, so a missing time never reads as an error. */
-.ty-slot-pending{ font-family:var(--fb); font-size:15px; font-weight:600; color:var(--ink-soft); letter-spacing:0; }
-.ty-slot-name{ display:block; margin-top:16px; padding-top:15px; border-top:1px solid var(--border);
-  font-family:var(--fb); font-size:12.5px; color:var(--muted); line-height:1.6; }
+/* The .ty-slot rules went with the card itself (2026-10-01). */
+
 .ty-reschedule{ width:100%; max-width:70ch; margin:28px auto 0; text-align:center; font-size:13.5px;
   font-style:italic; line-height:1.75; color:var(--muted-dark); }
 
@@ -621,3 +606,130 @@
   .co-consent-box{ width:24px; height:24px; }
   .co-consent-msg{ font-size:12px; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE WHATSAPP CONFIRMATION STEP  ·  /thank-you  ·  ConfirmationStep.js
+   Added 2026-10-01.
+
+   Lives here rather than in its own ConfirmationStep.css because this funnel
+   has no per-component stylesheets: three sheets serve the whole site, and
+   /thank-you already loads this one. A fourth sheet would also mean a fourth
+   content-hashed CSS file — the exact asset whose hash moving is what left
+   in-app-browser users on an unstyled page (see the note in middleware.js).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ty-confirm{ width:100%; max-width:760px; margin:0 auto; text-align:center; }
+
+/* The alert word. --danger is the token the funnel already uses for errors, so
+   the red is the site's red and not a new one. */
+.ty-alert{ color:var(--danger); }
+
+/* Doubled class: .sdp-root h1 is (0,0,1,1) and out-specifies a single class,
+   which would otherwise eat the margin. Same trap as .fp-team span. */
+.ty-confirm-h1.ty-confirm-h1{ margin:0 auto 26px; max-width:26ch; }
+
+/* ---- Avatar ---- */
+/* The ring is the brand gradient rather than a flat border so it reads as part
+   of the same family as .fp-seal and the hero disc. */
+.ty-avatar{ width:176px; height:176px; margin:0 auto 26px; border-radius:50%; padding:4px;
+  background:var(--grad-brand); box-shadow:0 14px 34px -12px rgba(var(--brand-rgb),.55); }
+.ty-avatar img{ width:100%; height:100%; border-radius:50%; object-fit:cover;
+  /* The source is a standing portrait, so the face sits high in the frame;
+     centring the crop would hand you a picture of a polo shirt. */
+  object-position:50% 16%; background:var(--paper-2,#EEF3FA); display:block; }
+
+/* ---- Copy ---- */
+.ty-confirm-step,.ty-confirm-lead{ font-family:var(--fb); font-size:clamp(15px,2.2vw,17px);
+  line-height:1.65; color:var(--ink-soft); margin:0 auto 12px; max-width:46ch; }
+.ty-confirm-step strong,.ty-confirm-lead strong{ color:var(--ink); font-weight:800; }
+.ty-confirm-lead{ margin-bottom:26px; }
+.ty-confirm-note{ font-family:var(--fb); font-size:13px; line-height:1.6; color:var(--muted);
+  /* pretty stops the last word dropping to a line of its own; the wider cap
+     keeps it to two lines on desktop. */
+  margin:14px auto 0; max-width:52ch; text-wrap:pretty; }
+
+/* ---- The WhatsApp CTA ---- */
+/* WhatsApp green, not the brand gradient. The button is asking for a specific
+   app and the platform's own colour is the fastest way to say which — this is
+   the one CTA on the funnel that is deliberately off-palette. */
+.ty-wa{ --wa:#25D366; --wa-deep:#128C7E;
+  display:inline-flex; align-items:center; justify-content:center; gap:12px;
+  min-height:56px; padding:15px 38px; border:0; border-radius:999px; text-decoration:none;
+  background:linear-gradient(180deg,var(--wa) 0%,#1EBE5B 55%,var(--wa-deep) 100%); color:#fff;
+  font-family:var(--fh); font-size:clamp(15px,2.5vw,17.5px); letter-spacing:.045em; line-height:1.2;
+  box-shadow:0 10px 30px -8px rgba(37,211,102,.6), var(--inset-hi);
+  position:relative; overflow:hidden; transition:transform .2s, filter .2s, box-shadow .2s; }
+
+/* The sweep is lifted from .sdp-cta so this button behaves like every other
+   CTA on the site on hover — same geometry, same timing. */
+.ty-wa::after{ content:""; position:absolute; top:0; bottom:0; left:-60%; width:40%;
+  background:linear-gradient(120deg,transparent,rgba(255,255,255,.45),transparent);
+  transform:skewX(-20deg); transition:left .9s; }
+.ty-wa:hover{ transform:translateY(-2px); filter:brightness(1.06);
+  box-shadow:0 14px 38px -8px rgba(37,211,102,.72), inset 0 1px 0 rgba(255,255,255,.3); }
+.ty-wa:hover::after{ left:120%; }
+.ty-wa:active{ transform:translateY(0); filter:brightness(.97); }
+.ty-wa-ico{ display:inline-flex; flex:0 0 auto; }
+.ty-wa-text{ min-width:0; }
+.ty-wa-ln{ display:inline; }
+.ty-wa-ln + .ty-wa-ln::before{ content:" "; white-space:pre; }
+
+/* Attention loop. The funnel had no looping CTA animation to reuse — sdpPulse
+   is a 8px status dot on a dark panel and its ring is white, which would be
+   invisible here — so this is the ring pattern restated in WhatsApp green.
+   box-shadow only: no layout, no repaint of the button itself. */
+.ty-wa-inline{ animation:tyWaPulse 2.4s ease-out infinite; }
+@keyframes tyWaPulse{
+  0%   { box-shadow:0 10px 30px -8px rgba(37,211,102,.6), 0 0 0 0 rgba(37,211,102,.5); }
+  70%  { box-shadow:0 10px 30px -8px rgba(37,211,102,.6), 0 0 0 16px rgba(37,211,102,0); }
+  100% { box-shadow:0 10px 30px -8px rgba(37,211,102,.6), 0 0 0 0 rgba(37,211,102,0); }
+}
+/* Hover takes the shadow over, so the loop must not fight it. */
+.ty-wa-inline:hover{ animation:none; }
+
+/* ---- Sticky bar (mobile only) ---- */
+/* Hidden above 768px: on desktop the inline button is already in view and a
+   fixed bar would just eat the viewport. */
+.ty-stuck{ display:none; }
+
+@media (max-width:767px){
+  .ty-stuck{ display:block; position:fixed; left:0; right:0; bottom:0; z-index:900;
+    background:linear-gradient(180deg,rgba(var(--ink-rgb),.93),rgba(var(--ink-rgb),.985));
+    backdrop-filter:blur(20px) saturate(140%);
+    padding:11px 0 calc(11px + env(safe-area-inset-bottom));
+    border-top:1px solid rgba(37,211,102,.4);
+    box-shadow:0 -16px 40px rgba(0,0,0,.4);
+    /* NO transform and NO .on class, unlike .sdp-stuck. The bar is painted in
+       place on the first frame: this page has exactly one action and it must
+       never be the thing the man has to scroll to find. */ }
+  .ty-stuck::before{ content:""; position:absolute; top:0; left:0; right:0; height:1px;
+    background:linear-gradient(90deg,transparent 10%,#25D366 50%,transparent 90%);
+    background-size:200% 100%; animation:sdpStuckSweep 5s linear infinite; }
+  .ty-stuck-inner{ display:flex; }
+  .ty-wa-stuck{ width:100%; padding:14px 20px; font-size:14.5px; letter-spacing:.03em; }
+
+  /* Break the label at the run boundary, the same way .sdp-cta-ln does on the
+     landing page, so it splits where intended instead of wherever the box runs
+     out. Dropping the joining space keeps the second line centred. */
+  .ty-wa-ln{ display:block; }
+  .ty-wa-ln + .ty-wa-ln::before{ content:none; }
+
+  /* Clear the bar so the footer and the last section are reachable. */
+  .fp-page{ padding-bottom:84px; }
+
+  .ty-avatar{ width:148px; height:148px; margin-bottom:22px; }
+  .ty-confirm-h1.ty-confirm-h1{ max-width:18ch; margin-bottom:22px; }
+}
+
+@media (max-width:480px){
+  .ty-avatar{ width:128px; height:128px; }
+  .ty-wa{ min-height:54px; padding:14px 22px; }
+  .ty-confirm-note{ font-size:12px; }
+}
+
+/* The global reduced-motion block already kills animations under .sdp-root;
+   the sticky bar sits inside it, so the sweep and the pulse are covered. */
+
+/* The old confirmation heading, now the reassurance under the WhatsApp step.
+   It needs the separation a mast heading got for free when it led the page. */
+.ty-reassure.ty-reassure{ margin:34px auto 0; }

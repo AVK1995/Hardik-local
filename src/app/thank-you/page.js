@@ -2,30 +2,29 @@
 
 import '@/styles/funnel-pages.css';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import useReveal from '@/hooks/useReveal';
+import ConfirmationStep from '@/components/ConfirmationStep';
 import FunnelSteps from '@/components/FunnelSteps';
 import SiteFooter from '@/components/SiteFooter';
-import { Check, Calendar } from '@/components/Icons';
 import { thankYou } from '@/lib/content';
 import { reapplyMamFromCookie } from '@/lib/analytics';
 
 
 /**
  * §9 Confirmation — step 3. Structure follows the reference the client sent:
- * marquee, seal + booked slot, what the call covers, prep, why the room is
- * small. Copy is ours. NO competing CTA on this page, by design — the sale is
- * made and the only job left is making sure he turns up.
+ * marquee, the WhatsApp confirmation step, what the call covers, prep, why
+ * the room is small. Copy is ours. The ONE action here is the WhatsApp tap:
+ * the sale is made, and what is left is getting him into WhatsApp, because
+ * until he messages there first no reminder can reach him there at all.
  *
- * The slot in the hero comes from Calendly's redirect parameters. See
- * CalendlyEmbed.js for the one setting that has to be switched on for them to
- * arrive; without it this falls back to "check your email" rather than showing
- * an empty slot card.
+ * The slot card that used to sit under the mast came out on the client’s
+ * call (2026-10-01): it restated a time he had just picked and competed with
+ * the one thing this page exists to get done. The Calendly redirect params it
+ * read are no longer parsed here.
  */
 export default function ThankYou() {
   useReveal();
-  const [slot, setSlot] = useState(null);
-
   /* Belt and braces on Advanced Matching. The inline pixel script in the
      layout reads the same cookie, but this page is frequently arrived at by a
      Calendly redirect — a full navigation whose PageView can race the cookie
@@ -36,28 +35,6 @@ export default function ThankYou() {
     reapplyMamFromCookie();
   }, []);
 
-  useEffect(() => {
-    const q = new URLSearchParams(window.location.search);
-    const start = q.get('event_start_time');
-    if (!start) return;
-
-    const d = new Date(start);
-    if (Number.isNaN(d.getTime())) return;
-
-    /* Rendered in the viewer's own timezone, and the zone is named explicitly.
-       A time with no zone on a booking confirmation is how people miss calls. */
-    setSlot({
-      day: d.toLocaleDateString(undefined, {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      }),
-      time: d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }),
-      zone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      name: q.get('invitee_full_name') || null,
-    });
-  }, []);
 
   return (
     <main className="sdp-root fp-page">
@@ -71,39 +48,19 @@ export default function ThankYou() {
         <FunnelSteps current={2} />
 
         <div className="fp-mast">
-          <div className="fp-seal" data-sdp-reveal>
-            <Check size={44} />
-          </div>
-          <h1 className="sdp-h2" data-sdp-reveal>
+          {/* The tick-and-"confirmed" mast that used to open this page is gone.
+              It told the man he was done, which is the one thing that stops him
+              doing the step the reminders depend on. */}
+          <ConfirmationStep />
+
+          {/* h2, not h1: ConfirmationStep owns the page heading now. */}
+          <h2 className="sdp-h2 ty-reassure" data-sdp-reveal>
             {thankYou.h1[0]}
             <em>{thankYou.h1[1]}</em>
-          </h1>
+          </h2>
           <p className="sdp-sub" data-sdp-reveal>
             {thankYou.bridge}
           </p>
-
-          {/* ── The booked slot ── */}
-          <div className="ty-slot" data-sdp-reveal>
-            <span className="ty-slot-label">{thankYou.slotLabel}</span>
-            {slot ? (
-              <>
-                <span className="ty-slot-when">
-                  <Calendar size={18} />
-                  {slot.day}
-                </span>
-                <span className="ty-slot-time">
-                  {slot.time}
-                  <em>{slot.zone}</em>
-                </span>
-              </>
-            ) : (
-              <span className="ty-slot-when ty-slot-pending">
-                <Calendar size={18} />
-                {thankYou.slotPending}
-              </span>
-            )}
-            <span className="ty-slot-name">{thankYou.sessionName}</span>
-          </div>
         </div>
       </div>
 
